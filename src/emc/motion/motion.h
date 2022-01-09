@@ -788,6 +788,71 @@ Suggestion: Split this in to an Error and a Status flag register..
 	unsigned char tail;	/* flag count for mutex detect */
     } emcmot_error_t;
 
+//begin motion_debug.h =====================================================
+#include "tp.h"			/* TP_STRUCT */
+#include "tc.h"			/* TC_STRUCT, TC_QUEUE_STRUCT */
+
+/*********************************
+
+        DEBUG STRUCTURE
+*********************************/
+
+/* This is the debug structure.  I guess it was intended to make some
+   of the motion controller's internal variables visible from user
+   space for debugging, but it has evolved into a monster.
+   180K last time I checked - most of it (174K or so) is the traj
+   planner queues... each entry is 720 bytes, and there are 210
+   entries in the main queue.
+   I'll figure it out eventually though.
+   Low level things will be exported thru the HAL so they can be
+   monitored with halscope.  High level things will remain here,
+   and things that are internal will be moved to a private structure.
+*/
+
+/*! \todo FIXME - this struct is broken into two parts... at the top are
+   structure members that I understand, and that are needed for emc2.
+   Other structure members follow.  All the later ones need to be
+   evaluated - either they move up, or they go away.
+*/
+
+/*! \todo FIXME - this has become a dumping ground for all kinds of stuff */
+
+typedef struct emcmot_debug_t {
+	unsigned char head;	/* flag count for mutex detect */
+
+/*! \todo FIXME - all structure members beyond this point are in limbo */
+
+	int split;		/* number of split command reads */
+
+	TP_STRUCT coord_tp;	/* coordinated mode planner */
+
+/* space for trajectory planner queues, plus 10 more for safety */
+/*! \todo FIXME-- default is used; dynamic is not honored */
+	TC_STRUCT queueTcSpace[DEFAULT_TC_QUEUE_SIZE + 10];
+
+	int enabling;		/* starts up disabled */
+	int coordinating;	/* starts up in free mode */
+	int teleoperating;	/* starts up in free mode */
+
+	int overriding;		/* non-zero means we've initiated an joint
+				   move while overriding limits */
+
+	int stepping;
+	int idForStep;
+
+#ifdef STRUCTS_IN_SHMEM
+	emcmot_joint_t joints[EMCMOT_MAX_JOINTS];	/* joint data */
+	emcmot_axis_t axes[EMCMOT_MAX_AXIS];	        /* axis data */
+#endif
+
+	double start_time;
+	double running_time;
+	double cur_time;
+	double last_time;
+	unsigned char tail;	/* flag count for mutex detect */
+    } emcmot_debug_t;
+//end motion_debug.h=========================================================
+
 /*
   function prototypes for emcmot code
 */
@@ -798,6 +863,16 @@ Suggestion: Split this in to an Error and a Status flag register..
     extern int emcmotErrorPutfv(emcmot_error_t * errlog, const char *fmt, va_list ap);
     extern int emcmotErrorPutf(emcmot_error_t * errlog, const char *fmt, ...);
     extern int emcmotErrorGet(emcmot_error_t * errlog, char *error);
+
+    extern void emcmotDioWrite(int index, char value);
+    extern void emcmotAioWrite(int index, double value);
+
+    extern void emcmotSetRotaryUnlock(int axis, int unlock);
+    extern int emcmotGetRotaryIsUnlocked(int axis);
+
+    extern emcmot_status_t* emcmotGetStatusPtr(void);
+    extern emcmot_config_t* emcmotGetConfigPtr(void);
+    extern emcmot_debug_t*  emcmotGetDebugPtr(void);
 
 #ifdef __cplusplus
 }

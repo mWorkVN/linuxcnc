@@ -15,11 +15,11 @@
 #include "rtapi_string.h"       /* memset */
 #include "hal.h"		/* decls for HAL implementation */
 #include "motion.h"
-#include "motion_debug.h"
+#include "mot_tp.h"
+#include "homing.h"
 #include "motion_struct.h"
 #include "mot_priv.h"
 #include "rtapi_math.h"
-#include "homing.h"
 
 // Mark strings for translation, but defer translation to userspace
 #define _(s) (s)
@@ -131,6 +131,7 @@ static int mot_comp_id;	/* component ID for motion module */
 /***********************************************************************
 *                   LOCAL FUNCTION PROTOTYPES                          *
 ************************************************************************/
+static void tp_vectors (void);
 
 /* init_hal_io() exports HAL pins and parameters making data from
    the realtime control module visible and usable by the world
@@ -346,6 +347,8 @@ int rtapi_app_main(void)
 	return -1;
     }
 
+    tp_vectors();
+
     /* allocate/initialize user space comm buffers (cmd/status/err) */
     retval = init_comm_buffers();
     if (retval != 0) {
@@ -370,6 +373,7 @@ int rtapi_app_main(void)
     rtapi_set_msg_handler(emc_message_handler);
     return 0;
 }
+
 
 void rtapi_app_exit(void)
 {
@@ -399,9 +403,89 @@ void rtapi_app_exit(void)
     rtapi_print_msg(RTAPI_MSG_INFO, "MOTION: cleanup_module() finished.\n");
 }
 
+// definitions for modtp typesets (modular tp)
+#define TMOD_DECL(fname) \
+        _##fname mod##fname;
+
+/* Example:
+**    TMOD_DECL(tpFoo) expands to:
+**    _tpFoo modtpFoo;
+*/
+TMOD_DECL(tpAbort)
+TMOD_DECL(tpActiveDepth)
+TMOD_DECL(tpAddCircle)
+TMOD_DECL(tpAddLine)
+TMOD_DECL(tpAddRigidTap)
+TMOD_DECL(tpClear)
+TMOD_DECL(tpCreate)
+TMOD_DECL(tpGetExecId)
+TMOD_DECL(tpGetExecTag)
+TMOD_DECL(tpGetMotionType)
+TMOD_DECL(tpGetPos)
+TMOD_DECL(tpIsDone)
+TMOD_DECL(tpPause)
+TMOD_DECL(tpQueueDepth)
+TMOD_DECL(tpResume)
+TMOD_DECL(tpRunCycle)
+TMOD_DECL(tpSetAmax)
+TMOD_DECL(tpSetAout)
+TMOD_DECL(tpSetCycleTime)
+TMOD_DECL(tpSetDout)
+TMOD_DECL(tpSetId)
+TMOD_DECL(tpSetPos)
+TMOD_DECL(tpSetRunDir)
+TMOD_DECL(tpSetSpindleSync)
+TMOD_DECL(tpSetTermCond)
+TMOD_DECL(tpSetVlimit)
+TMOD_DECL(tpSetVmax)
+
+TMOD_DECL(tcqFull)
+
+#undef TMOD_DECL
 /***********************************************************************
 *                         LOCAL FUNCTION CODE                          *
 ************************************************************************/
+
+static void tp_vectors() {
+
+#define TMOD_VECTOR(fname) \
+        mod##fname = v_##fname();
+/* Example:
+**     TMOD_VECTOR(tpFoo) expands to:
+**     modtpFoo = v_tpFoo();
+*/
+
+TMOD_VECTOR(tpAbort)
+TMOD_VECTOR(tpActiveDepth)
+TMOD_VECTOR(tpAddCircle)
+TMOD_VECTOR(tpAddLine)
+TMOD_VECTOR(tpAddRigidTap)
+TMOD_VECTOR(tpClear)
+TMOD_VECTOR(tpCreate)
+TMOD_VECTOR(tpGetExecId)
+TMOD_VECTOR(tpGetExecTag)
+TMOD_VECTOR(tpGetMotionType)
+TMOD_VECTOR(tpGetPos)
+TMOD_VECTOR(tpIsDone)
+TMOD_VECTOR(tpPause)
+TMOD_VECTOR(tpQueueDepth)
+TMOD_VECTOR(tpResume)
+TMOD_VECTOR(tpRunCycle)
+TMOD_VECTOR(tpSetAmax)
+TMOD_VECTOR(tpSetAout)
+TMOD_VECTOR(tpSetCycleTime)
+TMOD_VECTOR(tpSetDout)
+TMOD_VECTOR(tpSetId)
+TMOD_VECTOR(tpSetPos)
+TMOD_VECTOR(tpSetRunDir)
+TMOD_VECTOR(tpSetSpindleSync)
+TMOD_VECTOR(tpSetTermCond)
+TMOD_VECTOR(tpSetVlimit)
+TMOD_VECTOR(tpSetVmax)
+
+TMOD_VECTOR(tcqFull)
+#undef TMOD_VECTOR
+}
 
 /* init_hal_io() exports HAL pins and parameters making data from
    the realtime control module visible and usable by the world
@@ -1007,18 +1091,37 @@ static int init_comm_buffers(void)
     emcmotDebug->start_time = etime();
     emcmotDebug->running_time = 0.0;
 
+//=========================================================
+    // supply key pointers to tp
+    emcmot_tp_ptrs(emcmotStatus
+                  ,emcmotDebug
+                  ,emcmotConfig
+                  );
+#ifdef TPMOD_DEBUG
+    rtapi_print("MOTMOD:beg %s\n",__FUNCTION__);
+    rtapi_print("MOTMOD            emcmotDioWrite=%p\n",emcmotDioWrite);
+    rtapi_print("MOTMOD            emcmotAioWrite=%p\n",emcmotAioWrite);
+    rtapi_print("MOTMOD     emcmotSetRotaryUnlock=%p\n",emcmotSetRotaryUnlock);
+    rtapi_print("MOTMOD emcmotGetRotaryIsUnlocked=%p\n",emcmotGetRotaryIsUnlocked);
+#endif
+    emcmot_tp_funcs(&emcmotDioWrite
+                   ,&emcmotAioWrite
+                   ,&emcmotSetRotaryUnlock
+                   ,&emcmotGetRotaryIsUnlocked
+                   );
+//=========================================================
     /* init motion emcmotDebug->coord_tp */
-    if (-1 == tpCreate(&emcmotDebug->coord_tp, DEFAULT_TC_QUEUE_SIZE,
+    if (-1 == modtpCreate(&emcmotDebug->coord_tp, DEFAULT_TC_QUEUE_SIZE,
 	    emcmotDebug->queueTcSpace)) {
 	rtapi_print_msg(RTAPI_MSG_ERR,
 	    "MOTION: failed to create motion emcmotDebug->coord_tp\n");
 	return -1;
     }
-//    tpInit(&emcmotDebug->coord_tp); // tpInit called from tpCreate
-    tpSetCycleTime(&emcmotDebug->coord_tp, emcmotConfig->trajCycleTime);
-    tpSetPos(&emcmotDebug->coord_tp, &emcmotStatus->carte_pos_cmd);
-    tpSetVmax(&emcmotDebug->coord_tp, emcmotStatus->vel, emcmotStatus->vel);
-    tpSetAmax(&emcmotDebug->coord_tp, emcmotStatus->acc);
+    // modtpInit(&emcmotDebug->coord_tp); // modtpInit called from modtpCreate
+    modtpSetCycleTime(&emcmotDebug->coord_tp, emcmotConfig->trajCycleTime);
+    modtpSetPos(&emcmotDebug->coord_tp, &emcmotStatus->carte_pos_cmd);
+    modtpSetVmax(&emcmotDebug->coord_tp, emcmotStatus->vel, emcmotStatus->vel);
+    modtpSetAmax(&emcmotDebug->coord_tp, emcmotStatus->acc);
 
     emcmotStatus->tail = 0;
 
@@ -1145,7 +1248,7 @@ static int setTrajCycleTime(double secs)
         emcmotConfig->interpolationRate = 1;
 
     /* set traj planner */
-    tpSetCycleTime(&emcmotDebug->coord_tp, secs);
+    modtpSetCycleTime(&emcmotDebug->coord_tp, secs);
 
     /* set the free planners, cubic interpolation rate and segment time */
     for (t = 0; t < ALL_JOINTS; t++) {

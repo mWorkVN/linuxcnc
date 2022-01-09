@@ -11,14 +11,16 @@
 * Copyright (c) 2004 All rights reserved.
 ********************************************************************/
 #include "rtapi.h"              /* rtapi_print_msg */
+#include "rtapi_app.h"
 #include "posemath.h"           /* Geometry types & functions */
 #include "tc.h"
 #include "tp.h"
 #include "emcpose.h"
 #include "rtapi_math.h"
-#include "mot_priv.h"
-#include "motion_debug.h"
+#include "hal.h"
+#include "motion.h"
 #include "motion_types.h"
+#include "mot_tp.h"
 #include "spherical_arc.h"
 #include "blendmath.h"
 //KLUDGE Don't include all of emc.hh here, just hand-copy the TERM COND
@@ -45,9 +47,25 @@
 
 #define TP_OPTIMIZATION_LAZY
 
-extern emcmot_status_t *emcmotStatus;
-extern emcmot_debug_t *emcmotDebug;
-extern emcmot_config_t *emcmotConfig;
+//=========================================================
+#define TPMOD_DEBUG
+#undef  TPMOD_DEBUG
+
+#define TPMOD_HAL
+#undef  TPMOD_HAL
+
+static emcmot_status_t *emcmotStatus;
+static emcmot_debug_t *emcmotDebug;
+static emcmot_config_t *emcmotConfig;
+
+// provision to support hal pins,params:
+#ifdef  TPMOD_HAL
+static struct haldata {
+  hal_u32_t   *in0;   // Example pin
+  hal_float_t param0; // Example parameter
+} *haldata;
+#endif
+//=========================================================
 
 /** static function primitives (ugly but less of a pain than moving code around)*/
 STATIC int tpComputeBlendVelocity(
@@ -313,6 +331,22 @@ STATIC inline double tpGetSignedSpindlePosition(spindle_status_t *status) {
  */
 int tpCreate(TP_STRUCT * const tp, int _queueSize, TC_STRUCT * const tcSpace)
 {
+
+    vector_DioWrite            = vector_DioWrite;
+    vector_AioWrite            = vector_AioWrite;
+    vector_SetRotaryUnlock     = vector_SetRotaryUnlock;
+    vector_GetRotaryIsUnlocked = vector_GetRotaryIsUnlocked;
+
+#ifdef TPMOD_DEBUG
+    rtapi_print("tpCreate:               emcmotStatus=%p\n",emcmotStatus);
+    rtapi_print("tpCreate:                emcmotDebug=%p\n",emcmotDebug);
+    rtapi_print("tpCreate:               emcmotConfig=%p\n",emcmotConfig);
+    rtapi_print("tpCreate:            vector_DioWrite=%p\n",vector_DioWrite);
+    rtapi_print("tpCreate:            vector_AioWrite=%p\n",vector_AioWrite);
+    rtapi_print("tpCreate:     vector_SetRotaryUnlock=%p\n",vector_SetRotaryUnlock);
+    rtapi_print("tpCreate: vector_GetRotaryIsUnlocked=%p\n",vector_GetRotaryIsUnlocked);
+#endif
+
     if (0 == tp) {
         return TP_ERR_FAIL;
     }
@@ -386,7 +420,9 @@ int tpClear(TP_STRUCT * const tp)
     emcmotStatus->requested_vel = 0.0;
     emcmotStatus->distance_to_go = 0.0;
     ZERO_EMC_POSE(emcmotStatus->dtg);
-    SET_MOTION_INPOS_FLAG(1);
+
+    // equivalent to: SET_MOTION_INPOS_FLAG(1):
+    emcmotStatus->motionFlag |= EMCMOT_MOTION_INPOS_BIT;
 
     return tpClearDIOs(tp);
 }
@@ -406,6 +442,10 @@ int tpInit(TP_STRUCT * const tp)
     tp->aLimit = 0.0;
     PmCartesian acc_bound;
     //FIXME this acceleration bound isn't valid (nor is it used)
+    if (emcmotStatus == 0) {
+       rtapi_print("!!!tpInit: NULL emcmotStatus, bye\n\n");
+       return -1;
+    }
     tpGetMachineAccelBounds(&acc_bound);
     tpGetMachineActiveLimit(&tp->aMax, &acc_bound);
     //Angular limits
@@ -2394,12 +2434,12 @@ void tpToggleDIOs(TC_STRUCT * const tc) {
     if (tc->syncdio.anychanged != 0) { // we have DIO's to turn on or off
         for (i=0; i < emcmotConfig->numDIO; i++) {
             if (!(tc->syncdio.dio_mask & (1 << i))) continue;
-            if (tc->syncdio.dios[i] > 0) emcmotDioWrite(i, 1); // turn DIO[i] on
-            if (tc->syncdio.dios[i] < 0) emcmotDioWrite(i, 0); // turn DIO[i] off
+            if (tc->syncdio.dios[i] > 0) vector_DioWrite(i, 1); // turn DIO[i] on
+            if (tc->syncdio.dios[i] < 0) vector_DioWrite(i, 0); // turn DIO[i] off
         }
         for (i=0; i < emcmotConfig->numAIO; i++) {
             if (!(tc->syncdio.aio_mask & (1 << i))) continue;
-            emcmotAioWrite(i, tc->syncdio.aios[i]); // set AIO[i]
+            vector_AioWrite(i, tc->syncdio.aios[i]); // set AIO[i]
         }
         tc->syncdio.anychanged = 0; //we have turned them all on/off, nothing else to do for this TC the next time
     }
@@ -2590,12 +2630,12 @@ STATIC void tpHandleEmptyQueue(TP_STRUCT * const tp)
 
 /** Wrapper function to unlock rotary axes */
 STATIC void tpSetRotaryUnlock(int axis, int unlock) {
-    emcmotSetRotaryUnlock(axis, unlock);
+    vector_SetRotaryUnlock(axis, unlock);
 }
 
 /** Wrapper function to check rotary axis lock */
 STATIC int tpGetRotaryIsUnlocked(int axis) {
-    return emcmotGetRotaryIsUnlocked(axis);
+    return vector_GetRotaryIsUnlocked(axis);
 }
 
 
@@ -2627,9 +2667,8 @@ STATIC int tpCompleteSegment(TP_STRUCT * const tp,
         tpSetRotaryUnlock(tc->indexer_jnum, 0);
         // if it is now locked, fall through and remove the finished move.
         // otherwise, just come back later and check again
-        if(tpGetRotaryIsUnlocked(tc->indexer_jnum)) {
+        if(tpGetRotaryIsUnlocked(tc->indexer_jnum))
             return TP_ERR_FAIL;
-        }
     }
 
     //Clear status flags associated since segment is done
@@ -2807,8 +2846,9 @@ STATIC tp_err_t tpActivateSegment(TP_STRUCT * const tp, TC_STRUCT * const tc) {
         tpSetRotaryUnlock(tc->indexer_jnum, 1);
         // if it is unlocked, fall through and start the move.
         // otherwise, just come back later and check again
-        if (!tpGetRotaryIsUnlocked(tc->indexer_jnum))
+        if (!tpGetRotaryIsUnlocked(tc->indexer_jnum)) {
             return TP_ERR_WAITING;
+        }
     }
 
     // Temporary debug message
@@ -3430,6 +3470,11 @@ int tpSetSpindleSync(TP_STRUCT * const tp, int spindle, double sync, int mode) {
 
 int tpPause(TP_STRUCT * const tp)
 {
+//example hal pin usage:
+#ifdef TPMOD_HAL
+    rtapi_print("tpPause in0=%d\n",*haldata->in0);
+#endif
+
     if (0 == tp) {
         return TP_ERR_FAIL;
     }
@@ -3560,5 +3605,128 @@ int tpIsMoving(TP_STRUCT const * const tp)
     return false;
 }
 
+//=======================================================================
+// Begin provisions for loadable module (tpmod)
+
+static int comp_id;
+
+int rtapi_app_main(void)
+{
+#define HAL_PREFIX "tpmod"
+    char* emsg = "?";
+
+    comp_id = hal_init("tpmod");  //name must agree with tpmod.so
+    if (comp_id < 0) {emsg="hal_init()"; goto error;}
+
+#ifdef TPMOD_HAL
+    int res = 0;
+    haldata = hal_malloc(sizeof(struct haldata));
+    if (!haldata) {emsg="hal_malloc()";goto error;}
+
+    res += hal_pin_u32_newf(HAL_IN ,&(haldata->in0) ,comp_id,"%s.in0" ,HAL_PREFIX);
+    res += hal_param_float_newf(HAL_RW, &haldata->param0,comp_id,"%s.param0",HAL_PREFIX);
+    if (res) {emsg="hal pinparam setup";goto error;}
+#endif
+
+    hal_ready(comp_id);
+    return 0;
+
+error:
+    rtapi_print_msg(RTAPI_MSG_ERR,"\ntpmod FAIL:<%s>\n",emsg);
+    hal_exit(comp_id);
+    return -1;
+}
+
+void rtapi_app_exit(void)
+{
+    hal_exit(comp_id);
+    return;
+}
+//==========================================================
+void(*vector_DioWrite)(int,char);
+void(*vector_AioWrite)(int,double);
+void(*vector_SetRotaryUnlock)(int,int);
+int (*vector_GetRotaryIsUnlocked)(int);
+
+void(*TMPDioWrite)(int,char);
+void(*TMPAioWrite)(int,double);
+void(*TMPSetRotaryUnlock)(int,int);
+int (*TMPGetRotaryIsUnlocked)(int);
+
+void emcmot_tp_funcs(void(*TMPDioWrite)(int,char)
+                    ,void(*TMPAioWrite)(int,double)
+                    ,void(*TMPSetRotaryUnlock)(int,int)
+                    ,int (*TMPGetRotaryIsUnlocked)(int)
+                    )
+{
+    vector_DioWrite            = *TMPDioWrite;
+    vector_AioWrite            = *TMPAioWrite;
+    vector_SetRotaryUnlock     = *TMPSetRotaryUnlock;
+    vector_GetRotaryIsUnlocked = *TMPGetRotaryIsUnlocked;
+
+#ifdef TPMOD_DEBUG
+    rtapi_print("TPMOD            vector_DioWrite=%p\n",vector_DioWrite);
+    rtapi_print("TPMOD            vector_AioWrite=%p\n",vector_AioWrite);
+    rtapi_print("TPMOD     vector_SetRotaryUnlock=%p\n",vector_SetRotaryUnlock);
+    rtapi_print("TPMOD vector_GetRotaryIsUnlocked=%p\n",vector_GetRotaryIsUnlocked);
+#endif
+}
+EXPORT_SYMBOL(emcmot_tp_funcs);
+//==========================================================
+
+void emcmot_tp_ptrs(emcmot_status_t* pstatus
+                   ,emcmot_debug_t * pdebug
+                   ,emcmot_config_t* pconfig
+                   )
+{
+    // retrieve emcmot pointers from motmod
+    emcmotStatus = pstatus;
+    emcmotDebug  = pdebug;
+    emcmotConfig = pconfig;
+}
+EXPORT_SYMBOL(emcmot_tp_ptrs);
+
+// tp functions accesible to motmod:
+#define TPVECTOR_FUNC(fname) \
+    _##fname v_##fname() {return &fname;}; \
+    EXPORT_SYMBOL(v_##fname );
+
+/* Example:
+**    TPVECTOR_FUNC(tpFoo) expands to:
+**    _tpFoo v_tpFoo {return &tpFoo;}
+**    EXPORT_SYMBOL(v_tpFoo);
+*/
+
+TPVECTOR_FUNC(tpAbort)
+TPVECTOR_FUNC(tpActiveDepth)
+TPVECTOR_FUNC(tpAddCircle)
+TPVECTOR_FUNC(tpAddLine)
+TPVECTOR_FUNC(tpAddRigidTap)
+TPVECTOR_FUNC(tpClear)
+TPVECTOR_FUNC(tpCreate)
+TPVECTOR_FUNC(tpGetExecId)
+TPVECTOR_FUNC(tpGetExecTag)
+TPVECTOR_FUNC(tpGetMotionType)
+TPVECTOR_FUNC(tpGetPos)
+TPVECTOR_FUNC(tpIsDone)
+TPVECTOR_FUNC(tpPause)
+TPVECTOR_FUNC(tpQueueDepth)
+TPVECTOR_FUNC(tpResume)
+TPVECTOR_FUNC(tpRunCycle)
+TPVECTOR_FUNC(tpSetAmax)
+TPVECTOR_FUNC(tpSetAout)
+TPVECTOR_FUNC(tpSetCycleTime)
+TPVECTOR_FUNC(tpSetDout)
+TPVECTOR_FUNC(tpSetId)
+TPVECTOR_FUNC(tpSetPos)
+TPVECTOR_FUNC(tpSetRunDir)
+TPVECTOR_FUNC(tpSetSpindleSync)
+TPVECTOR_FUNC(tpSetTermCond)
+TPVECTOR_FUNC(tpSetVlimit)
+TPVECTOR_FUNC(tpSetVmax)
+
+TPVECTOR_FUNC(tcqFull)
+
+#undef TPVECTOR_FUNC
 
 // vim:sw=4:sts=4:et:

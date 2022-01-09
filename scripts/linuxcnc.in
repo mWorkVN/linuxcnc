@@ -52,6 +52,9 @@ HALLIB_DIR=@HALLIB_DIR@; export HALLIB_DIR
 #HALLIB_PATH: see also -H option
 HALLIB_PATH=.:$HALLIB_DIR; export HALLIB_PATH
 
+# default tp (trajectory planning) module:
+TPMOD=tpmod
+
 # put ~.local/bin in PATH if missing. See:
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=839155
 if [ -d $HOME/.local/bin ]; then
@@ -113,6 +116,8 @@ Options:
     -d: Turn on "debug" mode
     -v: Turn on "verbose" mode
     -k: Continue in the presence of errors in .hal files
+    -t "tpmodulename": specify trajectory_planning_module
+                      (default=tpmod)
     -H "dirname": search dirname for Halfiles before searching
                   ini directory and system library:
                   $HALLIB_DIR
@@ -125,7 +130,7 @@ EOF
 ################################################################################
 # 1.1. strip and process command line options
 ################################################################################
-while getopts "dvlhkrH:" opt
+while getopts "dvlhkrH:t:" opt
 do
 	case "$opt" in
 	d)
@@ -158,6 +163,11 @@ do
             echo "Invalid dirname specified: -H $OPTARG"
             exit 1
         fi
+        ;;
+    t)  # -t modname: user-supplied trajectory planning module
+        # modname must conform to tpmod api,
+        # and be located in: $LINUXCNC_RTLIB_DIR
+        TPMOD=$OPTARG
         ;;
 	*)
 		usage
@@ -814,6 +824,10 @@ fi
 
 # 4.3.6. execute HALCMD config files (if any)
 
+# loadrt $TPMOD must precede loadrt for EMCMOT (motmod)
+echo "EMCMOT=$EMCMOT TPMOD=$TPMOD"
+$HALCMD loadrt $TPMOD
+
 TWOPASS=`$INIVAR -ini "$INIFILE" -var TWOPASS -sec HAL -num 1 2> /dev/null`
 if [ -n "$TWOPASS" ] ; then
   # 4.3.6.1. if [HAL]TWOPASS is defined, handle all [HAL]HALFILE entries here:
@@ -889,6 +903,7 @@ else
         CFGFILE=`$INIVAR -tildeexpand -ini "$INIFILE" -var HALFILE -sec HAL -num $NUM 2> /dev/null`
     done
 fi
+
 
 # 4.3.7. Run task in background
 echo "Starting TASK program: $EMCTASK" >>$PRINT_FILE

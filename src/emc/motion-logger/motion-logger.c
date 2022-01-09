@@ -30,7 +30,6 @@
 #include <unistd.h>
 
 #include "hal.h"
-#include "motion_debug.h"
 #include "motion.h"
 #include "motion_struct.h"
 #include "motion_types.h"

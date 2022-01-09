@@ -72,4 +72,6 @@ extern TC_STRUCT * tcqLast(TC_QUEUE_STRUCT const * const tcq);
 /* get full status */
 extern int tcqFull(TC_QUEUE_STRUCT const * const tcq);
 
+typedef  int(*_tcqFull)(TC_QUEUE_STRUCT const * const tcq);
+extern        _tcqFull v_tcqFull(void);
 #endif

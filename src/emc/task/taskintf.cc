@@ -20,7 +20,6 @@
 #include "usrmotintf.h"		// usrmotInit(), usrmotReadEmcmotStatus(),
 				// etc.
 #include "motion.h"		// emcmot_command_t,STATUS, etc.
-#include "motion_debug.h"
 #include "homing.h"
 #include "emc.hh"
 #include "emccfg.h"		// EMC_INIFILE

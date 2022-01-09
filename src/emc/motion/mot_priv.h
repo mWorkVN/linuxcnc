@@ -266,13 +266,6 @@ extern void emcmotCommandHandler(void *arg, long period);
 extern void emcmotController(void *arg, long period);
 extern void emcmotSetCycleTime(unsigned long nsec);
 
-/* these are related to synchronized I/O */
-extern void emcmotDioWrite(int index, char value);
-extern void emcmotAioWrite(int index, double value);
-
-extern void emcmotSetRotaryUnlock(int axis, int unlock);
-extern int emcmotGetRotaryIsUnlocked(int axis);
-
 //
 // Try to change the Motion mode to Teleop.
 //
