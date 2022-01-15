@@ -60,9 +60,10 @@
 #include "hal.h"
 #include "motion.h"
 #include "homing.h"
-#include "motion_struct.h"
 #include "mot_priv.h"
 #include "mot_tp.h"
+#include "homing.h"
+#include "mot_home.h"
 #include "rtapi_math.h"
 #include "motion_types.h"
 
@@ -76,27 +77,6 @@
 extern int motion_num_spindles;
 
 static int rehomeAll;
-
-/* loops through the active joints and checks if any are not homed */
-bool checkAllHomed(void)
-{
-    int joint_num;
-    emcmot_joint_t *joint;
-
-    for (joint_num = 0; joint_num < ALL_JOINTS; joint_num++) {
-	joint = &joints[joint_num];
-	if (!GET_JOINT_ACTIVE_FLAG(joint)) {
-	    /* if joint is not active, don't even look at its limits */
-	    continue;
-	}
-	if (!get_homed(joint_num) ) {
-	    /* if any of the joints is not homed return false */
-	    return 0;
-	}
-    }
-    /* return true if all active joints are homed*/
-    return 1;
-}
 
 /* limits_ok() returns 1 if none of the hard limits are set,
    0 if any are set. Called on a linear and circular move. */
@@ -181,7 +161,7 @@ void refresh_jog_limits(emcmot_joint_t *joint, int joint_num)
 {
     double range;
 
-    if (get_homed(joint_num) ) {
+    if (hmod_get_homed(joint_num) ) {
 	/* if homed, set jog limits using soft limits */
 	joint->max_jog_limit = joint->max_pos_limit;
 	joint->min_jog_limit = joint->min_pos_limit;
@@ -322,10 +302,10 @@ void clearHomes(int joint_num)
     if (emcmotConfig->kinType == KINEMATICS_INVERSE_ONLY) {
 	if (rehomeAll) {
 	    for (n = 0; n < ALL_JOINTS; n++) {
-                set_joint_homed(joint_num,0);
+                hmod_set_joint_homed(joint_num,0);
 	    }
 	} else {
-            set_joint_homed(joint_num,0);
+            hmod_set_joint_homed(joint_num,0);
 	}
     }
 }
@@ -513,18 +493,18 @@ void emcmotCommandHandler(void *arg, long servo_period)
                     || emcmotCommand->command == EMCMOT_JOG_ABS
                    )
                 && !(GET_MOTION_TELEOP_FLAG())
-                && get_home_is_synchronized(joint_num)
-                && !get_homing_is_active()
+                && hmod_get_home_is_synchronized(joint_num)
+                && !hmod_get_homing_is_active()
                ) {
                   if (emcmotConfig->kinType == KINEMATICS_IDENTITY) {
                       rtapi_print_msg(RTAPI_MSG_ERR,
                       "Homing is REQUIRED to jog requested coordinate\n"
                       "because joint (%d) home_sequence is synchronized (%d)\n"
-                      ,joint_num,get_home_sequence(joint_num));
+                      ,joint_num,hmod_get_home_sequence(joint_num));
                   } else {
                       rtapi_print_msg(RTAPI_MSG_ERR,
                       "Cannot jog joint %d because home_sequence is synchronized (%d)\n"
-                      ,joint_num,get_home_sequence(joint_num));
+                      ,joint_num,hmod_get_home_sequence(joint_num));
                   }
                   return;
             }
@@ -561,8 +541,8 @@ void emcmotCommandHandler(void *arg, long servo_period)
 		    /* tell joint planner to stop */
 		    joint->free_tp.enable = 0;
 		    /* stop homing if in progress */
-		    if ( ! get_home_is_idle(joint_num)) {
-			set_home_abort(joint_num);
+		    if ( ! hmod_get_home_is_idle(joint_num)) {
+			hmod_set_home_abort(joint_num);
 		    }
 		}
 	    }
@@ -595,8 +575,8 @@ void emcmotCommandHandler(void *arg, long servo_period)
 		/* validate joint */
 		if (joint == 0) { break; }
 		/* stop homing if in progress */
-		if ( !get_home_is_idle(joint_num) ) {
-                    set_home_abort(joint_num);
+		if ( !hmod_get_home_is_idle(joint_num) ) {
+                    hmod_set_home_abort(joint_num);
 		}
 		/* update status flags */
 		SET_JOINT_ERROR_FLAG(joint, 0);
@@ -632,7 +612,7 @@ void emcmotCommandHandler(void *arg, long servo_period)
 	    emcmotDebug->coordinating = 1;
 	    emcmotDebug->teleoperating = 0;
 	    if (emcmotConfig->kinType != KINEMATICS_IDENTITY) {
-		if (!checkAllHomed()) {
+		if (!hmod_get_allhomed()) {
 		    reportError
 			(_("all joints must be homed before going into coordinated mode"));
 		    emcmotDebug->coordinating = 0;
@@ -699,16 +679,16 @@ void emcmotCommandHandler(void *arg, long servo_period)
 	    if (joint == 0) {
 		break;
 	    }
-	    set_joint_homing_params(joint_num,
-	                            emcmotCommand->offset,
-	                            emcmotCommand->home,
-	                            emcmotCommand->home_final_vel,
-	                            emcmotCommand->search_vel,
-	                            emcmotCommand->latch_vel,
-	                            emcmotCommand->flags,
-	                            emcmotCommand->home_sequence,
-	                            emcmotCommand->volatile_home
-	                           );
+	    hmod_set_joint_homing_params(joint_num,
+	                                 emcmotCommand->offset,
+	                                 emcmotCommand->home,
+	                                 emcmotCommand->home_final_vel,
+	                                 emcmotCommand->search_vel,
+	                                 emcmotCommand->latch_vel,
+	                                 emcmotCommand->flags,
+	                                 emcmotCommand->home_sequence,
+	                                 emcmotCommand->volatile_home
+	                                );
 	    break;
 
 	case EMCMOT_UPDATE_JOINT_HOMING_PARAMS:
@@ -718,11 +698,11 @@ void emcmotCommandHandler(void *arg, long servo_period)
 	    if (joint == 0) {
 		break;
 	    }
-	    update_joint_homing_params(joint_num,
-	                               emcmotCommand->offset,
-	                               emcmotCommand->home,
-	                               emcmotCommand->home_sequence
-	                               );
+	    hmod_update_joint_homing_params(joint_num,
+	                                    emcmotCommand->offset,
+	                                    emcmotCommand->home,
+	                                    emcmotCommand->home_sequence
+	                                    );
 	    break;
 
 	case EMCMOT_OVERRIDE_LIMITS:
@@ -830,7 +810,7 @@ void emcmotCommandHandler(void *arg, long servo_period)
 		SET_JOINT_ERROR_FLAG(joint, 1);
 		break;
 	    }
-	    if ( get_homing_is_active() ) {
+	    if ( hmod_get_homing_is_active() ) {
 		reportError(_("Can't jog any joints while homing."));
 		SET_JOINT_ERROR_FLAG(joint, 1);
 		break;
@@ -840,7 +820,7 @@ void emcmotCommandHandler(void *arg, long servo_period)
 		    /* can't do two kinds of jog at once */
 		    break;
 	        }
-                if (get_home_needs_unlock_first(joint_num) ) {
+                if (hmod_get_home_needs_unlock_first(joint_num) ) {
                     reportError("Can't jog locking joint_num=%d",joint_num);
                     SET_JOINT_ERROR_FLAG(joint, 1);
                     break;
@@ -920,7 +900,7 @@ void emcmotCommandHandler(void *arg, long servo_period)
 		SET_JOINT_ERROR_FLAG(joint, 1);
 		break;
 	    }
-	    if ( get_homing_is_active() ) {
+	    if ( hmod_get_homing_is_active() ) {
 		reportError(_("Can't jog any joint while homing."));
 		SET_JOINT_ERROR_FLAG(joint, 1);
 		break;
@@ -930,7 +910,7 @@ void emcmotCommandHandler(void *arg, long servo_period)
 		    /* can't do two kinds of jog at once */
 		    break;
 	        }
-                if (get_home_needs_unlock_first(joint_num) ) {
+                if (hmod_get_home_needs_unlock_first(joint_num) ) {
                     reportError("Can't jog locking joint_num=%d",joint_num);
                     SET_JOINT_ERROR_FLAG(joint, 1);
                     break;
@@ -1019,7 +999,7 @@ void emcmotCommandHandler(void *arg, long servo_period)
 		SET_JOINT_ERROR_FLAG(joint, 1);
 		break;
 	    }
-	    if ( get_homing_is_active() ) {
+	    if ( hmod_get_homing_is_active() ) {
 		reportError(_("Can't jog any joints while homing."));
 		SET_JOINT_ERROR_FLAG(joint, 1);
 		break;
@@ -1491,8 +1471,8 @@ void emcmotCommandHandler(void *arg, long servo_period)
 
 
 	    if(joint_num == -1) { // -1 means home all
-                if(get_home_sequence_state() == HOME_SEQUENCE_IDLE) {
-                    set_home_sequence_state(HOME_SEQUENCE_START);
+                if(hmod_get_home_sequence_state() == HOME_SEQUENCE_IDLE) {
+                    hmod_set_home_sequence_state(HOME_SEQUENCE_START);
                 } else {
                     reportError(_("homing sequence already in progress"));
                 }
@@ -1504,19 +1484,19 @@ void emcmotCommandHandler(void *arg, long servo_period)
 
             // ********************************************************
             // support for other homing modes (one sequence, one joint)
-            if (get_home_sequence(joint_num) < 0) {
+            if (hmod_get_home_sequence(joint_num) < 0) {
                int jj;
-               set_home_sequence_state(HOME_SEQUENCE_DO_ONE_SEQUENCE);
+               hmod_set_home_sequence_state(HOME_SEQUENCE_DO_ONE_SEQUENCE);
                for (jj = 0; jj < ALL_JOINTS; jj++) {
-                  if (ABS(get_home_sequence(jj)) == ABS(get_home_sequence(joint_num))) {
+                  if (ABS(hmod_get_home_sequence(jj)) == ABS(hmod_get_home_sequence(joint_num))) {
                       // set home_state for all joints at same neg sequence
-                      set_home_start(jj);
+                      hmod_set_home_start(jj);
                   }
                }
                break;
             } else {
-               set_home_sequence_state(HOME_SEQUENCE_DO_ONE_JOINT);
-               set_home_start(joint_num); //one joint only
+               hmod_set_home_sequence_state(HOME_SEQUENCE_DO_ONE_JOINT);
+               hmod_set_home_start(joint_num); //one joint only
             }
 	    break;
 
@@ -1538,7 +1518,7 @@ void emcmotCommandHandler(void *arg, long servo_period)
                 for (n = 0; n < ALL_JOINTS; n++) {
                     joint = &joints[n];
                     if(GET_JOINT_ACTIVE_FLAG(joint)) {
-                        if (get_homing(n)) {
+                        if (hmod_get_homing(n)) {
                             reportError(_("Cannot unhome while homing, joint %d"), n);
                             return;
                         }
@@ -1567,8 +1547,8 @@ void emcmotCommandHandler(void *arg, long servo_period)
                         This part is unimplemented so far.
                         */
                         /* if -2, only unhome the volatile_home joints */
-                        if( (joint_num != -2) || get_home_is_volatile(n) ) {
-                            set_joint_homed(n, 0);
+                        if( (joint_num != -2) || hmod_get_home_is_volatile(n) ) {
+                            hmod_set_joint_homed(n, 0);
                         }
 
                     }
@@ -1581,7 +1561,7 @@ void emcmotCommandHandler(void *arg, long servo_period)
                     return;
                 }
                 if(GET_JOINT_ACTIVE_FLAG(joint)) {
-                    if (get_homing(joint_num) ) {
+                    if (hmod_get_homing(joint_num) ) {
                         reportError(_("Cannot unhome while homing, joint %d"), joint_num);
                         return;
                     }
@@ -1589,7 +1569,7 @@ void emcmotCommandHandler(void *arg, long servo_period)
                         reportError(_("Cannot unhome while moving, joint %d"), joint_num);
                         return;
                     }
-                    set_joint_homed(joint_num, 0);
+                    hmod_set_joint_homed(joint_num, 0);
                 } else {
                     reportError(_("Cannot unhome inactive joint %d"), joint_num);
                 }

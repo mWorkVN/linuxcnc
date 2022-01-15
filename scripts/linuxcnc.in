@@ -52,9 +52,6 @@ HALLIB_DIR=@HALLIB_DIR@; export HALLIB_DIR
 #HALLIB_PATH: see also -H option
 HALLIB_PATH=.:$HALLIB_DIR; export HALLIB_PATH
 
-# default tp (trajectory planning) module:
-TPMOD=tpmod
-
 # put ~.local/bin in PATH if missing. See:
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=839155
 if [ -d $HOME/.local/bin ]; then
@@ -116,8 +113,10 @@ Options:
     -d: Turn on "debug" mode
     -v: Turn on "verbose" mode
     -k: Continue in the presence of errors in .hal files
-    -t "tpmodulename": specify trajectory_planning_module
-                      (default=tpmod)
+    -t "tpmodulename":   specify trajectory_planning_module
+                         overrides optional ini setting [TRAJ]TPMOD
+    -m "homemodulename": specify homing_module 
+                         overrides optional ini setting [EMCMOT]HOMEMOD
     -H "dirname": search dirname for Halfiles before searching
                   ini directory and system library:
                   $HALLIB_DIR
@@ -130,7 +129,7 @@ EOF
 ################################################################################
 # 1.1. strip and process command line options
 ################################################################################
-while getopts "dvlhkrH:t:" opt
+while getopts "dvlhkrH:t:m:" opt
 do
 	case "$opt" in
 	d)
@@ -168,6 +167,11 @@ do
         # modname must conform to tpmod api,
         # and be located in: $LINUXCNC_RTLIB_DIR
         TPMOD=$OPTARG
+        ;;
+    m)  # -m modname: user-supplied homing module
+        # modname must conform to homing api,
+        # and be located in: $LINUXCNC_RTLIB_DIR
+        HOMEMOD=$OPTARG
         ;;
 	*)
 		usage
@@ -510,6 +514,18 @@ RS274NGC_PARAMFILE=$retval
 GetFromIniEx MOT MOT EMCMOT EMCMOT motmod
 EMCMOT=$retval$MODULE_EXT # add module extension
 
+# commandline -t option supersedes inifile setting
+if [ -z "$TPMOD" ] ; then
+    GetFromIni TPMOD   TRAJ
+    TPMOD=${retval:-tpmod} #use default if not found
+fi
+# commandline -m option supersedes inifile setting
+if [ -z "$HOMEMOD" ] ; then
+    GetFromIni HOMEMOD EMCMOT
+    HOMEMOD=${retval:-homemod} #use default if not found
+fi
+
+
 # 2.4. get io information
 GetFromIniEx IO IO EMCIO EMCIO io
 EMCIO=$retval
@@ -824,9 +840,10 @@ fi
 
 # 4.3.6. execute HALCMD config files (if any)
 
-# loadrt $TPMOD must precede loadrt for EMCMOT (motmod)
-echo "EMCMOT=$EMCMOT TPMOD=$TPMOD"
+echo "$(basename $0) EMCMOT=${EMCMOT%.so} TPMOD=$TPMOD HOMEMOD=$HOMEMOD"
 $HALCMD loadrt $TPMOD
+$HALCMD loadrt $HOMEMOD
+$HALCMD -s show comp \*mod
 
 TWOPASS=`$INIVAR -ini "$INIFILE" -var TWOPASS -sec HAL -num 1 2> /dev/null`
 if [ -n "$TWOPASS" ] ; then

@@ -334,6 +334,7 @@ HEADERS := \
     emc/motion/emcmotcfg.h \
     emc/motion/motion.h \
     emc/motion/mot_tp.h \
+    emc/motion/mot_home.h \
     emc/motion/simple_tp.h \
     emc/motion/state_tag.h \
     emc/motion/usrmotintf.h \
@@ -1139,11 +1140,13 @@ motmod-objs := emc/kinematics/cubic.o
 motmod-objs += emc/motion/motion.o
 motmod-objs += emc/motion/command.o
 motmod-objs += emc/motion/control.o
-motmod-objs += emc/motion/homing.o
 motmod-objs += emc/motion/simple_tp.o
 motmod-objs += emc/motion/emcmotutil.o
 motmod-objs += emc/motion/stashf.o
 motmod-objs += emc/motion/dbuf.o
+
+obj-m += homemod.o
+homemod-objs := emc/motion/homing.o
 
 obj-m += tpmod.o
 tpmod-objs := emc/tp/tc.o
@@ -1243,6 +1246,7 @@ endif
 ../rtlib/hal_lib$(MODULE_EXT): $(addprefix objects/rt,$(hal_lib-objs))
 ../rtlib/motmod$(MODULE_EXT): $(addprefix objects/rt,$(motmod-objs))
 ../rtlib/tpmod$(MODULE_EXT): $(addprefix objects/rt,$(tpmod-objs))
+../rtlib/homemod$(MODULE_EXT): $(addprefix objects/rt,$(homemod-objs))
 ../rtlib/trivkins$(MODULE_EXT): $(addprefix objects/rt,$(trivkins-objs))
 ../rtlib/5axiskins$(MODULE_EXT): $(addprefix objects/rt,$(5axiskins-objs))
 ../rtlib/maxkins$(MODULE_EXT): $(addprefix objects/rt,$(maxkins-objs))

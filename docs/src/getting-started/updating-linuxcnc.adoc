@@ -1376,6 +1376,18 @@ The userspace test program has not been actively maintained and
 its use is deprecated.  The ugenserkins.c file may be removed
 in the future.
 
+==== Trajectory Planner
+
+The trajectory planner is now implemented as a loadable module
+(default:tpmod).  An alternate (user-built) planner can be loaded using
+the 'linuxcnc -t modulename' option.
+
+==== Homing
+
+Homing functions are now implemented by a loadable module
+(default:homemod).  An alternate (user-built) planner can be loaded using
+the 'linuxcnc -m modulename' option.
+
 ==== Other
 
 lib/hallib/sim_lib.tcl: simulate encoder index if [JOINT_n]HOME_USE_INDEX

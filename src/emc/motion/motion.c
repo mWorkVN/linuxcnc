@@ -18,8 +18,13 @@
 #include "mot_tp.h"
 #include "homing.h"
 #include "motion_struct.h"
+#include "mot_tp.h"
+#include "mot_home.h"
 #include "mot_priv.h"
 #include "rtapi_math.h"
+
+#define MOTMOD_DEBUG
+#undef  MOTMOD_DEBUG
 
 // Mark strings for translation, but defer translation to userspace
 #define _(s) (s)
@@ -132,6 +137,7 @@ static int mot_comp_id;	/* component ID for motion module */
 *                   LOCAL FUNCTION PROTOTYPES                          *
 ************************************************************************/
 static void tp_vectors (void);
+static void hmod_vectors (void);
 
 /* init_hal_io() exports HAL pins and parameters making data from
    the realtime control module visible and usable by the world
@@ -177,7 +183,7 @@ void switch_to_teleop_mode(void) {
     emcmot_joint_t *joint;
 
     if (emcmotConfig->kinType != KINEMATICS_IDENTITY) {
-        if (!checkAllHomed()) {
+        if (!hmod_get_allhomed()) {
             reportError(_("all joints must be homed before going into teleop mode"));
             return;
         }
@@ -339,6 +345,9 @@ int rtapi_app_main(void)
     return -1;
   }
 
+    tp_vectors();
+    hmod_vectors();
+
     /* initialize/export HAL pins and parameters */
     retval = init_hal_io();
     if (retval != 0) {
@@ -346,8 +355,6 @@ int rtapi_app_main(void)
 	hal_exit(mot_comp_id);
 	return -1;
     }
-
-    tp_vectors();
 
     /* allocate/initialize user space comm buffers (cmd/status/err) */
     retval = init_comm_buffers();
@@ -442,6 +449,41 @@ TMOD_DECL(tpSetVmax)
 TMOD_DECL(tcqFull)
 
 #undef TMOD_DECL
+
+// definitions for homemod typesets (modular home)
+#define HMOD_DECL(fname) \
+        _##fname hmod_##fname;
+
+HMOD_DECL(do_homing)
+HMOD_DECL(do_homing_sequence)
+HMOD_DECL(export_joint_home_pins)
+HMOD_DECL(get_allhomed)
+HMOD_DECL(get_homed)
+HMOD_DECL(get_home_is_idle)
+HMOD_DECL(get_home_is_synchronized)
+HMOD_DECL(get_home_is_volatile)
+HMOD_DECL(get_home_needs_unlock_first)
+HMOD_DECL(get_home_sequence)
+HMOD_DECL(get_home_sequence_state)
+HMOD_DECL(get_homing)
+HMOD_DECL(get_homing_at_index_search_wait)
+HMOD_DECL(get_homing_is_active)
+HMOD_DECL(get_index_enable)
+HMOD_DECL(homing_init)
+HMOD_DECL(read_homing_in_pins)
+HMOD_DECL(set_home_abort)
+HMOD_DECL(set_home_idle)
+HMOD_DECL(set_home_sequence_state)
+HMOD_DECL(set_home_start)
+HMOD_DECL(set_joint_at_home)
+HMOD_DECL(set_joint_homed)
+HMOD_DECL(set_joint_homing)
+HMOD_DECL(set_joint_homing_params)
+HMOD_DECL(update_joint_homing_params)
+HMOD_DECL(write_homing_out_pins)
+
+#undef HMOD_DECL
+
 /***********************************************************************
 *                         LOCAL FUNCTION CODE                          *
 ************************************************************************/
@@ -485,6 +527,47 @@ TMOD_VECTOR(tpSetVmax)
 
 TMOD_VECTOR(tcqFull)
 #undef TMOD_VECTOR
+}
+
+static void hmod_vectors() {
+
+#define HMOD_VECTOR(fname) \
+    hmod_##fname = v_##fname();
+
+/* Example:
+**   HMOD_VECTOR(foo) expands to:
+**   hmod_foo = v_foo();
+*/
+
+HMOD_VECTOR(do_homing)
+HMOD_VECTOR(do_homing_sequence)
+HMOD_VECTOR(export_joint_home_pins)
+HMOD_VECTOR(get_allhomed)
+HMOD_VECTOR(get_homed)
+HMOD_VECTOR(get_home_is_idle)
+HMOD_VECTOR(get_home_is_synchronized)
+HMOD_VECTOR(get_home_is_volatile)
+HMOD_VECTOR(get_home_needs_unlock_first)
+HMOD_VECTOR(get_home_sequence)
+HMOD_VECTOR(get_home_sequence_state)
+HMOD_VECTOR(get_homing)
+HMOD_VECTOR(get_homing_at_index_search_wait)
+HMOD_VECTOR(get_homing_is_active)
+HMOD_VECTOR(get_index_enable)
+HMOD_VECTOR(homing_init)
+HMOD_VECTOR(read_homing_in_pins)
+HMOD_VECTOR(set_home_abort)
+HMOD_VECTOR(set_home_idle)
+HMOD_VECTOR(set_home_sequence_state)
+HMOD_VECTOR(set_home_start)
+HMOD_VECTOR(set_joint_at_home)
+HMOD_VECTOR(set_joint_homed)
+HMOD_VECTOR(set_joint_homing)
+HMOD_VECTOR(set_joint_homing_params)
+HMOD_VECTOR(update_joint_homing_params)
+HMOD_VECTOR(write_homing_out_pins)
+
+#undef HMOD_VECTOR
 }
 
 /* init_hal_io() exports HAL pins and parameters making data from
@@ -696,7 +779,6 @@ static int init_hal_io(void)
             return -1;
         }
     }
-
     /* export joint pins and parameters */
     for (n = 0; n < num_joints; n++) {
 	joint_data = &(emcmot_hal_data->joint[n]);
@@ -711,11 +793,10 @@ static int init_hal_io(void)
 	/* We'll init the index model to EXT_ENCODER_INDEX_MODEL_RAW for now,
 	   because it is always supported. */
     }
-
     /* export joint home pins (assigned to motion comp)*/
-    retval = export_joint_home_pins(num_joints,mot_comp_id);
+    retval = hmod_export_joint_home_pins(num_joints,mot_comp_id);
     if (retval != 0) {
-        rtapi_print_msg(RTAPI_MSG_ERR, _("MOTION: export_joint_home_pins failed\n"));
+        rtapi_print_msg(RTAPI_MSG_ERR, _("MOTION: hmod_export_joint_home_pins failed\n"));
         return -1;
     }
     /* export joint pins and parameters */
@@ -1083,22 +1164,18 @@ static int init_comm_buffers(void)
 	cubicInit(&(joint->cubic));
     }
 
-	homing_init();  // for all joints
-
-    /*! \todo FIXME-- add emcmotError */
-
     emcmotDebug->cur_time = emcmotDebug->last_time = 0.0;
     emcmotDebug->start_time = etime();
     emcmotDebug->running_time = 0.0;
 
-//=========================================================
     // supply key pointers to tp
     emcmot_tp_ptrs(emcmotStatus
                   ,emcmotDebug
                   ,emcmotConfig
                   );
-#ifdef TPMOD_DEBUG
-    rtapi_print("MOTMOD:beg %s\n",__FUNCTION__);
+
+#ifdef MOTMOD_DEBUG
+    rtapi_print("MOTMOD:<%s>\n",__FUNCTION__);
     rtapi_print("MOTMOD            emcmotDioWrite=%p\n",emcmotDioWrite);
     rtapi_print("MOTMOD            emcmotAioWrite=%p\n",emcmotAioWrite);
     rtapi_print("MOTMOD     emcmotSetRotaryUnlock=%p\n",emcmotSetRotaryUnlock);
@@ -1109,7 +1186,16 @@ static int init_comm_buffers(void)
                    ,&emcmotSetRotaryUnlock
                    ,&emcmotGetRotaryIsUnlocked
                    );
-//=========================================================
+    // supply key pointers to homemod
+    emcmot_home_ptrs(emcmotConfig
+                    ,joints
+                    );
+    // supply key funcs to homemod
+    emcmot_home_funcs(&emcmotSetRotaryUnlock
+                     ,&emcmotGetRotaryIsUnlocked
+                     );
+    hmod_homing_init();  // for all joints
+
     /* init motion emcmotDebug->coord_tp */
     if (-1 == modtpCreate(&emcmotDebug->coord_tp, DEFAULT_TC_QUEUE_SIZE,
 	    emcmotDebug->queueTcSpace)) {
