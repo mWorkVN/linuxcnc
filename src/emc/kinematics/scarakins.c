@@ -92,7 +92,8 @@ int scaraKinematicsForward(const double * joint,
 
     x = D2*cos(a0) + D4*cos(a1) + D6*cos(a3);
     y = D2*sin(a0) + D4*sin(a1) + D6*sin(a3);
-    z = D1 + D3 - joint[2] - D5;
+    //z = D1 + D3 - joint[2] - D5;
+    z = joint[2];
     c = a3;
 
     *iflags = 0;
@@ -160,7 +161,8 @@ static int scaraKinematicsInverse(const EmcPose * world,
 
     joint[0] = q0;
     joint[1] = q1;
-    joint[2] = D1 + D3 - D5 - z;
+    //joint[2] = D1 + D3 - D5 - z;
+    joint[2] = z;
     joint[3] = c - ( q0 + q1);
     joint[4] = world->a;
     joint[5] = world->b;
@@ -193,14 +195,14 @@ static int scaraKinematicsSetup(const  int   comp_id,
     res += hal_pin_float_newf(HAL_IN, &(haldata->d5), comp_id,"%s.D5",kp->halprefix);
     res += hal_pin_float_newf(HAL_IN, &(haldata->d6), comp_id,"%s.D6",kp->halprefix);
     if (res) { goto error; }
-
+    /*
     D1 = DEFAULT_D1;
     D2 = DEFAULT_D2;
     D3 = DEFAULT_D3;
     D4 = DEFAULT_D4;
     D5 = DEFAULT_D5;
     D6 = DEFAULT_D6;
-
+    */
     return 0;
 
 error:

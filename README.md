@@ -24,6 +24,8 @@ This software is released under the GPLv2, with some parts under the LGPL.
 See the file COPYING for more details.
 
 
+
+
 # The Build Process
 
 Refer to the file 'docs/src/code/building-linuxcnc.txt' for information

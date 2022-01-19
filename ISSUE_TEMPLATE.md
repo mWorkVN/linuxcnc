@@ -20,6 +20,8 @@ If you have a question about how to use the software, use one of the other metho
 software, describe the change you think is responsible.  E.g., "after upgrading
 from LinuxCNC 2.7.3 to 2.7.4")
 
+
+
 ## Information about my hardware and software:
 
  * I am using this Linux distribution and version (often, shown by `lsb_release -a`):

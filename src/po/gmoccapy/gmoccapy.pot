@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-04 08:33+0100\n"
+"POT-Creation-Date: 2021-12-19 20:23-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -650,7 +650,7 @@ msgid ""
 msgstr ""
 
 #: emc/usr_intf/gmoccapy/gmoccapy.py:4597
-msgid "Could not understand the entered tool number. Will not change anything"
+msgid "Could not understand the entered tool number. Will not change anything!"
 msgstr ""
 
 #: emc/usr_intf/gmoccapy/gmoccapy.py:4881
@@ -1514,7 +1514,7 @@ msgstr ""
 #: emc/usr_intf/gmoccapy/gmoccapy.glade.h:206
 msgid ""
 "run the program from a certain line, attention, that is dangerous, because "
-"the previous lines will not checed!"
+"the previous lines will not checked!"
 msgstr ""
 
 #: emc/usr_intf/gmoccapy/gmoccapy.glade.h:207

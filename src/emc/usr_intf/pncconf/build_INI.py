@@ -195,9 +195,6 @@ class INI:
         print("[HAL]", file=file)
         print("HALUI = halui", file=file)
         print("HALFILE = %s.hal" % self.d.machinename, file=file)
-        # qtplasmac requires the qtplasmac_comp file to connect the plasmac component
-        if self.d.frontend == _PD._QTPLASMAC:
-            print("HALFILE = qtplasmac_comp.hal", file=file)
         print("HALFILE = custom.hal", file=file)
 
         if self.d.pyvcp and self.d.pyvcphaltype == 1 and self.d.pyvcpconnect:
@@ -272,7 +269,7 @@ class INI:
         # trivial kinematics: no. of joints == no.of axes)
         # with trivkins, axes do not have to be consecutive
         print("JOINTS = %d"%num_joints, file=file)
-        if tandemflag and self.d.frontend != _PD._QTPLASMAC:
+        if tandemflag:
             print("KINEMATICS = trivkins coordinates=%s kinstype=BOTH"%coords.replace(" ",""), file=file)
         else:
             print("KINEMATICS = trivkins coordinates=%s"%coords.replace(" ",""), file=file)

@@ -63,7 +63,7 @@ use -g WIDTHxHEIGHT for just setting size or -g +XOFFSET+YOFFSET for just positi
                   , help="reparent window into a plug add push the plug xid number to standardout")
           , Option( '-u', dest='usermod', default="", help='file path of user defined handler file')
           , Option( '-o', dest='useropts', action='append', metavar='USEROPTS', default=[]
-                  , help='pass USEROPTS strings to handler under self.w.USEROPTIONS_ list varible')
+                  , help='pass USEROPTS strings to handler under self.w.USEROPTIONS_ list varible')    
           ]
 
 
@@ -115,6 +115,7 @@ class QTVCP:
                 del sys.argv[i]
                 # pop out the ini path
                 INIPATH = sys.argv.pop(i)
+                print(INIPATH)
                 break
         (opts, args) = parser.parse_args()
 

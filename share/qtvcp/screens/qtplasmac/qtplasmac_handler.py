@@ -1,4 +1,4 @@
-VERSION = '1.221.155'
+VERSION = '1.221.153'
 
 '''
 qtplasmac_handler.py
@@ -58,7 +58,6 @@ from qtvcp.lib.aux_program_loader import Aux_program_loader
 from qtvcp.lib.qtplasmac import tooltips as TOOLTIPS
 from qtvcp.lib.qtplasmac import set_offsets as OFFSETS
 from qtvcp.lib.qtplasmac import run_from_line as RFL
-from qtvcp.lib.qtplasmac import updater as UPDATER
 
 LOG = logger.getLogger(__name__)
 KEYBIND = Keylookup()
@@ -111,7 +110,7 @@ class HandlerClass:
         self.w = widgets
         self.h.comp.setprefix('qtplasmac')
         self.PATHS = paths
-        self.iniFile = INFO.INI
+        self.iniFile = linuxcnc.ini(INIPATH)
         self.foreColor = '#ffee06'
 # changes sim common folder to a link so sims keep up to date
         if 'by_machine.qtplasmac' in self.PATHS.CONFIGPATH:
@@ -122,7 +121,6 @@ class HandlerClass:
                     linkFolder = os.path.join(self.PATHS.BASEDIR, 'configs/by_machine/qtplasmac/qtplasmac/')
                 os.rename(os.path.join(self.PATHS.CONFIGPATH, 'qtplasmac'), os.path.join(self.PATHS.CONFIGPATH, 'qtplasmac' + str(time.time())))
                 os.symlink(linkFolder, os.path.join(self.PATHS.CONFIGPATH, 'qtplasmac'))
-        self.update_check()
         self.STYLEEDITOR = SSE(widgets, paths)
         self.GCODES = GCodes(widgets)
         self.valid = QDoubleValidator(0.0, 999.999, 3)
@@ -722,9 +720,9 @@ class HandlerClass:
         CALL(['halcmd', 'net', 'plasmac:gcode-scale', 'plasmac.gcode-scale', 'qtplasmac.gcode_scale'])
 
 # *** add system hal pin changes here that may affect existing configs ***
-# *** these may be removed after auto updating is implemented          ***
         if not hal.pin_has_writer('plasmac.feed-upm'): # if feed-upm is not yet connected in hal
             CALL(['halcmd', 'net', 'plasmac:feed-upm', 'motion.feed-upm', 'plasmac.feed-upm'])
+
 
     def init_preferences(self):
         self.lastLoadedProgram = self.w.PREFS_.getpref('RecentPath_0', 'None', str,'BOOK_KEEPING')
@@ -1875,12 +1873,6 @@ class HandlerClass:
 #########################################################################################################################
 # GENERAL FUNCTIONS #
 #########################################################################################################################
-
-    def update_check(self):
-        # use qtplasmac_comp.hal for component connections (pre V1.221.154)
-        halfiles = self.iniFile.findall('HAL', 'HALFILE') or None
-        if halfiles and not 'qtplasmac_comp.hal' in halfiles and not 'plasmac.tcl' in halfiles:
-            UPDATER.add_component_hal_file(self.PATHS.CONFIGPATH, INIPATH, halfiles)
 
     def set_blank_gcodeprops(self):
         # a workaround for the extreme values in gcodeprops for a blank file
@@ -4931,8 +4923,6 @@ class HandlerClass:
             hal.set_p('plasmac.paused-motion-speed',str(speed))
 
     def cutrec_move(self, state, x, y):
-        if not STATUS.is_interp_paused():
-            return
         if state:
             maxMove = 10
             if self.units == 'inch':

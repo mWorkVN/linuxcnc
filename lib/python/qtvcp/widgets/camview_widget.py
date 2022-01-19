@@ -377,7 +377,8 @@ class WebcamVideoStream:
     def __init__(self, src=0):
         # initialize the video camera stream and read the first frame
         # from the stream
-        self.stream = CV.VideoCapture(src)
+        self.camnum = src
+        
         # initialize the variable used to indicate if the thread should
         # be stopped
         self.stopped = False
@@ -391,6 +392,12 @@ class WebcamVideoStream:
 
     def _update(self):
         # keep looping infinitely until the thread is stopped
+        self.stream = CV.VideoCapture(self.camnum)
+        if self.stream is None:
+            print('Warning: unable to open video source: ', self.camnum)
+        elif not self.stream.isOpened():
+            print('Warning: uCan open video source: ', self.camnum)
+        
         while True:
             # if the thread indicator variable is set, stop the thread
             if self.stopped:

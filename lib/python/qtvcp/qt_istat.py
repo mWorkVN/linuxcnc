@@ -71,7 +71,6 @@ class _IStat(object):
         self.MIN_SPINDLE_OVERRIDE = 0.5
         self.TITLE = ""
         self.ICON = ""
-
         self.update()
 
     def update(self):
@@ -80,7 +79,7 @@ class _IStat(object):
             self.CYCLE_TIME = int(ct * 1000)
         else:
             self.CYCLE_TIME = int(ct)
-        self.GRAPHICS_CYCLE_TIME =int(self.INI.find('DISPLAY', 'GRAPHICS_CYCLE_TIME') or 100) # in seconds
+        self.GRAPHICS_CYCLE_TIME = int(self.INI.find('DISPLAY', 'GRAPHICS_CYCLE_TIME') or 100) # in seconds
         self.HALPIN_CYCLE_TIME = int(self.INI.find('DISPLAY', 'HALPIN_CYCLE_TIME') or 100) # in seconds
         self.MDI_HISTORY_PATH = self.INI.find('DISPLAY', 'MDI_HISTORY_FILE') or '~/.axis_mdi_history'
         self.QTVCP_LOG_HISTORY_PATH = self.INI.find('DISPLAY', 'LOG_FILE') or '~/qtvcp.log'
@@ -307,12 +306,12 @@ class _IStat(object):
         else:
             self.TRAJ_COORDINATES = None
         self.JOINT_COUNT = int(self.INI.find("KINS", "JOINTS") or 0)
-        self.DEFAULT_LINEAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "DEFAULT_LINEAR_VELOCITY", 1)) * 60
-        self.MIN_LINEAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "MIN_LINEAR_VELOCITY", 1)) * 60
-        self.MAX_LINEAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "MAX_LINEAR_VELOCITY", 5)) * 60
-        self.DEFAULT_ANGULAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "DEFAULT_ANGULAR_VELOCITY", 6)) * 60
-        self.MIN_ANGULAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "MIN_ANGULAR_VELOCITY", 1)) * 60
-        self.MAX_ANGULAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "MAX_ANGULAR_VELOCITY", 60)) * 60
+        self.DEFAULT_LINEAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "DEFAULT_LINEAR_VELOCITY", 1)) 
+        self.MIN_LINEAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "MIN_LINEAR_VELOCITY", 1))
+        self.MAX_LINEAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "MAX_LINEAR_VELOCITY", 5)) 
+        self.DEFAULT_ANGULAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "DEFAULT_ANGULAR_VELOCITY", 6)) 
+        self.MIN_ANGULAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "MIN_ANGULAR_VELOCITY", 1)) 
+        self.MAX_ANGULAR_JOG_VEL = float(self.get_error_safe_setting("DISPLAY", "MAX_ANGULAR_VELOCITY", 60)) 
         log.debug('DEFAULT_LINEAR_VELOCITY = {}'.format(self.DEFAULT_LINEAR_JOG_VEL))
         log.debug('MIN_LINEAR_VELOCITY = {}'.format(self.MIN_LINEAR_JOG_VEL))
         log.debug('MAX_LINEAR_VELOCITY = {}'.format(self.MAX_LINEAR_JOG_VEL))

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-06 07:52+0100\n"
+"POT-Creation-Date: 2021-12-19 20:23-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -100,7 +100,7 @@ msgid "G4 not allowed with G2 or G3 because they both use P"
 msgstr ""
 
 #: src/emc/rs274ngc/interp_check.cc:92
-msgid "Line with G10 does not have L1, L10, L11, L2, or L20"
+msgid "Line with G10 does not have L0, L1, L10, L11, L2, or L20"
 msgstr ""
 
 #: src/emc/rs274ngc/interp_check.cc:93
@@ -248,7 +248,7 @@ msgid "Cannot do an arc in planes G17.1, G18.1, or G19.1"
 msgstr ""
 
 #: src/emc/rs274ngc/interp_convert.cc:402
-#: src/emc/rs274ngc/interp_convert.cc:4702
+#: src/emc/rs274ngc/interp_convert.cc:4708
 msgid "Cannot feed with zero spindle speed in feed per rev mode"
 msgstr ""
 
@@ -286,9 +286,9 @@ msgstr ""
 #: src/emc/rs274ngc/interp_convert.cc:1066
 #: src/emc/rs274ngc/interp_convert.cc:1070
 #: src/emc/rs274ngc/interp_convert.cc:1074
-#: src/emc/rs274ngc/interp_convert.cc:4121
-#: src/emc/rs274ngc/interp_convert.cc:4124
-#: src/emc/rs274ngc/interp_convert.cc:4127 src/emc/rs274ngc/interp_find.cc:99
+#: src/emc/rs274ngc/interp_convert.cc:4127
+#: src/emc/rs274ngc/interp_convert.cc:4130
+#: src/emc/rs274ngc/interp_convert.cc:4133 src/emc/rs274ngc/interp_find.cc:99
 #, c-format
 msgid "Invalid absolute position %5.2f for wrapped rotary axis %c"
 msgstr ""
@@ -475,135 +475,135 @@ msgstr ""
 msgid "Invalid spindle ($) number in M51 command"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:3676
-#: src/emc/rs274ngc/interp_convert.cc:3677
-#: src/emc/rs274ngc/interp_convert.cc:3678
+#: src/emc/rs274ngc/interp_convert.cc:3682
+#: src/emc/rs274ngc/interp_convert.cc:3683
+#: src/emc/rs274ngc/interp_convert.cc:3684
 #, c-format
 msgid "Indexing axis %c can only be moved with G0"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:3685
-#: src/emc/rs274ngc/interp_convert.cc:3687
-#: src/emc/rs274ngc/interp_convert.cc:3689
+#: src/emc/rs274ngc/interp_convert.cc:3691
+#: src/emc/rs274ngc/interp_convert.cc:3693
+#: src/emc/rs274ngc/interp_convert.cc:3695
 #, c-format
 msgid "Indexing axis %c can only be moved alone"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:3796
+#: src/emc/rs274ngc/interp_convert.cc:3802
 msgid "Cannot probe with feed per rev mode"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:3844
+#: src/emc/rs274ngc/interp_convert.cc:3850
 msgid "Cannot change retract mode with cutter radius compensation on"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:3878
+#: src/emc/rs274ngc/interp_convert.cc:3884
 msgid "G10 L1 without offsets has no effect"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:3984
+#: src/emc/rs274ngc/interp_convert.cc:3990
 msgid "Q number in G10 is not an integer"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:3985
+#: src/emc/rs274ngc/interp_convert.cc:3991
 msgid "Invalid tool orientation"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4109
+#: src/emc/rs274ngc/interp_convert.cc:4115
 msgid "I J words not allowed with G10 L2"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4130
+#: src/emc/rs274ngc/interp_convert.cc:4136
 msgid ""
 "Cannot change the active coordinate system with cutter radius compensation on"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4138
+#: src/emc/rs274ngc/interp_convert.cc:4144
 msgid "R not allowed in G10 L20"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4482
+#: src/emc/rs274ngc/interp_convert.cc:4488
 msgid "Bug:  Reached convert_stop() from M99 as subprogram return"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4762
+#: src/emc/rs274ngc/interp_convert.cc:4768
 msgid "Invalid spindle ($) number in G33 move"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4767
+#: src/emc/rs274ngc/interp_convert.cc:4773
 msgid "Spindle not turning in G33"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4777
+#: src/emc/rs274ngc/interp_convert.cc:4783
 msgid "Invalid spindle ($) number in G33.1 move"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4782
+#: src/emc/rs274ngc/interp_convert.cc:4788
 msgid "Spindle not turning in G33.1"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4797
+#: src/emc/rs274ngc/interp_convert.cc:4803
 msgid "Invalid D-number in G76 cycle"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4802
+#: src/emc/rs274ngc/interp_convert.cc:4808
 #, c-format
 msgid "Chosen spindle (%i) not turning in G76"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4840
+#: src/emc/rs274ngc/interp_convert.cc:4846
 msgid "BUG: An axis incorrectly moved along with an indexer"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4853
+#: src/emc/rs274ngc/interp_convert.cc:4859
 msgid "BUG: trying to index incorrect axis"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4948
+#: src/emc/rs274ngc/interp_convert.cc:4954
 msgid "Cannot use G76 threading cycle with cutter radius compensation on"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4951
+#: src/emc/rs274ngc/interp_convert.cc:4957
 msgid "In G76, I must not be 0"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4953
+#: src/emc/rs274ngc/interp_convert.cc:4959
 msgid "In G76, J must be greater than 0"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:4955
+#: src/emc/rs274ngc/interp_convert.cc:4961
 msgid "In G76, K must be greater than J"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:5098
+#: src/emc/rs274ngc/interp_convert.cc:5104
 msgid ""
 "Length of cutter compensation entry move is not greater than the tool radius"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:5317
+#: src/emc/rs274ngc/interp_convert.cc:5323
 msgid "Zero degree inside corner is invalid for cutter compensation"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:5355
-#: src/emc/rs274ngc/interp_convert.cc:5363
+#: src/emc/rs274ngc/interp_convert.cc:5361
+#: src/emc/rs274ngc/interp_convert.cc:5369
 msgid ""
 "Arc to straight motion makes a corner the compensated tool can't fit in "
 "without gouging"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:5447
+#: src/emc/rs274ngc/interp_convert.cc:5453
 msgid "Cannot change tools with cutter radius compensation on"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:5571
+#: src/emc/rs274ngc/interp_convert.cc:5577
 msgid "Cannot change tool offset with cutter radius compensation on"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:5622
+#: src/emc/rs274ngc/interp_convert.cc:5628
 msgid "G43.2: Can not have both H and axis words"
 msgstr ""
 
-#: src/emc/rs274ngc/interp_convert.cc:5625
+#: src/emc/rs274ngc/interp_convert.cc:5631
 msgid "G43.2: No axes specified and H word missing"
 msgstr ""
 
@@ -2577,7 +2577,7 @@ msgstr ""
 
 #: src/emc/motion/command.c:1896
 #, c-format
-msgid "Attempt to decreasenon-existent spindle <%d>"
+msgid "Attempt to decrease non-existent spindle <%d>."
 msgstr ""
 
 #: src/emc/motion/command.c:1911
@@ -2605,20 +2605,20 @@ msgstr ""
 msgid "unrecognized command %d"
 msgstr ""
 
-#: src/emc/motion/motion.c:164
+#: src/emc/motion/motion.c:180
 msgid "all joints must be homed before going into teleop mode"
 msgstr ""
 
-#: src/emc/motion/motion.c:220
+#: src/emc/motion/motion.c:247
 msgid "MOTION: hal_init() failed\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:225
+#: src/emc/motion/motion.c:252
 #, c-format
 msgid "MOTION: num_joints is %d, must be between 1 and %d\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:232
+#: src/emc/motion/motion.c:259
 #, c-format
 msgid ""
 "\n"
@@ -2626,14 +2626,14 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:237
+#: src/emc/motion/motion.c:264
 msgid ""
 "\n"
 "MOTION: nonzero num_extrajoints requires KINEMATICS_BOTH\n"
 "\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:242
+#: src/emc/motion/motion.c:269
 #, c-format
 msgid ""
 "\n"
@@ -2643,77 +2643,89 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:249
+#: src/emc/motion/motion.c:276
 #, c-format
 msgid "MOTION: num_spindles is %d, must be between 0 and %d\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:257
+#: src/emc/motion/motion.c:283
+msgid "MOTION: Can't specify both names and number for digital pins\n"
+msgstr ""
+
+#: src/emc/motion/motion.c:297
 #, c-format
 msgid "MOTION: num_dio is %d, must be between 1 and %d\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:264
+#: src/emc/motion/motion.c:303
+msgid "MOTION: Can't specify both names and number for analog pins\n"
+msgstr ""
+
+#: src/emc/motion/motion.c:316
 #, c-format
 msgid "MOTION: num_aio is %d, must be between 1 and %d\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:271
+#: src/emc/motion/motion.c:322
+msgid "MOTION: Can't specify both names and number for misc error\n"
+msgstr ""
+
+#: src/emc/motion/motion.c:335
 #, c-format
 msgid "MOTION: num_misc_error is %d, must be between 0 and %d\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:279
+#: src/emc/motion/motion.c:343
 msgid "MOTION: init_hal_io() failed\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:287
+#: src/emc/motion/motion.c:351
 msgid "MOTION: init_comm_buffers() failed\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:295
+#: src/emc/motion/motion.c:359
 msgid "MOTION: init_threads() failed\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:320
+#: src/emc/motion/motion.c:384
 #, c-format
 msgid "MOTION: hal_stop_threads() failed, returned %d\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:326
+#: src/emc/motion/motion.c:390
 #, c-format
 msgid "MOTION: rtapi_shmem_delete() failed, returned %d\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:332
+#: src/emc/motion/motion.c:396
 #, c-format
 msgid "MOTION: hal_exit() failed, returned %d\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:356
+#: src/emc/motion/motion.c:420
 msgid "MOTION: emcmot_hal_data malloc failed\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:500
+#: src/emc/motion/motion.c:610
 #, c-format
 msgid "MOTION: spindle %d pin export failed"
 msgstr ""
 
-#: src/emc/motion/motion.c:511
+#: src/emc/motion/motion.c:621
 #, c-format
 msgid "MOTION: joint %d pin/param export failed\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:523
+#: src/emc/motion/motion.c:633
 msgid "MOTION: export_joint_home_pins failed\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:531
+#: src/emc/motion/motion.c:641
 #, c-format
 msgid "MOTION: ejoint %d pin/param export failed\n"
 msgstr ""
 
-#: src/emc/motion/motion.c:567
+#: src/emc/motion/motion.c:677
 #, c-format
 msgid "MOTION: axis %c pin/param export failed\n"
 msgstr ""
@@ -11501,8 +11513,8 @@ msgstr ""
 
 #: src/emc/usr_intf/pncconf/build_INI.py:17
 #: src/emc/usr_intf/pncconf/build_HAL.py:53
-#: src/emc/usr_intf/pncconf/build_HAL.py:1043
-#: src/emc/usr_intf/pncconf/build_HAL.py:1063
+#: src/emc/usr_intf/pncconf/build_HAL.py:1046
+#: src/emc/usr_intf/pncconf/build_HAL.py:1066
 #, python-format
 msgid "# Generated by PNCconf at %s"
 msgstr ""
@@ -11631,73 +11643,73 @@ msgid "# **** Setup of spindle speed display using pyvcp -END ****"
 msgstr ""
 
 #: src/emc/usr_intf/pncconf/build_HAL.py:965
-#: src/emc/usr_intf/pncconf/build_HAL.py:1893
+#: src/emc/usr_intf/pncconf/build_HAL.py:1896
 msgid "# This file will not be overwritten when you run PNCconf again"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:971
+#: src/emc/usr_intf/pncconf/build_HAL.py:974
 msgid "# These commands are required for Touchy GUI"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1071
+#: src/emc/usr_intf/pncconf/build_HAL.py:1074
 #, python-format
 msgid "Generated by PNCconf at %s"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1083
+#: src/emc/usr_intf/pncconf/build_HAL.py:1086
 msgid "configures LinuxCNC as:\n"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1084
+#: src/emc/usr_intf/pncconf/build_HAL.py:1087
 msgid "type CNC\n"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1085
+#: src/emc/usr_intf/pncconf/build_HAL.py:1088
 msgid "will be used as the frontend display"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1094
+#: src/emc/usr_intf/pncconf/build_HAL.py:1097
 msgid " connector"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1106
+#: src/emc/usr_intf/pncconf/build_HAL.py:1109
 msgid "invrt"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1115
+#: src/emc/usr_intf/pncconf/build_HAL.py:1118
 #, python-format
 msgid "%(name)s Parport"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1120
-#: src/emc/usr_intf/pncconf/build_HAL.py:1128
+#: src/emc/usr_intf/pncconf/build_HAL.py:1123
+#: src/emc/usr_intf/pncconf/build_HAL.py:1131
 msgid "-> inverted"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1122
+#: src/emc/usr_intf/pncconf/build_HAL.py:1125
 #, python-format
 msgid "pin# %(pinnum)d is connected to input signal:'%(data)s' %(mesag)s"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1130
+#: src/emc/usr_intf/pncconf/build_HAL.py:1133
 #, python-format
 msgid "pin# %(pinnum)d is connected to output signal:'%(data)s' %(mesag)s"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1539
+#: src/emc/usr_intf/pncconf/build_HAL.py:1542
 msgid "#  Use ACTUAL spindle velocity from spindle encoder"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1540
+#: src/emc/usr_intf/pncconf/build_HAL.py:1543
 msgid "#  spindle-velocity bounces around so we filter it with lowpass"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1541
+#: src/emc/usr_intf/pncconf/build_HAL.py:1544
 msgid ""
 "#  spindle-velocity is signed so we use absolute component to remove sign"
 msgstr ""
 
-#: src/emc/usr_intf/pncconf/build_HAL.py:1542
+#: src/emc/usr_intf/pncconf/build_HAL.py:1545
 msgid "#  ACTUAL velocity is in RPS not RPM so we scale it."
 msgstr ""
 
@@ -17013,23 +17025,23 @@ msgstr ""
 
 #: src/emc/usr_intf/pncconf/finished.glade:6
 msgid ""
-"All the necessary information has now been gathered. \n"
+"All the necessary info has now been gathered. \n"
 "Click \"Done\" to write your configuration files to disk.\n"
 "\n"
 "If you experience lockups while running LinuxCNC:\n"
-"-you will need to decrease the maximum velocity which will have the effect "
-"of increasing BASE_PERIOD.\n"
+"-Decrease the maximum velocity which will have the effect of increasing "
+"BASE_PERIOD.\n"
 "\n"
 "If you experience lost steps while running LinuxCNC:\n"
-"-first verify that you entered the proper timings for your stepper "
+"-First verify that you entered the proper timings for your stepper "
 "drivers. \n"
-"-then run a more thorough latency test as described on the linuxcnc.org "
+"-Then run a more thorough latency test as described on the linuxcnc.org "
 "wiki.\n"
-" http;//wiki.linuxcnc.org/cgi-bin/wiki.pl?TroubleShooting\n"
+"https://wiki.linuxcnc.org/cgi-bin/wiki.pl?TroubleShooting\n"
 "\n"
 "If you experience the \"Unexpected Realtime Delay\" message:\n"
-"-run a more thorough latency test as described on the linuxcnc.org wiki: \n"
-" http://wiki.linuxcnc.org/cgi-bin/wiki.pl?TroubleShooting"
+"-Run a more thorough latency test as described on the linuxcnc.org wiki: \n"
+"https://wiki.linuxcnc.org/cgi-bin/wiki.pl?TroubleShooting"
 msgstr ""
 
 #: src/emc/usr_intf/gscreen/gscreen.py:64

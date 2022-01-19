@@ -282,7 +282,7 @@ class Window(QWidget):
         super(Window, self).__init__()
         self.glWidget = GLWidget()
         v = self.glWidget
-        v.set_latitudelimits(-180, 180)
+        v.set_latitudelimits(-10, 18)
 
         world = Capture()
 
