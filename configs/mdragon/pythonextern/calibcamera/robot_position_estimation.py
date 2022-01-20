@@ -165,7 +165,22 @@ if __name__ == "__main__":
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         #Now Place the base_plate_tool on the surface below the camera.
         while(1):
-            _,frame = cap.read()
+            ret,frame = cap.read()
+            if not ret:
+                print("Cannot read camera frame, exit from program!")
+                cap.release()
+                for i in range(10):
+                    cap = cv2.VideoCapture(i)
+                    if(cap.isOpened()):
+                        camnum = i
+                        cap.release()
+                        break
+                    cap.release()   
+                print("CAMNUM ",camnum)
+                cap = cv2.VideoCapture(camnum)
+                cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)  
+                continue 
             cv2.imshow("Live1" , frame)
             frame = undistortImage(frame)
             cv2.imshow("Live" , frame)
