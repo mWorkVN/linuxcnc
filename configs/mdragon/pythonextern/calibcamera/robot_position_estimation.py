@@ -98,10 +98,13 @@ def load_params( param_file:str='./output/camera_params.xml'):
 def undistortImage(img):
     #if not isinstance(img, np.ndarray):
     #    AssertionError("Image type '{}' is not numpy.ndarray.".format(type(img)))
+    h,  w = img.shape[:2]
+    print("Imgae ",w,h)
+    new_camera_matrix, roi=cv2.getOptimalNewCameraMatrix(matrix,dist,(w,h),1,(w,h))
     dst = cv2.undistort(img, matrix, dist, new_camera_matrix)
     x, y, w, h = roi
     dst = dst[y:y + h, x:x + w]
-    dst = cv2.resize(dst, (640, 480))
+    #dst = cv2.resize(dst, (640, 480))
     return dst    
     
 
@@ -152,6 +155,7 @@ if __name__ == "__main__":
         #Now Place the base_plate_tool on the surface below the camera.
         while(1):
             _,frame = cap.read()
+            cv2.imshow("Live1" , frame)
             frame = undistortImage(frame)
             cv2.imshow("Live" , frame)
             k = cv2.waitKey(1) & 0xFF

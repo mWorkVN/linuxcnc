@@ -169,7 +169,7 @@ class MyGUI(QMainWindow):
 		self.detectCornersButton.setStyleSheet("background-color : green")
 		self.captureButton.setText('Waiting Corner')
 
-	def captureImage(self):
+	def captureImageold(self):
 		""" captures frame from webcam & tries to detect corners on chess board """
 		ret, frame = self.cap.read() # read frame from webcam
 		if ret: # if frame captured successfully
@@ -184,7 +184,33 @@ class MyGUI(QMainWindow):
 					self.detectCornersButton.setText('Detect Corners')
 			self.pixmap = self.imageToPixmap(frame_inverted)
 			self.update()
-			
+
+	def detectCorners(self, image):
+		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+		ret, corners = cv2.findChessboardCorners(gray, (no_of_columns,no_of_rows), cv2.CALIB_CB_FAST_CHECK)
+		if ret:
+			corners2 = cv2.cornerSubPix(gray, corners, (11,11), (-1,-1), criteria)
+			cv2.drawChessboardCorners(image, (no_of_columns,no_of_rows), corners, ret)
+			return ret, corners2, image
+		return ret, corners, image
+		
+	def captureImage(self):
+		""" captures frame from webcam & tries to detect corners on chess board """
+		ret, frame = self.cap.read() # read frame from webcam
+		if ret: # if frame captured successfully
+			frame_inverted = cv2.flip(frame, 1) # flip frame horizontally
+			if self.detectingCorners: # if detect corners checkbox is checked
+				cornersDetected, corners, imageWithCorners = self.detectCorners(frame_inverted) # detect corners on chess board
+				if cornersDetected: # if corners detected successfully
+					self.currentCorners = corners
+					self.frameWithCornersCaptured()
+					self.detectingCorners = False
+					self.detectCornersButton.setStyleSheet("background-color : red")
+					self.detectCornersButton.setText('Detect Corners')
+			self.pixmap = self.imageToPixmap(frame_inverted)
+			self.update()		
+
 	def frameWithCornersCaptured(self):
 		self.captureClicked() #fix last frame
 		self.toggleConfirmAndIgnoreVisibility(True)
@@ -205,6 +231,29 @@ class MyGUI(QMainWindow):
 		self.toggleConfirmAndIgnoreVisibility(False)
 		self.captureClicked() #continue capturing
 
+	def mycalib(self):
+		ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera([objpoints], [imgpoints], (640,480), None, None)
+
+		if not ret:
+			print("Cannot compute calibration!")		
+		else:
+			print("Camera calibration successfully computed")
+			# Compute reprojection errors
+			for i in range(len(objpoints)):
+				imgpoints2, _ = cv2.projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
+				error = cv2.norm(imgpoints[i],imgpoints2, cv2.NORM_L2)/len(imgpoints2)
+				tot_error += error
+			print("Camera matrix: ", mtx)
+			print("Distortion coeffs: ", dist)
+			print("Total error: ", tot_error)
+			print("Mean error: ", np.mean(error))
+			
+			# Saving calibration matrix
+			result_file = "./output/calibration.yaml"
+			print("Saving camera matrix .. in ",result_file)
+			data={"camera_matrix": mtx.tolist(), "dist_coeff": dist.tolist()}
+			with open(result_file, "w") as f:
+				yaml.dump(data, f, default_flow_style=False)
 	def ignoreClicked(self):
 		self.captureClicked() #continue capturing
 		self.toggleConfirmAndIgnoreVisibility(False)
@@ -216,6 +265,7 @@ class MyGUI(QMainWindow):
 		#elif self.confirmedImagesCounter % 2 != 0:
 		#	QMessageBox.question(self, 'Warning!', "the number of captured photos should be even. Please take one more photo!",QMessageBox.Ok)
 		else:
+			self.mycalib()
 			self.captureClicked() #stop capturing
 			M=self.buildMmatrix()
 			b=self.getMinimumEigenVector(M)
@@ -224,7 +274,7 @@ class MyGUI(QMainWindow):
 			#self.A = A
 			Rt = self.calculateExtrinsicParam(A)
 			#self.Rts = self.calculateAllExtrinsicParam(A, lamda)
-			self.built_in_calib()
+			#self.built_in_calib()
 			self.predicted2D = self.predict2Dpoints(self.objectPoints[1], A, Rt, lamda)
 			self.done_drawPredicted = True
 			self.update()
@@ -244,14 +294,7 @@ class MyGUI(QMainWindow):
 			self.confirmButton.hide()
 			#self.doneButton.hide()
 
-	def detectCorners(self, image):
-		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		ret, corners = cv2.findChessboardCorners(gray, (no_of_columns,no_of_rows), cv2.CALIB_CB_FAST_CHECK)
-		if ret:
-			cv2.cornerSubPix(gray, corners, (11,11), (-1,-1), criteria)
-			cv2.drawChessboardCorners(image, (no_of_columns,no_of_rows), corners, ret)
-		return ret, corners, image
+
 
 	def imageToPixmap(self, image):
 		qformat = QImage.Format_RGB888
