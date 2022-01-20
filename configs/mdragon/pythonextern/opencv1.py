@@ -14,7 +14,7 @@ import linuxcnc
 import hal
 from subprocess import call as CALL
 import atexit
-import lib.image_recognition_singlecam
+import lib.Object_detect
 import yaml
 import warnings
 import init_camera
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     ret, bg = cam.read()
     imgdir="Captures/"
     savedir="camera_data/"
-    imageRec=lib.image_recognition_singlecam.image_recognition(False,False,imgdir,imgdir,False,True,True)
+    imageRec=lib.Object_detect.image_recognition(False,False,imgdir,imgdir,False,True,True)
     key = 0
     timedebug=20
     init_camera.load_params()
