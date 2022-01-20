@@ -46,7 +46,8 @@ class MyGUI(QMainWindow):
 		self.objp[:,:2] = np.mgrid[0:no_of_rows,0:no_of_columns].T.reshape(-1,2)
 		self.objls = [] # 3d point in real world space
 		self.imgls = [] # 2d points in image plane.
-
+		self.tot_error = 0
+		
 		self.pixmap = None
 		self.firstPixmap = None # first captured image. to be displayed at the end
 		self.capturing = False
@@ -238,10 +239,10 @@ class MyGUI(QMainWindow):
 			for i in range(len(self.objls)):
 				imgpoints2, _ = cv2.projectPoints(self.objls[i], rvecs[i], tvecs[i], mtx, dist)
 				error = cv2.norm(self.imgls[i],imgpoints2, cv2.NORM_L2)/len(imgpoints2)
-				tot_error += error
+				self.tot_error += error
 			print("Camera matrix: ", mtx)
 			print("Distortion coeffs: ", dist)
-			print("Total error: ", tot_error)
+			print("Total error: ", self.tot_error)
 			print("Mean error: ", np.mean(error))		
 			# Saving calibration matrix
 			result_file = "./output/calibration.yaml"
