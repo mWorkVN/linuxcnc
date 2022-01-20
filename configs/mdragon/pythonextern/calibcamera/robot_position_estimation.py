@@ -199,7 +199,8 @@ if __name__ == "__main__":
             if k == 27: #exit by pressing Esc key
                 cv2.destroyAllWindows()
                 sys.exit()
-            if k == 34: #B
+            if k == 98: #b
+                print("update backgrou")
                 bg = frame
 
             if k == 13: #Save the centroid and angle values of the rectangle in a file
@@ -258,8 +259,10 @@ if __name__ == "__main__":
             """
             #points=[float(x),float(y),float(w),float(h),cx,cy,float(angle)]
             obj_count, detected_points, img_output=imageRec.run_detection(frame,bg)
-
-            (cx, cy), (width, height), (_, _), angle = detected_points
+            if (obj_count == 0):
+                continue
+            print("NUM OB",obj_count)
+            [cx, cy, width, height, _, _, angle] = detected_points[0]
             
             #centetoid of the rectangle conture
             cx=int(cx)
@@ -300,7 +303,7 @@ if __name__ == "__main__":
             cv2.namedWindow('Detected Rect', cv2.WINDOW_AUTOSIZE)
             #cv2.imshow('Detected Rect',im)
             cv2.imshow('Detected Rect',img_output)
-            cv2.waitKey(1)
+
 
             
                 
