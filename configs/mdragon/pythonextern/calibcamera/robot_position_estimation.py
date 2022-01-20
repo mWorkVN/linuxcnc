@@ -43,7 +43,7 @@ rectangle_width_in_mm = 90.5    #size of the calibration rectangle (longer side)
 cx = 0.0    #object location in mm
 cy = 0.0    #object location in mm
 angle = 0.0 #robotic arm rotation angle
-one_pixel_length = 0.0  #leqngth of one pixel in cm units
+mm_per_pixel = 0.0  #leqngth of one pixel in cm units
 number_of_cm_in_Resolution_width = 0.0  #total number of cm in the camera resolution width
 
 matrix = np.zeros((3, 3), np.float)
@@ -175,6 +175,7 @@ if __name__ == "__main__":
         #Now Place the base_plate_tool on the surface below the camera.
         ret,frame = cap.read()
         bg = frame
+        H0_C = None
         while(1):
             ret,frame = cap.read()
             if not ret:
@@ -203,6 +204,15 @@ if __name__ == "__main__":
                 bg = frame
             if k == 116: #t
                 print("update backgrou")
+                x_location1 = (cx * mm_per_pixel) #pixel to cm conversion
+                y_location1 = (cy * mm_per_pixel)
+                PC = [[x_location1],[y_location1],[0],[1]]    
+                P0 = np.dot(H0_C,PC)
+                print("Toa Do",P0[0],P0[1])
+                #These are global variables - I am using these variables in main loop below as process value in PID algorithm
+                #Location of Gripper in Robot coordinates
+                #Gripper_X[0] = P0[0]  #x coordinate of gripper in cm
+                #Gripper_Y[0] = P0[1]  #y coordinate of gripper in cm
 
             if k == 13: #Save the centroid and angle values of the rectangle in a file
                 result_file = r'output/robot_position.yaml'    
@@ -211,12 +221,20 @@ if __name__ == "__main__":
                 except:
                     pass
                 print("Saving Robot Position Matrices .. in ",result_file)
-                cx = (cx * one_pixel_length) #pixel to cm conversion
-                cy = (cy * one_pixel_length)
-                data={"robot_position": [cx,cy,angle,number_of_cm_in_Resolution_width]}
+                cx = (cx * mm_per_pixel) #pixel to cm conversion
+                cy = (cy * mm_per_pixel)
+                data={"robot_position": [cx,cy,angle,mm_per_pixel]}
                 with open(result_file, "w") as f:
                     yaml.dump(data, f, default_flow_style=False)
-            
+                R0_C = [[np.cos(np.pi),0,np.sin(np.pi)],[0,1,0],[-np.sin(np.pi),0,np.cos(np.pi)]]
+                #Displacement Vector - Find using "robot_position_estimation.py" file
+                robot_distance_from_X = cx # cm - distance from Image origin X axis to the robotic arm origin
+                robot_distance_from_Y = -cy # cm - distance from Image origin Y axis to the robotic arm origin
+                d0_C = [[robot_distance_from_X],[robot_distance_from_Y],[0]]  #distance between Robot origin to the Camera coordinates orign
+                #Homogeneous transformation matrix
+                H0_C = np.concatenate((R0_C,d0_C),1)
+                H0_C = np.concatenate((H0_C,[[0,0,0,1]]),0)
+
             """
             red = np.matrix(frame[:,:,2])  #extracting red layer (layer No 2) from RGB
             green = np.matrix(frame[:,:,1]) #extracting green layer (layer No 1) from RGB
@@ -263,7 +281,7 @@ if __name__ == "__main__":
             obj_count, detected_points, img_output=imageRec.run_detection(frame,bg)
             if (obj_count == 0):
                 continue
-            print("NUM OB",obj_count)
+            #print("NUM OB",obj_count)
             [cx, cy, width, height, _, _, angle] = detected_points[0]
             
             #centetoid of the rectangle conture
@@ -280,9 +298,9 @@ if __name__ == "__main__":
             
             #cm-per-pixel calculation
             if(width != 0.0):
-                one_pixel_length = rectangle_width_in_mm/width #length of one pixel in mm (rectangle_width_in_mm/rectangle_width_in_pixels)
-                number_of_cm_in_Resolution_width = (one_pixel_length*640) #in cm
-                print("number_of_cm_in_Resolution_width",number_of_cm_in_Resolution_width)
+                mm_per_pixel = rectangle_width_in_mm/width #length of one pixel in mm (rectangle_width_in_mm/rectangle_width_in_pixels)
+                #number_of_cm_in_Resolution_width = (mm_per_pixel*640) #in cm
+                #print("number_of_cm_in_Resolution_width",number_of_cm_in_Resolution_width)
             
             
             ##############################################################
