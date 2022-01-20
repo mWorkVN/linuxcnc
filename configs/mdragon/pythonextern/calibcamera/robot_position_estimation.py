@@ -173,6 +173,8 @@ if __name__ == "__main__":
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         #Now Place the base_plate_tool on the surface below the camera.
+        ret,frame = cap.read()
+        bg = frame
         while(1):
             ret,frame = cap.read()
             if not ret:
@@ -197,7 +199,9 @@ if __name__ == "__main__":
             if k == 27: #exit by pressing Esc key
                 cv2.destroyAllWindows()
                 sys.exit()
-            
+            if k == 34: #B
+                bg = frame
+
             if k == 13: #Save the centroid and angle values of the rectangle in a file
                 result_file = r'output/robot_position.xml'    
                 try:
@@ -210,7 +214,7 @@ if __name__ == "__main__":
                 data={"robot_position": [cx,cy,angle,number_of_cm_in_Resolution_width]}
                 with open(result_file, "w") as f:
                     yaml.dump(data, f, default_flow_style=False)
-
+            """
             red = np.matrix(frame[:,:,2])  #extracting red layer (layer No 2) from RGB
             green = np.matrix(frame[:,:,1]) #extracting green layer (layer No 1) from RGB
             blue = np.matrix(frame[:,:,0])  #extracting blue layer (layer No 0) from RGB
@@ -251,7 +255,11 @@ if __name__ == "__main__":
             rotatedRect = cv2.minAreaRect(cnt)
             #getting centroid, width, height and angle of the rectangle conture
             (cx, cy), (width, height), angle = rotatedRect
-            
+            """
+            #points=[float(x),float(y),float(w),float(h),cx,cy,float(angle)]
+            obj_count, detected_points, img_output=imageRec.run_detection(frame,bg)
+
+            (cx, cy), (width, height), (_, _), angle = detected_points
             
             #centetoid of the rectangle conture
             cx=int(cx)
@@ -281,16 +289,17 @@ if __name__ == "__main__":
             
             #Draw rectangle around the detected object
             #https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_contours/py_contours_begin/py_contours_begin.html#how-to-draw-the-contours
-            im = cv2.drawContours(frame,[cnt],0,(0,0,255),2)
+            #im = cv2.drawContours(frame,[cnt],0,(0,0,255),2)
             # cv2.namedWindow('Contours', cv2.WINDOW_AUTOSIZE)
             # cv2.imshow("Contours",im)
             # cv2.waitKey(1)
             
-            cv2.circle(im, (cx,cy), 2,(200, 255, 0),2) #draw center
-            cv2.putText(im, str("Angle: "+str(int(angle))), (int(cx)-40, int(cy)+60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
-            cv2.putText(im, str("Center: "+str(cx)+","+str(cy)), (int(cx)-40, int(cy)-50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
+            #cv2.circle(im, (cx,cy), 2,(200, 255, 0),2) #draw center
+            #cv2.putText(im, str("Angle: "+str(int(angle))), (int(cx)-40, int(cy)+60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
+            #cv2.putText(im, str("Center: "+str(cx)+","+str(cy)), (int(cx)-40, int(cy)-50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
             cv2.namedWindow('Detected Rect', cv2.WINDOW_AUTOSIZE)
-            cv2.imshow('Detected Rect',im)
+            #cv2.imshow('Detected Rect',im)
+            cv2.imshow('Detected Rect',img_output)
             cv2.waitKey(1)
 
             
