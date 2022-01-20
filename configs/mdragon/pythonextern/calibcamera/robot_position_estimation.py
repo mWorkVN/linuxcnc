@@ -185,8 +185,8 @@ if __name__ == "__main__":
                 cy = (cy * one_pixel_length)/10.0
                 data={"robot_position": [cx,cy,angle,number_of_cm_in_Resolution_width]}
                 with open(result_file, "w") as f:
-                    .dump(data, f, default_flow_style=False)
-yaml
+                    yaml.dump(data, f, default_flow_style=False)
+
             red = np.matrix(frame[:,:,2])  #extracting red layer (layer No 2) from RGB
             green = np.matrix(frame[:,:,1]) #extracting green layer (layer No 1) from RGB
             blue = np.matrix(frame[:,:,0])  #extracting blue layer (layer No 0) from RGB
