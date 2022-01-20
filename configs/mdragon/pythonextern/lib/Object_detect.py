@@ -82,13 +82,13 @@ class image_recognition:
                 #get rectangle detected_points
                 #x,y,w,h=cv2.boundingRect(cnt)
                 rect = cv2.minAreaRect(cnt)
-                print("rect ",rect)
+                
                 (x, y), (w, h), angle = rect
                 box = cv2.boxPoints(rect)
                 box = np.int0(box)
                 angle = float(angle)
                 ratio_size = float(w) / float(h)
-                print("ratio_size",ratio_size)
+                #print("ratio_size",ratio_size)
                 if 1.25 > ratio_size > 0.75:
                     if angle < -45:
                         angle = 90 + angle
@@ -100,7 +100,7 @@ class image_recognition:
 
                     if angle > 90:
                         angle = angle - 180
-                print(" angle caculator ",angle)
+                #print(" angle caculator ",angle)
                 #get centroid
                 M=cv2.moments(cnt)
                 cx=int(M['m10']/M['m00'])

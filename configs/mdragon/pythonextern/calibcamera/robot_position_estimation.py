@@ -192,7 +192,6 @@ if __name__ == "__main__":
                 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
                 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)  
                 continue 
-            cv2.imshow("Live1" , frame)
             frame = undistortImage(frame)
             cv2.imshow("Live" , frame)
             k = cv2.waitKey(1) & 0xFF
@@ -202,19 +201,22 @@ if __name__ == "__main__":
             if k == 98: #b
                 print("update backgrou")
                 bg = frame
+            if k == 116: #t
+                print("update backgrou")
 
             if k == 13: #Save the centroid and angle values of the rectangle in a file
-                result_file = r'output/robot_position.xml'    
+                result_file = r'output/robot_position.yaml'    
                 try:
                     os.remove(result_file)  #Delete old file first
                 except:
                     pass
                 print("Saving Robot Position Matrices .. in ",result_file)
-                cx = (cx * one_pixel_length)/10.0 #pixel to cm conversion
-                cy = (cy * one_pixel_length)/10.0
+                cx = (cx * one_pixel_length) #pixel to cm conversion
+                cy = (cy * one_pixel_length)
                 data={"robot_position": [cx,cy,angle,number_of_cm_in_Resolution_width]}
                 with open(result_file, "w") as f:
                     yaml.dump(data, f, default_flow_style=False)
+            
             """
             red = np.matrix(frame[:,:,2])  #extracting red layer (layer No 2) from RGB
             green = np.matrix(frame[:,:,1]) #extracting green layer (layer No 1) from RGB
@@ -274,17 +276,13 @@ if __name__ == "__main__":
                             
             #but we choose the Shorter edge of the rotated rect to compute the angle between Vertical
             #https://stackoverflow.com/a/21427814/3661547
-            if(width > height):
-                angle = angle+180
-            else:
-                angle = angle+90
             # print("Angle b/w shorter side with Image Vertical: \n", angle)
             
             #cm-per-pixel calculation
             if(width != 0.0):
                 one_pixel_length = rectangle_width_in_mm/width #length of one pixel in mm (rectangle_width_in_mm/rectangle_width_in_pixels)
-                number_of_cm_in_Resolution_width = (one_pixel_length*640)/10 #in cm
-                print(number_of_cm_in_Resolution_width)
+                number_of_cm_in_Resolution_width = (one_pixel_length*640) #in cm
+                print("number_of_cm_in_Resolution_width",number_of_cm_in_Resolution_width)
             
             
             ##############################################################
