@@ -20,7 +20,8 @@ Created on Sun Nov  8 21:58:01 2020
 # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_contours/py_contours_begin/py_contours_begin.html#how-to-draw-the-contours
 # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_contours/py_contour_features/py_contour_features.html#b-rotated-rectangle
 # https://stackoverflow.com/questions/52247821/find-width-and-height-of-rotatedrect
-
+import sys
+sys.path.append('../lib')
 import numpy as np
 import cv2
 import sys
@@ -30,6 +31,7 @@ import os
 import warnings
 import xml.etree.ElementTree as ET
 import atexit
+import Object_detect
 warnings.filterwarnings("ignore")
 
 #Constants Declaration
@@ -48,7 +50,9 @@ matrix = np.zeros((3, 3), np.float)
 new_camera_matrix = np.zeros((3, 3), np.float)
 dist = np.zeros((1, 5))
 roi = np.zeros(4, np.int)
-
+imgdir="Captures/"
+savedir="camera_data/"
+imageRec=Object_detect.image_recognition(False,False,imgdir,imgdir,False,True,True)
 def load_params( param_file:str='./output/camera_params.xml'):
     if not os.path.exists(param_file):
         print("File {} does not exist.",format(param_file))
