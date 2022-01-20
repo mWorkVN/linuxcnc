@@ -94,6 +94,16 @@ def load_params( param_file:str='./output/camera_params.xml'):
             roi[i] = int(roi1['data{}'.format(i)])
     else:
         print('No element named roi was found in {}'.format(param_file))
+def load_paramsyaml( param_file:str='./output/calibration.yaml'):
+    with open(param_file) as file:
+        documents = yaml.full_load(file)    #loading yaml file as Stream
+        matrix = np.array(documents['camera_matrix'])    #extracting camera_matrix key and convert it into Numpy Array (2D Matrix)
+        dist = np.array(documents['dist_coeff'])
+        #extrinsic_matrix = np.array(documents['extrinsics_matrix']) 
+        # print ("\nIntrinsic Matrix\n",camera_matrix)
+        # print ("\nExtrinsic Matrix\n",extrinsic_matrix)
+        # print ("\nDistortion Coefficients\n",distortion_coeff)
+        print("\nCamera Matrices Loaded Succeccfully\n")
 
 def undistortImage(img):
     #if not isinstance(img, np.ndarray):
@@ -136,7 +146,8 @@ def exit_handler():
 atexit.register(exit_handler)
 
 if __name__ == "__main__":
-    load_params()
+    #load_params()
+    load_paramsyaml()
     while(1):
         #try:
         #Start reading camera feed (https://answers.opencv.org/question/227535/solvedassertion-error-in-video-capturing/))
@@ -174,8 +185,8 @@ if __name__ == "__main__":
                 cy = (cy * one_pixel_length)/10.0
                 data={"robot_position": [cx,cy,angle,number_of_cm_in_Resolution_width]}
                 with open(result_file, "w") as f:
-                    yaml.dump(data, f, default_flow_style=False)
-
+                    .dump(data, f, default_flow_style=False)
+yaml
             red = np.matrix(frame[:,:,2])  #extracting red layer (layer No 2) from RGB
             green = np.matrix(frame[:,:,1]) #extracting green layer (layer No 1) from RGB
             blue = np.matrix(frame[:,:,0])  #extracting blue layer (layer No 0) from RGB
