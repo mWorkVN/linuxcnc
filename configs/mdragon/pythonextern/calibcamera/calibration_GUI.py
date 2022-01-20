@@ -2,6 +2,7 @@ import sys
 import cv2
 import numpy as np
 import xml.etree.ElementTree as ET
+import yaml
 from scipy import optimize
 from PyQt5.QtWidgets import QDialog, QApplication, QMainWindow, QLabel, QPushButton, QFrame, QCheckBox, QMessageBox
 from PyQt5.uic import loadUi
@@ -40,6 +41,12 @@ class MyGUI(QMainWindow):
 		self.cap = cv2.VideoCapture(camnum) # webcam object
 		self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 		self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+		# prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(n_row-1,n_col-1,0)
+		self.objp = np.zeros((no_of_rows*no_of_columns,3), np.float32)
+		self.objp[:,:2] = np.mgrid[0:no_of_rows,0:no_of_columns].T.reshape(-1,2)
+		self.objls = [] # 3d point in real world space
+		self.imgls = [] # 2d points in image plane.
+
 		self.pixmap = None
 		self.firstPixmap = None # first captured image. to be displayed at the end
 		self.capturing = False
@@ -47,6 +54,7 @@ class MyGUI(QMainWindow):
 		self.detectingCorners = False
 		self.done_drawPredicted = False
 		self.currentCorners = None # array of last detected corners
+		self.currentcornerSubPixs = None
 		self.predicted2D = None
 		self.homographies = [] # list of homographies of each captured image
 		self.capturedImagePoints = {} # dictionary of 2D points on captured image
@@ -169,15 +177,16 @@ class MyGUI(QMainWindow):
 		self.detectCornersButton.setStyleSheet("background-color : green")
 		self.captureButton.setText('Waiting Corner')
 
-	def captureImageold(self):
+	def captureImage(self):
 		""" captures frame from webcam & tries to detect corners on chess board """
 		ret, frame = self.cap.read() # read frame from webcam
 		if ret: # if frame captured successfully
 			frame_inverted = cv2.flip(frame, 1) # flip frame horizontally
 			if self.detectingCorners: # if detect corners checkbox is checked
-				cornersDetected, corners, imageWithCorners = self.detectCorners(frame_inverted) # detect corners on chess board
+				cornersDetected, corners, imageWithCorners , cornerSubPixs = self.detectCorners(frame_inverted) # detect corners on chess board
 				if cornersDetected: # if corners detected successfully
 					self.currentCorners = corners
+					self.currentcornerSubPixs = cornerSubPixs
 					self.frameWithCornersCaptured()
 					self.detectingCorners = False
 					self.detectCornersButton.setStyleSheet("background-color : red")
@@ -189,29 +198,14 @@ class MyGUI(QMainWindow):
 		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 		ret, corners = cv2.findChessboardCorners(gray, (no_of_columns,no_of_rows), cv2.CALIB_CB_FAST_CHECK)
+		cornerSubPixs = None
 		if ret:
-			corners2 = cv2.cornerSubPix(gray, corners, (11,11), (-1,-1), criteria)
+			cornerSubPixs = cv2.cornerSubPix(gray, corners, (11,11), (-1,-1), criteria)
 			cv2.drawChessboardCorners(image, (no_of_columns,no_of_rows), corners, ret)
-			return ret, corners2, image
-		return ret, corners, image
-		
-	def captureImage(self):
-		""" captures frame from webcam & tries to detect corners on chess board """
-		ret, frame = self.cap.read() # read frame from webcam
-		if ret: # if frame captured successfully
-			frame_inverted = cv2.flip(frame, 1) # flip frame horizontally
-			if self.detectingCorners: # if detect corners checkbox is checked
-				cornersDetected, corners, imageWithCorners = self.detectCorners(frame_inverted) # detect corners on chess board
-				if cornersDetected: # if corners detected successfully
-					self.currentCorners = corners
-					self.frameWithCornersCaptured()
-					self.detectingCorners = False
-					self.detectCornersButton.setStyleSheet("background-color : red")
-					self.detectCornersButton.setText('Detect Corners')
-			self.pixmap = self.imageToPixmap(frame_inverted)
-			self.update()		
+		return ret, corners, image , cornerSubPixs
 
 	def frameWithCornersCaptured(self):
+
 		self.captureClicked() #fix last frame
 		self.toggleConfirmAndIgnoreVisibility(True)
 
@@ -221,6 +215,9 @@ class MyGUI(QMainWindow):
 		#if self.confirmedImagesCounter == 3: self.doneButton.show()
 		self.counterLabel.setText('Images taken: '+str(self.confirmedImagesCounter))
 		self.capturedImagePoints[self.confirmedImagesCounter] = self.currentCorners
+		self.objls.append(self.objp)
+		self.imgls.append(self.currentcornerSubPixs)
+
 		if self.currentCorners[0,0,0]<self.currentCorners[-1,0,0]:
 			capturedObjectPoints=self.capturedObjectPointsLR
 		else:capturedObjectPoints=self.capturedObjectPointsRL
@@ -232,28 +229,27 @@ class MyGUI(QMainWindow):
 		self.captureClicked() #continue capturing
 
 	def mycalib(self):
-		ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera([objpoints], [imgpoints], (640,480), None, None)
-
+		ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(self.objls, self.imgls, (640,480), None, None)
 		if not ret:
 			print("Cannot compute calibration!")		
 		else:
 			print("Camera calibration successfully computed")
 			# Compute reprojection errors
-			for i in range(len(objpoints)):
-				imgpoints2, _ = cv2.projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
-				error = cv2.norm(imgpoints[i],imgpoints2, cv2.NORM_L2)/len(imgpoints2)
+			for i in range(len(self.objls)):
+				imgpoints2, _ = cv2.projectPoints(self.objls[i], rvecs[i], tvecs[i], mtx, dist)
+				error = cv2.norm(self.imgls[i],imgpoints2, cv2.NORM_L2)/len(imgpoints2)
 				tot_error += error
 			print("Camera matrix: ", mtx)
 			print("Distortion coeffs: ", dist)
 			print("Total error: ", tot_error)
-			print("Mean error: ", np.mean(error))
-			
+			print("Mean error: ", np.mean(error))		
 			# Saving calibration matrix
 			result_file = "./output/calibration.yaml"
 			print("Saving camera matrix .. in ",result_file)
 			data={"camera_matrix": mtx.tolist(), "dist_coeff": dist.tolist()}
 			with open(result_file, "w") as f:
 				yaml.dump(data, f, default_flow_style=False)
+
 	def ignoreClicked(self):
 		self.captureClicked() #continue capturing
 		self.toggleConfirmAndIgnoreVisibility(False)
@@ -265,8 +261,9 @@ class MyGUI(QMainWindow):
 		#elif self.confirmedImagesCounter % 2 != 0:
 		#	QMessageBox.question(self, 'Warning!', "the number of captured photos should be even. Please take one more photo!",QMessageBox.Ok)
 		else:
-			self.mycalib()
+			
 			self.captureClicked() #stop capturing
+			self.mycalib()
 			M=self.buildMmatrix()
 			b=self.getMinimumEigenVector(M)
 			#print(type(b),b)
