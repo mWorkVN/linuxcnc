@@ -35,13 +35,13 @@ warnings.filterwarnings("ignore")
 #Constants Declaration
 webcam_Resolution_Width	= 640.0
 webcam_Resolution_Height = 480.0
-rectangle_width_in_mm = 49.0    #size of the calibration rectangle (longer side) along x-axis in mm.
+rectangle_width_in_mm = 90.5    #size of the calibration rectangle (longer side) along x-axis in mm.
 
 # Global Variables
 cx = 0.0    #object location in mm
 cy = 0.0    #object location in mm
 angle = 0.0 #robotic arm rotation angle
-one_pixel_length = 0.0  #length of one pixel in cm units
+one_pixel_length = 0.0  #leqngth of one pixel in cm units
 number_of_cm_in_Resolution_width = 0.0  #total number of cm in the camera resolution width
 
 matrix = np.zeros((3, 3), np.float)
@@ -94,14 +94,16 @@ def load_params( param_file:str='./output/camera_params.xml'):
             roi[i] = int(roi1['data{}'.format(i)])
     else:
         print('No element named roi was found in {}'.format(param_file))
+
 def load_paramsyaml( param_file:str='./output/calibration.yaml'):
+    global matrix,dist
     with open(param_file) as file:
         documents = yaml.full_load(file)    #loading yaml file as Stream
         matrix = np.array(documents['camera_matrix'])    #extracting camera_matrix key and convert it into Numpy Array (2D Matrix)
         dist = np.array(documents['dist_coeff'])
         #extrinsic_matrix = np.array(documents['extrinsics_matrix']) 
-        # print ("\nIntrinsic Matrix\n",camera_matrix)
-        # print ("\nExtrinsic Matrix\n",extrinsic_matrix)
+        #print ("\nIntrinsic Matrix\n",matrix)
+        #print ("\nExtrinsic Matrix\n",dist)
         # print ("\nDistortion Coefficients\n",distortion_coeff)
         print("\nCamera Matrices Loaded Succeccfully\n")
 
@@ -109,12 +111,15 @@ def undistortImage(img):
     #if not isinstance(img, np.ndarray):
     #    AssertionError("Image type '{}' is not numpy.ndarray.".format(type(img)))
     h,  w = img.shape[:2]
-    print("Imgae ",w,h)
-    new_camera_matrix, roi=cv2.getOptimalNewCameraMatrix(matrix,dist,(w,h),1,(w,h))
-    dst = cv2.undistort(img, matrix, dist, new_camera_matrix)
+    mtx = matrix
+    ss = dist
+
+    #print("Imgae ",w,h)
+    new_camera_matrix, roi=cv2.getOptimalNewCameraMatrix(mtx,ss,(w,h),1,(w,h))
+    dst = cv2.undistort(img, mtx, ss,None, new_camera_matrix)
     x, y, w, h = roi
     dst = dst[y:y + h, x:x + w]
-    #dst = cv2.resize(dst, (640, 480))
+    dst = cv2.resize(dst, (640, 480))
     return dst    
     
 
@@ -206,13 +211,13 @@ if __name__ == "__main__":
             green = np.matrix(frame[:,:,1]) #extracting green layer (layer No 1) from RGB
             blue = np.matrix(frame[:,:,0])  #extracting blue layer (layer No 0) from RGB
             #it will display only the Blue colored objects bright with black background
-            blue_only = np.int16(blue)-np.int16(red)-np.int16(green)
+            blue_only = np.int16(red)-np.int16(blue)-np.int16(green)
             blue_only[blue_only<0] =0
             blue_only[blue_only>255] =255
             blue_only = np.uint8(blue_only)            
             # cv2.namedWindow('blue_only', cv2.WINDOW_AUTOSIZE)
-            # cv2.imshow("blue_only",blue_only)
-            # cv2.waitKey(1)
+            cv2.imshow("blue_only",blue_only)
+            cv2.waitKey(1)
             
             #https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_thresholding/py_thresholding.html#otsus-binarization
             #Gaussian filtering
@@ -232,7 +237,7 @@ if __name__ == "__main__":
                 if area>100000:
                     contours.remove(contour)
             if (lencontours ==0):
-                print("No detect lencontours")
+                #print("No detect lencontours")
                 continue
             cnt = contours[0] #Conture of our rectangle
             

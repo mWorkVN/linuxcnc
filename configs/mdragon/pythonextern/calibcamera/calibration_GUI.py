@@ -12,9 +12,7 @@ import os
 import redis
 from PyQt5.QtCore import QRect
 #Config Variables - Enter their values according to your Checkerboard
-no_of_columns = 9   #number of columns of your Checkerboard
-no_of_rows = 7  #number of rows of your Checkerboard
-square_size = 20.0 # size of square on the Checkerboard in mm
+
 
 class MyGUI(QMainWindow):
 	def __init__(self):
@@ -42,12 +40,13 @@ class MyGUI(QMainWindow):
 		self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 		self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 		# prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(n_row-1,n_col-1,0)
-		self.objp = np.zeros((no_of_rows*no_of_columns,3), np.float32)
-		self.objp[:,:2] = np.mgrid[0:no_of_rows,0:no_of_columns].T.reshape(-1,2)
+
 		self.objls = [] # 3d point in real world space
 		self.imgls = [] # 2d points in image plane.
 		self.tot_error = 0
-		
+		self.no_of_columns = 9   #number of columns of your Checkerboard
+		self.no_of_rows = 7  #number of rows of your Checkerboard
+		self.square_size = 20.0 # size of square on the Checkerboard in mm
 		self.pixmap = None
 		self.firstPixmap = None # first captured image. to be displayed at the end
 		self.capturing = False
@@ -62,8 +61,8 @@ class MyGUI(QMainWindow):
 		self.objectPoints = {} # dictionary of 3D points on chessboard
 		self.A = None #intrinsic
 		self.Rts = [] #extrinsic
-		self.points_in_row, self.points_in_column = no_of_rows, no_of_columns    #number of rows and columns of your Checkerboard
-		x, y = square_size, square_size   #size of square on the Checkerboard in mm
+		self.points_in_row, self.points_in_column = self.no_of_rows , self.no_of_columns    #number of rows and columns of your Checkerboard
+		x, y = self.square_size, self.square_size   #size of square on the Checkerboard in mm
 		# points in 3D
 		self.capturedObjectPointsLR = [[i*x, j*y, 0] for i in range(self.points_in_row,0,-1) for j in range(self.points_in_column,0,-1)]
 		self.capturedObjectPointsRL = list(reversed(self.capturedObjectPointsLR))
@@ -198,11 +197,11 @@ class MyGUI(QMainWindow):
 	def detectCorners(self, image):
 		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		ret, corners = cv2.findChessboardCorners(gray, (no_of_columns,no_of_rows), cv2.CALIB_CB_FAST_CHECK)
+		ret, corners = cv2.findChessboardCorners(gray, (self.no_of_columns,self.no_of_rows ), cv2.CALIB_CB_FAST_CHECK)
 		cornerSubPixs = None
 		if ret:
-			cornerSubPixs = cv2.cornerSubPix(gray, corners, (11,11), (-1,-1), criteria)
-			cv2.drawChessboardCorners(image, (no_of_columns,no_of_rows), corners, ret)
+			cornerSubPixs = cv2.cornerSubPix(gray, corners, (10, 10), (-1,-1), criteria)
+			cv2.drawChessboardCorners(image, (self.no_of_columns,self.no_of_rows ), corners, ret)
 		return ret, corners, image , cornerSubPixs
 
 	def frameWithCornersCaptured(self):
@@ -210,13 +209,19 @@ class MyGUI(QMainWindow):
 		self.captureClicked() #fix last frame
 		self.toggleConfirmAndIgnoreVisibility(True)
 
+	def cal_real_corner(self, corner_height, corner_width, square_size):
+		obj_corner = np.zeros([corner_height * corner_width, 3], np.float32)
+		obj_corner[:, :2] = np.mgrid[0:corner_height, 0:corner_width].T.reshape(-1, 2)  # (w*h)*2
+		return obj_corner * square_size
+
 	def confirmClicked(self):
 		self.confirmedImagesCounter += 1
 		if self.confirmedImagesCounter == 1: self.firstPixmap = self.pixmap
 		#if self.confirmedImagesCounter == 3: self.doneButton.show()
 		self.counterLabel.setText('Images taken: '+str(self.confirmedImagesCounter))
 		self.capturedImagePoints[self.confirmedImagesCounter] = self.currentCorners
-		self.objls.append(self.objp)
+		obj_corner = self.cal_real_corner(self.no_of_columns, self.no_of_rows , self.square_size)
+		self.objls.append(obj_corner)
 		self.imgls.append(self.currentcornerSubPixs)
 
 		if self.currentCorners[0,0,0]<self.currentCorners[-1,0,0]:
