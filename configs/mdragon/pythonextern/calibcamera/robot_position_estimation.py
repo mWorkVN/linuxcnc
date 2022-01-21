@@ -208,6 +208,8 @@ if __name__ == "__main__":
                 y_location1 = (cy * mm_per_pixel)
                 PC = [[x_location1],[y_location1],[0],[1]]    
                 P0 = np.dot(H0_C,PC)
+                P0[0] = P0[0] + 100
+                P0[1] = P0[1] + 100
                 print("Toa Do",P0[0],P0[1])
                 #These are global variables - I am using these variables in main loop below as process value in PID algorithm
                 #Location of Gripper in Robot coordinates
@@ -223,7 +225,9 @@ if __name__ == "__main__":
                 print("Saving Robot Position Matrices .. in ",result_file)
                 cx = (cx * mm_per_pixel) #pixel to cm conversion
                 cy = (cy * mm_per_pixel)
-                data={"robot_position": [cx,cy,angle,mm_per_pixel]}
+                offsetx = 0
+                offsety = 0
+                data={"robot_position": [cx,cy,angle,mm_per_pixel,offsetx,offsety]}
                 with open(result_file, "w") as f:
                     yaml.dump(data, f, default_flow_style=False)
                 R0_C = [[np.cos(np.pi),0,np.sin(np.pi)],[0,1,0],[-np.sin(np.pi),0,np.cos(np.pi)]]
