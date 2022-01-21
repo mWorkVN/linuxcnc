@@ -22,10 +22,6 @@ class MyGUI(QMainWindow):
 		
 		bg_status = False
 		bg_counter = 0
-		self.matrix = np.zeros((3, 3), np.float)
-		self.new_camera_matrix = np.zeros((3, 3), np.float)
-		self.dist = np.zeros((1, 5))
-		self.roi = np.zeros(4, np.int)
 		camnum = 0
 		for i in range(10):
 			cap = cv2.VideoCapture(i)
@@ -39,13 +35,15 @@ class MyGUI(QMainWindow):
 		self.cap = cv2.VideoCapture(camnum) # webcam object
 		self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 		self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+		self.width = int(cv2.get(cv2.CAP_PROP_FRAME_WIDTH)) 
+		self.height = int(cv2.get(cv2.CAP_PROP_FRAME_HEIGHT))
 		# prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(n_row-1,n_col-1,0)
 
 		self.objls = [] # 3d point in real world space
 		self.imgls = [] # 2d points in image plane.
 		self.tot_error = 0
-		self.no_of_columns = 9   #number of columns of your Checkerboard
-		self.no_of_rows = 7  #number of rows of your Checkerboard
+		self.n_col = 9   #number of columns of your Checkerboard
+		self.n_row = 7  #number of rows of your Checkerboard
 		self.square_size = 21.0 # size of square on the Checkerboard in mm
 		self.pixmap = None
 		self.firstPixmap = None # first captured image. to be displayed at the end
@@ -56,17 +54,11 @@ class MyGUI(QMainWindow):
 		self.currentCorners = None # array of last detected corners
 		self.currentcornerSubPixs = None
 		self.predicted2D = None
-		self.homographies = [] # list of homographies of each captured image
-		self.capturedImagePoints = {} # dictionary of 2D points on captured image
-		self.objectPoints = {} # dictionary of 3D points on chessboard
-		self.A = None #intrinsic
-		self.Rts = [] #extrinsic
-		self.points_in_row, self.points_in_column = self.no_of_rows , self.no_of_columns    #number of rows and columns of your Checkerboard
-		x, y = self.square_size, self.square_size   #size of square on the Checkerboard in mm
-		# points in 3D
-		self.capturedObjectPointsLR = [[i*x, j*y, 0] for i in range(self.points_in_row,0,-1) for j in range(self.points_in_column,0,-1)]
-		self.capturedObjectPointsRL = list(reversed(self.capturedObjectPointsLR))
-    
+
+
+
+
+
 	def fromRedis(self,r,n):
 		encoded = r.get(n)
 		h, w ,typed = struct.unpack('>III',encoded[:12])
@@ -107,7 +99,7 @@ class MyGUI(QMainWindow):
 		# initialize captured image label
 		self.imageLabel = QLabel('Image will be displayed here', self)
 		self.imageLabel.setAlignment(Qt.AlignCenter|Qt.AlignVCenter)
-		self.imageLabel.resize(640, 480)
+		self.imageLabel.resize(self.width, self.height)
 		self.imageLabel.move(10, 60)
 		self.imageLabel.setFrameShape(QFrame.Box)
 		
@@ -143,7 +135,7 @@ class MyGUI(QMainWindow):
 		if self.pixmap: # display image taken from webcam
 			self.imageLabel.setAlignment(Qt.AlignLeft|Qt.AlignTop)
 			self.imageLabel.setText('')
-			rect = QRect(10, 60, 640, 480)
+			rect = QRect(10, 60, self.width, self.height)
 			painter.drawPixmap(rect, self.pixmap)
 			#painter.drawPixmap(10, 60, self.pixmap)
 		if self.capturing: self.captureImage()
@@ -198,11 +190,11 @@ class MyGUI(QMainWindow):
 	def detectCorners(self, image):
 		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		ret, corners = cv2.findChessboardCorners(gray, (self.no_of_columns,self.no_of_rows ), cv2.CALIB_CB_FAST_CHECK)
+		ret, corners = cv2.findChessboardCorners(gray, (self.n_row,self.n_col ), cv2.CALIB_CB_FAST_CHECK)
 		cornerSubPixs = None
 		if ret:
 			cornerSubPixs = cv2.cornerSubPix(gray, corners, (11, 11), (-1,-1), criteria)
-			cv2.drawChessboardCorners(image, (self.no_of_columns,self.no_of_rows ), corners, ret)
+			cv2.drawChessboardCorners(image, (self.n_row,self.n_col ), corners, ret)
 		return ret, corners, image , cornerSubPixs
 
 	def frameWithCornersCaptured(self):
@@ -210,16 +202,16 @@ class MyGUI(QMainWindow):
 		self.toggleConfirmAndIgnoreVisibility(True)
 
 	def cal_real_corner(self, corner_height, corner_width, square_size):
-		obj_corner = np.zeros([corner_height * corner_width, 3], np.float32)
-		obj_corner[:, :2] = np.mgrid[0:corner_height, 0:corner_width].T.reshape(-1, 2)  # (w*h)*2
+		obj_corner = np.zeros([self.n_row * self.n_col, 3], np.float32)
+		obj_corner[:, :2] = np.mgrid[0:self.n_row, 0:self.n_col].T.reshape(-1, 2)  # (w*h)*2
+		#[0:n_row,0:n_col]
 		return obj_corner * square_size
 
 	def confirmClicked(self):
 		self.confirmedImagesCounter += 1
 		if self.confirmedImagesCounter == 1: self.firstPixmap = self.pixmap
-		#if self.confirmedImagesCounter == 3: self.doneButton.show()
 		self.counterLabel.setText('Images taken: '+str(self.confirmedImagesCounter))
-		obj_corner = self.cal_real_corner(self.no_of_columns, self.no_of_rows , self.square_size)
+		obj_corner = self.cal_real_corner(self.n_row,self.n_col, self.square_size)
 		self.objls.append(obj_corner)
 		self.imgls.append(self.currentcornerSubPixs)
 
@@ -227,7 +219,7 @@ class MyGUI(QMainWindow):
 		self.captureClicked() #continue capturing
 
 	def mycalib(self):
-		ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(self.objls, self.imgls, (640,480), None, None)
+		ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(self.objls, self.imgls, (self.width,self.height), None, None)
 		if not ret:
 			print("Cannot compute calibration!")		
 		else:
@@ -256,26 +248,19 @@ class MyGUI(QMainWindow):
 		if self.confirmedImagesCounter < 3:
 			rem = 3 - self.confirmedImagesCounter
 			QMessageBox.question(self, 'Warning!', "the number of captured photos should be at least 3. Please take "+str(rem)+" more photos",QMessageBox.Ok)
-		#elif self.confirmedImagesCounter % 2 != 0:
-		#	QMessageBox.question(self, 'Warning!', "the number of captured photos should be even. Please take one more photo!",QMessageBox.Ok)
-		else:
-			
+		else:		
 			self.captureClicked() #stop capturing
 			self.mycalib()
 			self.update()
-			print('Done :)\nCheck intrinsic.txt & extrinsic.txt & predicted VS actual.txt')
+			print('Done :)\n Check ./output/calibration.yaml')
 	
 	def toggleConfirmAndIgnoreVisibility(self, visibility=True):
 		if visibility:
 			self.ignoreButton.show()
 			self.confirmButton.show()
-			#self.doneButton.show()
 		else:
 			self.ignoreButton.hide()
 			self.confirmButton.hide()
-			#self.doneButton.hide()
-
-
 
 	def imageToPixmap(self, image):
 		qformat = QImage.Format_RGB888
