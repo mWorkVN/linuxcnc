@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="imageLabel">
     <property name="geometry">
      <rect>
       <x>280</x>
@@ -40,13 +40,13 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
       <string>Tab 1</string>
      </attribute>
-     <widget class="QPushButton" name="btn_START">
+     <widget class="QPushButton" name="captureButton">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -59,7 +59,7 @@
        <string>START</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_IGNORE">
+     <widget class="QPushButton" name="ignoreButton">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -72,7 +72,7 @@
        <string>IGNORE</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_confirm">
+     <widget class="QPushButton" name="confirmButton">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -85,7 +85,7 @@
        <string>CONFIRM</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_DONE">
+     <widget class="QPushButton" name="doneButton">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -98,7 +98,7 @@
        <string>DONE</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_detectcorners">
+     <widget class="QPushButton" name="detectCornersButton">
       <property name="geometry">
        <rect>
         <x>10</x>
