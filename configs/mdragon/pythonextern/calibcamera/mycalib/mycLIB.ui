@@ -1043,6 +1043,19 @@
        <string>Calib Points</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="btn_addbg">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>320</y>
+        <width>81</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Add BG</string>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
