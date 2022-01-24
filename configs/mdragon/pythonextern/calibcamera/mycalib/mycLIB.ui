@@ -122,7 +122,7 @@
         <x>20</x>
         <y>0</y>
         <width>231</width>
-        <height>431</height>
+        <height>231</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -222,7 +222,7 @@
             </font>
            </property>
            <property name="text">
-            <string>X</string>
+            <string/>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -248,7 +248,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>16777215</width>
+             <width>90</width>
              <height>30</height>
             </size>
            </property>
@@ -288,7 +288,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>16777215</width>
+             <width>90</width>
              <height>30</height>
             </size>
            </property>
@@ -358,7 +358,7 @@
             </font>
            </property>
            <property name="text">
-            <string>X</string>
+            <string>A</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -369,10 +369,42 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_3"/>
+          <widget class="QLineEdit" name="lbl_RPoint1X">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>90</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_4"/>
+          <widget class="QLineEdit" name="lbl_RPoint1Y">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>90</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -420,7 +452,7 @@
             </font>
            </property>
            <property name="text">
-            <string>X</string>
+            <string>B</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -431,10 +463,24 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_11"/>
+          <widget class="QLineEdit" name="lbl_RPoint2X">
+           <property name="maximumSize">
+            <size>
+             <width>90</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_12"/>
+          <widget class="QLineEdit" name="lbl_RPoint2Y">
+           <property name="maximumSize">
+            <size>
+             <width>90</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -482,7 +528,7 @@
             </font>
            </property>
            <property name="text">
-            <string>X</string>
+            <string>C</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -493,10 +539,10 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_13"/>
+          <widget class="QLineEdit" name="lbl_RPoint3X"/>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_14"/>
+          <widget class="QLineEdit" name="lbl_RPoint3Y"/>
          </item>
         </layout>
        </item>
@@ -544,7 +590,7 @@
             </font>
            </property>
            <property name="text">
-            <string>X</string>
+            <string>D</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -555,10 +601,10 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_15"/>
+          <widget class="QLineEdit" name="lbl_RPoint4X"/>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_16"/>
+          <widget class="QLineEdit" name="lbl_RPoint4Y"/>
          </item>
         </layout>
        </item>
@@ -575,7 +621,7 @@
         <x>10</x>
         <y>0</y>
         <width>221</width>
-        <height>311</height>
+        <height>231</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -592,44 +638,48 @@
         <number>5</number>
        </property>
        <item>
-        <widget class="QLabel" name="axisCB_X_10">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>20</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-           <weight>75</weight>
-           <italic>false</italic>
-           <bold>true</bold>
-           <stylestrategy>PreferAntialias</stylestrategy>
-          </font>
-         </property>
-         <property name="text">
-          <string>TOA DO pixel</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-         </property>
-         <property name="axis" stdset="0">
-          <string>TOA DO THUC</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="axisCB_X_10">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <weight>75</weight>
+             <italic>false</italic>
+             <bold>true</bold>
+             <stylestrategy>PreferAntialias</stylestrategy>
+            </font>
+           </property>
+           <property name="text">
+            <string>TOA DO pixel</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="axis" stdset="0">
+            <string>TOA DO THUC</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -675,7 +725,7 @@
             </font>
            </property>
            <property name="text">
-            <string>X</string>
+            <string/>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -811,7 +861,7 @@
             </font>
            </property>
            <property name="text">
-            <string>X</string>
+            <string>A</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -822,10 +872,10 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_5"/>
+          <widget class="QLineEdit" name="lbl_RPoint1Y_2"/>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_6"/>
+          <widget class="QLineEdit" name="lbl_Point1X"/>
          </item>
         </layout>
        </item>
@@ -873,7 +923,7 @@
             </font>
            </property>
            <property name="text">
-            <string>X</string>
+            <string>B</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -884,10 +934,10 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_17"/>
+          <widget class="QLineEdit" name="lbl_Point2X"/>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_18"/>
+          <widget class="QLineEdit" name="lbl_Point2Y"/>
          </item>
         </layout>
        </item>
@@ -935,7 +985,7 @@
             </font>
            </property>
            <property name="text">
-            <string>X</string>
+            <string>C</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -946,10 +996,10 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_19"/>
+          <widget class="QLineEdit" name="lbl_Point3X"/>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_20"/>
+          <widget class="QLineEdit" name="lbl_Point3Y"/>
          </item>
         </layout>
        </item>
@@ -997,7 +1047,7 @@
             </font>
            </property>
            <property name="text">
-            <string>X</string>
+            <string>D</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1008,10 +1058,10 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_21"/>
+          <widget class="QLineEdit" name="lbl_Point4X"/>
          </item>
          <item>
-          <widget class="QLineEdit" name="feedLE_22"/>
+          <widget class="QLineEdit" name="lbl_Point4Y"/>
          </item>
         </layout>
        </item>
