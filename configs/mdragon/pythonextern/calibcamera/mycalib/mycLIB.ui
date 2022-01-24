@@ -1017,7 +1017,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QPushButton" name="btn_detectpoin">
+     <widget class="QPushButton" name="btn_detectpoints">
       <property name="geometry">
        <rect>
         <x>20</x>
