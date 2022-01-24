@@ -9,13 +9,17 @@ import yaml
 from scipy import optimize
 from PyQt5.QtWidgets import QDialog, QApplication, QMainWindow, QLabel, QPushButton, QFrame, QCheckBox, QMessageBox
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt,QTimer
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen
 import os,time
 #import redis
 from PyQt5.QtCore import QRect,QSize
 #Config Variables - Enter their values according to your Checkerboard
-
+"""
+F1,
+indentationToSpaces or indentationToTabs (depending on your need)
+Enter.
+"""
 class mycalib(QMainWindow):
 	def __init__(self):
 		super(mycalib, self).__init__()
@@ -38,8 +42,12 @@ class mycalib(QMainWindow):
 		self.currentCorners = None # array of last detected corners
 		self.currentcornerSubPixs = None
 		self.predicted2D = None
-		self.initEvents() # initialize click events (listeners)
 		
+
+		timer = QTimer(self, interval=1000, timeout=self.handle_timeout)
+		timer.start()
+		self.handle_timeout()
+
 		bg_status = False
 		bg_counter = 0
 		camnum = 0
@@ -61,7 +69,12 @@ class mycalib(QMainWindow):
 
 		print( "Camera Resolution is: " + str(self.width) + "," + str(self.height) ) 
 		# prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(n_row-1,n_col-1,0)
+		self.initEvents() # initialize click events (listeners)
 
+	def handle_timeout(self):
+		self.update()
+		print("TImer", time.time(), flush=True)
+		
 
 	def initEvents(self):
 		""" initialize click events (listeners) """
@@ -92,7 +105,9 @@ class mycalib(QMainWindow):
 				painter.drawEllipse(cx-5,cy-5,10,10)
 				painter.drawLine(cx-5,cy,cx+5,cy)
 				painter.drawLine(cx,cy-5,cx,cy+5)
-			
+		print("painter")
+		time.sleep(0.2)
+
 	def captureClicked(self):
 		if self.capturing == False:
 			self.capturing = True
