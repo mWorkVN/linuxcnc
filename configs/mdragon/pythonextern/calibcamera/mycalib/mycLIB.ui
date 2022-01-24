@@ -1017,7 +1017,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QPushButton" name="detectCornersButton_2">
+     <widget class="QPushButton" name="btn_detectpoin">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -1027,10 +1027,10 @@
        </rect>
       </property>
       <property name="text">
-       <string>Detect Corners</string>
+       <string>Detect Points</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="detectCornersButton_3">
+     <widget class="QPushButton" name="btn_calibpoints">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -1040,7 +1040,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Detect Corners</string>
+       <string>Calib Points</string>
       </property>
      </widget>
     </widget>
