@@ -875,7 +875,11 @@
           <widget class="QLineEdit" name="lbl_RPoint1Y_2"/>
          </item>
          <item>
-          <widget class="QLineEdit" name="lbl_Point1X"/>
+          <widget class="QLineEdit" name="lbl_Point1X">
+           <property name="inputMethodHints">
+            <set>Qt::ImhDigitsOnly|Qt::ImhFormattedNumbersOnly</set>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
