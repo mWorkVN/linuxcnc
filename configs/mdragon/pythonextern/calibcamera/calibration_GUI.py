@@ -8,9 +8,9 @@ from PyQt5.QtWidgets import QDialog, QApplication, QMainWindow, QLabel, QPushBut
 from PyQt5.uic import loadUi
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen
-import os
+import os,time
 import redis
-from PyQt5.QtCore import QRect
+from PyQt5.QtCore import QRect,QSize
 #Config Variables - Enter their values according to your Checkerboard
 
 
@@ -33,10 +33,13 @@ class MyGUI(QMainWindow):
 		print("CAM NUM ",camnum)
 		#cam = cv2.VideoCapture(camnum)
 		self.cap = cv2.VideoCapture(camnum) # webcam object
+		time.sleep(1)
 		self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 		self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-		self.width = int(cv2.get(cv2.CAP_PROP_FRAME_WIDTH)) 
-		self.height = int(cv2.get(cv2.CAP_PROP_FRAME_HEIGHT))
+		self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) 
+		self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+		print( "Camera Resolution is: " + str(self.width) + "," + str(self.height) ) 
 		# prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(n_row-1,n_col-1,0)
 
 		self.objls = [] # 3d point in real world space
@@ -99,7 +102,8 @@ class MyGUI(QMainWindow):
 		# initialize captured image label
 		self.imageLabel = QLabel('Image will be displayed here', self)
 		self.imageLabel.setAlignment(Qt.AlignCenter|Qt.AlignVCenter)
-		self.imageLabel.resize(self.width, self.height)
+
+		self.imageLabel.resize(640, 480)
 		self.imageLabel.move(10, 60)
 		self.imageLabel.setFrameShape(QFrame.Box)
 		

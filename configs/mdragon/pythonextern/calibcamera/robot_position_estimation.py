@@ -46,6 +46,10 @@ angle = 0.0 #robotic arm rotation angle
 mm_per_pixel = 0.0  #leqngth of one pixel in cm units
 number_of_cm_in_Resolution_width = 0.0  #total number of cm in the camera resolution width
 
+robotposX = 100
+robotposY = 100
+robotposAngle = 30
+
 matrix = np.zeros((3, 3), np.float)
 new_camera_matrix = np.zeros((3, 3), np.float)
 dist = np.zeros((1, 5))
