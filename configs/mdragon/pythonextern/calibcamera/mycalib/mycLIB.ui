@@ -40,7 +40,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -2984,21 +2984,20 @@ REAL WORLD</string>
    <widget class="QPushButton" name="btn_addbg">
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>9</x>
       <y>440</y>
-      <width>50</width>
+      <width>241</width>
       <height>50</height>
      </rect>
     </property>
     <property name="maximumSize">
      <size>
-      <width>50</width>
+      <width>500</width>
       <height>50</height>
      </size>
     </property>
     <property name="text">
-     <string>ADD
-BG</string>
+     <string>Update BackGround</string>
     </property>
    </widget>
   </widget>
