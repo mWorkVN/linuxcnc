@@ -715,9 +715,9 @@ See the documentation of convert_cycle_xy for most of the details.
 
 */
 
-int Interp::convert_cycle(int motion,    //!< a g-code between G_81 and G_89, a canned cycle
-                         block_pointer block,   //!< pointer to a block of RS274 instructions      
-                         setup_pointer settings)        //!< pointer to machine settings                   
+int Interp::convert_cycle(int motion,    //!< a G-code between G_81 and G_89, a canned cycle
+                         block_pointer block,   //!< pointer to a block of RS274 instructions
+                         setup_pointer settings)        //!< pointer to machine settings
 {
   CANON_PLANE plane;
 
@@ -822,7 +822,7 @@ Returned Value: int
       NCE_BUG_FUNCTION_SHOULD_NOT_HAVE_BEEN_CALLED
 
 Side effects:
-   A number of moves are made to execute the g-code
+   A number of moves are made to execute the G-code
 
 Called by: convert_cycle
 
@@ -893,9 +893,9 @@ The rotary axes may not move during a canned cycle.
 
 */
 
-int Interp::convert_cycle_xy(int motion, //!< a g-code between G_81 and G_89, a canned cycle
-                            block_pointer block,        //!< pointer to a block of RS274 instructions      
-                            setup_pointer settings)     //!< pointer to machine settings                   
+int Interp::convert_cycle_xy(int motion, //!< a G-code between G_81 and G_89, a canned cycle
+                            block_pointer block,        //!< pointer to a block of RS274 instructions
+                            setup_pointer settings)     //!< pointer to machine settings
 {
   double aa;
   double aa_increment=0.;
@@ -1101,9 +1101,9 @@ int Interp::convert_cycle_xy(int motion, //!< a g-code between G_81 and G_89, a 
 
 
 
-int Interp::convert_cycle_uv(int motion, //!< a g-code between G_81 and G_89, a canned cycle
-                            block_pointer block,        //!< pointer to a block of RS274 instructions      
-                            setup_pointer settings)     //!< pointer to machine settings                   
+int Interp::convert_cycle_uv(int motion, //!< a G-code between G_81 and G_89, a canned cycle
+                            block_pointer block,        //!< pointer to a block of RS274 instructions
+                            setup_pointer settings)     //!< pointer to machine settings
 {
   int spindle = settings->active_spindle;
   double aa;
@@ -1337,9 +1337,9 @@ turned off, and the NC code written to take tool length into account.
 
 */
 
-int Interp::convert_cycle_yz(int motion, //!< a g-code between G_81 and G_89, a canned cycle
-                            block_pointer block,        //!< pointer to a block of RS274/NGC instructions  
-                            setup_pointer settings)     //!< pointer to machine settings                   
+int Interp::convert_cycle_yz(int motion, //!< a G-code between G_81 and G_89, a canned cycle
+                            block_pointer block,        //!< pointer to a block of RS274/NGC instructions
+                            setup_pointer settings)     //!< pointer to machine settings
 {
   int spindle = settings->active_spindle;
   double aa;
@@ -1526,9 +1526,9 @@ int Interp::convert_cycle_yz(int motion, //!< a g-code between G_81 and G_89, a 
 }
 
 
-int Interp::convert_cycle_vw(int motion, //!< a g-code between G_81 and G_89, a canned cycle
-                            block_pointer block,        //!< pointer to a block of RS274/NGC instructions  
-                            setup_pointer settings)     //!< pointer to machine settings                   
+int Interp::convert_cycle_vw(int motion, //!< a G-code between G_81 and G_89, a canned cycle
+                            block_pointer block,        //!< pointer to a block of RS274/NGC instructions
+                            setup_pointer settings)     //!< pointer to machine settings
 {
   double aa;
   double aa_increment=0.;
@@ -1771,9 +1771,9 @@ CANON_PLANE_XZ.
 
 */
 
-int Interp::convert_cycle_zx(int motion, //!< a g-code between G_81 and G_89, a canned cycle
-                            block_pointer block,        //!< pointer to a block of RS274 instructions      
-                            setup_pointer settings)     //!< pointer to machine settings                   
+int Interp::convert_cycle_zx(int motion, //!< a G-code between G_81 and G_89, a canned cycle
+                            block_pointer block,        //!< pointer to a block of RS274 instructions
+                            setup_pointer settings)     //!< pointer to machine settings
 {
   double aa;
   double aa_increment=0.;
@@ -1958,9 +1958,9 @@ int Interp::convert_cycle_zx(int motion, //!< a g-code between G_81 and G_89, a 
   return INTERP_OK;
 }
 
-int Interp::convert_cycle_wu(int motion, //!< a g-code between G_81 and G_89, a canned cycle
-                            block_pointer block,        //!< pointer to a block of RS274 instructions      
-                            setup_pointer settings)     //!< pointer to machine settings                   
+int Interp::convert_cycle_wu(int motion, //!< a G-code between G_81 and G_89, a canned cycle
+                            block_pointer block,        //!< pointer to a block of RS274 instructions
+                            setup_pointer settings)     //!< pointer to machine settings
 {
   double aa;
   double aa_increment=0.;

@@ -760,14 +760,15 @@ Some functions/features are only used for particular modes and are not displayed
 |PD:|If "View Material" is selected on the <<qt_parameters-tab, PARAMETERS Tab>>, this displays the currently selected material's Pierce Delay.
 |CH:|If "View Material" is selected on the <<qt_parameters-tab, PARAMETERS Tab>>, this displays the currently selected material's Cut Height.
 |CA:|If "View Material" is selected on the <<qt_parameters-tab, PARAMETERS Tab>>, and RS485 communications are enabled, this displays the currently selected material's Cut Amperage.
-|P|This button changes the preview to an isometric view.
-|Z|This button changes the preview to a top down view.
-|→|This button pans the preview right.
-|←|This button pans the preview left.
-|↑|This button pans the preview up.
-|↓|This button pans the preview down.
-|+|This button zooms the preview.
-|-|This button zooms the preview.
+|T|This button changes the <<qt_preview-view, preview>> to a top down full table view.
+|P|This button changes the <<qt_preview-view, preview>> to an isometric view.
+|Z|This button changes the <<qt_preview-view, preview>> to a top down view.
+|→|This button pans the <<qt_preview-view, preview>> right.
+|←|This button pans the <<qt_preview-view, preview>> left.
+|↑|This button pans the <<qt_preview-view, preview>> up.
+|↓|This button pans the <<qt_preview-view, preview>> down.
+|+|This button zooms the <<qt_preview-view, preview>>.
+|-|This button zooms the <<qt_preview-view, preview>>.
 |C|This button clears the live plot.
 |===
 
@@ -814,9 +815,10 @@ See <<qt_custom-user-buttons, custom user buttons>> for detailed information on 
 |===
 |*Name*|*Description*
 |EDIT|This button opens a G-Code editor for the currently loaded program.
-|MDI|This button places QtPlasmaC into Manual Data Input mode which will display the MDI HISTORY and an entry box over top of the G-Code window. +
+|MDI|This button places QtPlasmaC into Manual Data Input (MDI) mode which will display the MDI HISTORY and an entry box over top of the G-Code window. +
 Once pressed, this button will display "MDI CLOSE". +
-Pressing *MDI CLOSE* will close the MDI.
+Pressing *MDI CLOSE* will close the MDI. +
+Please see the <<qt_mdi, MDI>> section for additional MDI information.
 |OHMIC TEST|This button will enable the Ohmic Probe Enable output signal and if the Ohmic Probe input is sensed, the LED indicator in the SENSOR Panel will light. +
 The main purpose of this is to allow a quick test for a shorted torch tip.
 |PROBE TEST|This button will initiate a <<qt_probe-test, Probe Test>>.
@@ -961,6 +963,20 @@ The torch (T0) will be selected if it was not the active tool.
 *Divide By 2* - divides the currently displayed coordinate in the DRO by two. +
 *Set To Last* - sets the axis to the previously set coordinate.
 |===
+
+[[qt_preview-view]]
+
+==== Preview Views
+
+The QtPlasmaC preview screen has the ability to be switched between different views and displays, as well as zooming in and out, and panning horizontally and vertically.
+
+When QtPlasmaC is first started, the Z (top down) view will be selected as the default view for a loaded G-Code file, but the full table view will be displayed.
+
+When a G-Code file is loaded, the display will change to the selected view.
+
+Whenever there is no G-Code file loaded, the full table will automatically be displayed irrespective of which view is currently selected (the highlighted button representing the currently selected view will not change).
+
+If a full table is displayed due to no G-Code file being loaded and the user wishes to change the view orientation, then pressing either Z or P will change the display to the newly selected view. If the user then wishes to display the full table while maintaining the currently selected view as the default view for a loaded G-Code file, then pressing CLEAR will achieve this and allow the selected view orientation to prevail the next time a G-Code file is loaded.
 
 [[qt_conversational-tab]]
 
@@ -1172,6 +1188,7 @@ To return any of the color changes to their default values, see the <<qt_default
 |Optional Block|This radio button allows the user to enable or disable whether or not lines starting with "/" will be skipped if present in a running program.
 |Grid Size|This allows a user to change the size of the grid in the Preview Window on the <<qt_main-tab, MAIN Tab>>. Grid size of 0.0 will disable the grid.
 |Cone Size|This allows a user to change the size of the cone (which represents the current tool) in the Preview Window on the <<qt_main-tab, MAIN Tab>>.
+|Table Zoom|This allows a user to change the default zoom level for the top down full table view in the Preview Window on the <<qt_main-tab, MAIN Tab>>.
 |===
 
 [underline]*UTILITIES*
@@ -2309,6 +2326,9 @@ In order to utilize them, *KB Shortcuts* must be enabled in the *GUI SETTINGS* s
 |F2|Toggles the GUI power button.
 |F9|Toggles the "Cutting" command, used to begin or end a manual cut.
 |F12|Show stylesheet editor.
+|ALT + RETURN|Places QtPlasmaC into Manual Data Input (MDI) mode. +
+Note that ALT + ENTER will achieve the same result. +
+In addition, pressing RETURN (or ENTER) with no entry in the MDI will close the MDI window.
 |1|Changes jog speed to 10% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
 |2|Changes jog speed to 20% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
 |3|Changes jog speed to 30% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
@@ -2350,7 +2370,7 @@ In order to utilize them, *KB Shortcuts* must be enabled in the *GUI SETTINGS* s
 |↑|Jogs the Y axis positive.
 |↓|Jogs the Y axis negative.
 |PAGE UP|Jogs the Z axis positive.
-|PAGE DOWN|jog the Z axis negative.
+|PAGE DOWN|Jogs the Z axis negative.
 |[|Jogs the A axis positive.
 |]|Jogs the A axis negative.
 |.|Jogs the B axis positive.
@@ -2360,6 +2380,15 @@ In order to utilize them, *KB Shortcuts* must be enabled in the *GUI SETTINGS* s
 |- (+ Jog Key)|The minus key can be used with any jog key to invoke a slow jog (10% of the displayed jog speed) +
    If SLOW jogging is already active, the axis will jog at the displayed jog speed.
 |===
+
+[[qt_mdi]]
+=== MDI
+
+In addition to the typical G and M codes that are allowed by LinuxCNC in MDI mode, the MDI in QtPlasmaC can be used to access several other handy features. The following link outlines the features and their use:  link:http://linuxcnc.org/docs/devel/html/gui/qtvcp_widgets.html#_mdiline_widget[MDILine Widget]
+
+NOTE: M3, M4, and M5 are not allowed in the QtPlasmaC MDI.
+
+*In addition, pressing RETURN (or ENTER) with no entry in the MDI will close the MDI window.*
 
 [[qt_shape-library]]
 
@@ -2970,7 +2999,7 @@ The following code will allow the user to use a button to invert the current sta
 BUTTON_n_CODE = toggle-laser
 ----
 
-This code is also able to be used as a multiple command with g-code or external commands but may control only the alignment laser HAL bit pin.
+This code is also able to be used as a multiple command with G-code or external commands but may control only the alignment laser HAL bit pin.
 
 The button colors will follow the state of the alignment laser hal pin.
 
@@ -3376,6 +3405,16 @@ The following example would set the distance from Z MAX_LIMIT to 10mm:
 ----
 setp plasmac.max-offset 10
 ----
+
+=== Enable Tabs During Automated Motion
+
+By default, all tabs except the <<qt_main-tab, MAIN Tab>> are disabled during automated motion. It is possible for every tab but the <<qt_conversational-tab, CONVERSATIONAL Tab>> to be enabled during automated motion by setting the following HAL pin True:
+
+----
+setp qtplasmac.tabs_always_enabled 1
+----
+
+WARNING: It is the responsibility of the operator to ensure that the machine is equipped with a suitable, working hardware ESTOP. If using only a touchscreen to navigate the QtPlasmaC GUI, there is no way to stop automated machine motion on any tab but the MAIN tab.
 
 === QtPlasmaC State Outputs
 

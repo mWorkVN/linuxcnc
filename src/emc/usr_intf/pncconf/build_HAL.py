@@ -963,7 +963,7 @@ class HAL:
                 f1 = open(custom, "w")
                 print(_("# Include your %s HAL commands here")%i, file=f1)
                 print(_("# This file will not be overwritten when you run PNCconf again"), file=f1)
-                if i == "custom_postgui":
+                if i == "custom_postgui" and self.d.frontend == _PD._QTPLASMAC:
                     print(_("\n# --- PLASMAC:LASER-ON ---"), file=f1)
                     print("#net plasmac:laser-on  qtplasmac.laser_on  =>  YOUR_LASER_ON_PIN", file=f1)
 
@@ -1341,7 +1341,7 @@ class HAL:
 
         if potpinname:
                 # sserial digital potentiometer outputs for spindle eg 7i76 board
-                print(_("# ---digital potentionmeter output signals/setup---"), file=file)
+                print(_("# ---digital potentiometer output signals/setup---"), file=file)
                 print(file=file)
                 print("setp   "+potpinname+"spinout-minlim    [%s_%d]OUTPUT_MIN_LIMIT"% (title, jnum), file=file)
                 print("setp   "+potpinname+"spinout-maxlim    [%s_%d]OUTPUT_MAX_LIMIT"% (title, jnum), file=file)
@@ -1866,16 +1866,26 @@ class HAL:
                 dratio = (self.d.voltsrdiv + 100000) / 100000
             vscale = dratio / (((self.d.voltsfullf - self.d.voltszerof) * 1000) / int(self.d.voltsfjumper) / int(self.d.voltsmodel))
             voffset = self.d.voltszerof * 1000 / int(self.d.voltsfjumper)
-            # prefs file if not existing
+            # arc voltage settings in prefs file
             prefsfile = os.path.join(base, "qtplasmac.prefs")
+            # edit existing prefs file
             if os.path.exists(prefsfile):
-                # else make a file with new values
-                prefsfile = os.path.join(base, "qtplasmac.prefs.new_values")
-            f1 = open(prefsfile, "w")
-            print(("[PLASMA_PARAMETERS]"), file=f1)
-            print("Arc Voltage Offset = %.3f" % voffset, file=f1)
-            print("Arc Voltage Scale = %.6f" % vscale, file=f1)
-            f1.close()
+                with open(prefsfile, "r") as f1:
+                    prefs = f1.readlines()
+                with open(prefsfile, "w") as f1:
+                    for line in prefs:
+                        if line.startswith("Arc Voltage Offset"):
+                            line = "Arc Voltage Offset = {:.3f}\n".format(voffset)
+                        elif line.startswith("Arc Voltage Scal"):
+                            line = "Arc Voltage Scale = {:.6f}\n".format(vscale)
+                        f1.write(line)
+            # create new prefs file
+            else:
+                with open(prefsfile, "w") as f1:
+                    print(("[PLASMA_PARAMETERS]"), file=f1)
+                    print("Arc Voltage Offset = %.3f" % voffset, file=f1)
+                    print("Arc Voltage Scale = %.6f" % vscale, file=f1)
+            # arc voltage in hal file
             print(_("\n# ---ARC VOLTAGE ENCODER---"), file=file)
             print("net plasmac:arc-voltage-in <= %s%s"% (pinname, ending), file=file)
             print("setp {}.counter-mode  1".format(pinname), file=file)
@@ -1905,11 +1915,33 @@ class HAL:
                 print("setp db_ohmic.delay     5", file=f1)
             print("setp db_breakaway.delay 5", file=f1)
             print("setp db_arc-ok.delay    5", file=f1)
-            print(_("\n# ---ARC VOLTAGE LOWPASS FILTER---"), file=f1)
-            print(_("# Only use this if comprehensive testing shows that it is required"), file=f1)
-            print("#setp plasmac.lowpass-frequency 0", file=f1)
             if pinname:
                 self.plasmac_ohmic_sense(f1)
+            # hints for fine tuning
+            print(_("\n\n\n########################################"), file=f1)
+            print(_("# The following variables are available for fine tuning some parameters."), file=f1)
+            print(_("# To use any of these, uncomment the required setp line and set an appropriate value.\n"), file=f1)
+            print(_("# Dampen excessive noise on the arc voltage input"), file=f1)
+            print(_("# default = 0 (volts)"), file=f1)
+            print("#setp plasmac.lowpass-frequency 0\n", file=f1)
+            print(_("# The time delay from losing the arc ok signal until QtPlasmaC reacts to the arc loss."), file=f1)
+            print(_("# default = 0.0 (seconds)"), file=f1)
+            print("#setp plasmac.arc-lost-delay 0.0\n", file=f1)
+            print(_("# For mode 0 Arc-OK only, the number of consecutive readings within the threshold that are required to set the Arc-OK signal."), file=f1)
+            print(_("# default = 6"), file=f1)
+            print("#setp plasmac.arc-ok-counts 6\n", file=f1)
+            print(_("# For mode 0 Arc-OK only, the maximum voltage deviation that is allowed for a valid voltage to set the Arc OK signal."), file=f1)
+            print(_("# default = 10 (volts)"), file=f1)
+            print("#setp plasmac.arc-ok-threshold 10\n", file=f1)
+            print(_("# The voltage above and below 0V that will display as 0V. Prevents small fluctuations from flickering the voltage display."), file=f1)
+            print(_("# default = 0 (volts)"), file=f1)
+            print("#setp plasmac.zero-window 0\n", file=f1)
+            print(_("# The distance (in millimeters) away from the Z MAX_LIMIT that QtPlasmaC will allow the Z axis to travel while under machine control."), file=f1)
+            print(_("# default = 5 (mm)"), file=f1)
+            print("#setp plasmac.max-offset 5\n", file=f1)
+            print(_("# The required number of consecutive times that the threshold has been exceeded before applying the void lock to the THC."), file=f1)
+            print(_("# default = 2"), file=f1)
+            print("#setp plasmac.kerf-error-max 2\n", file=f1)
             f1.close()
         else:
             f1 = open(chfile, "r")
