@@ -32,6 +32,7 @@ import warnings
 import xml.etree.ElementTree as ET
 import atexit
 import Object_detect
+import keyboard
 warnings.filterwarnings("ignore")
 
 #Constants Declaration

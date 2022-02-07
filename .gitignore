@@ -47,5 +47,5 @@ position.txt
 *.pyc
 *.files
 *.dat
-configs/mdragon/pythonextern/Real-Time-Object-Detection/venv/lib/python3.6/site-packages/opencv_python-4.3.0.36.dist-info/METADATA
 configs/mdragon/pythonextern/noupdate
+configs/mdragon/pythonextern/calibcamera/noupdate
