@@ -3,6 +3,10 @@ import atexit
 import os,sys, threading, logging
 import asyncore
 import time
+import queue
+import json
+import linuxcnc
+queue  = queue.Queue(10)
 #sudo netstat -ap | grep :8080
 
 """
@@ -13,17 +17,15 @@ server_get = {"status":False,"data":""}
 handler = None
 
 class EchoHandler(asyncore.dispatcher_with_send):
-
+    data=""
     def handle_read(self):
         global server_get
         data = self.recv(1024)
         if data:
-            self.send(data)
+            #self.send(data)
             str_data = data.decode("utf8")
-            print("Client: " + str_data,self.data)
-            if (server_get["status"] == False):
-                server_get["status"] = True
-                server_get["data"]=str_data
+            server_get["status"] = True
+            server_get["data"]=str_data
 
     def sendData(self,data):
         self.send(data.encode())
@@ -71,41 +73,52 @@ class AsyncoreRunner(threading.Thread):
 
 class Linuxcnc_cmd(threading.Thread):
     
-    def __init__(self):
-        
-        self.bien =0
+    def __init__(self,lcnc_star,lcnc_cmd):
+        self.lcnc_star = lcnc_star
+        self.lcnc_cmd = lcnc_cmd
         threading.Thread.__init__(self)
 
     def run(self):
-        global handler
         global server_get
         while (1):
-            self.bien =self.bien +1
             if (server_get["status"]  == True):
                 print("havevari ",server_get["data"] )
+                data = json.loads(server_get["data"])
                 server_get["status"] = False
-                if handler == None:
-                    continue
-                handler.sendData("fffffffffff")
+                if "MDI" in data["sts"]:
+                    self.call_MDI(data["data"])
+                elif "tMDI" in data["sts"]:
+                    self.call_tMDI(data["data"])
+                
 
+    def call_MDI(self, cmd):
+        print("Call MDI",cmd)
+        self.lcnc_cmd.mdi(cmd)
+        while self.lcnc_cmd.wait_complete() == -1:
+            pass
+        self.sendBack_server("Done\n")
 
+    def call_tMDI(self, cmd):
+        print("Call MDI",cmd)
 
-
+    def sendBack_server(self,cmd):
+        global handler
+        if handler == None:
+            return
+        handler.sendData(cmd)
 
 if __name__ == '__main__':
+    s = linuxcnc.stat() # create a connection to the status channel
+    #s.poll() # get current values
+    c = linuxcnc.command()
     ar = AsyncoreRunner()
     ar.daemon = True
     ar.start()
-    li = Linuxcnc_cmd()
+    li = Linuxcnc_cmd(s,c)
     li.daemon = True
     li.start()
     def exit_handler():
-        #TCP_Server.stop()
         print('My application is ending!')
-        #h.exit()
     atexit.register(exit_handler)
     while(1):
-        #asyncore.loop(timeout=1, count=1)
-        #print("S")
         time.sleep(1)
-    #TCP_Server.start()

@@ -21,13 +21,13 @@ KeyboardDialog_sound_type = READY
 [DIALOG_GEOMETRY]
 ToolChangeDialog-geometry = 634 369 99 29
 axisToolButtonDialog_CALCULATOR = 634 369 472 354
-LncMessage-geometry = 634 369 99 29
+LncMessage-geometry = 634 369 286 120
 CalculatorDialog-geometry = 634 345 472 354
 FileDialog-geometry = 375 176 617 415
 
 [BOOK_KEEPING]
-last_loaded_directory = /home/mwork/mworkcnc/configs/mdragon
-last_loaded_file = /home/mwork/mworkcnc/configs/mdragon/z2003938789578_733d441e8d2dcee3ee4e628cdeb1aeb1.nc
+last_loaded_directory = /home/mwork/mworkcnc/configs/mdragon/gcode
+last_loaded_file = /home/mwork/mworkcnc/configs/mdragon/gcode/pickandplace.ngc
 style_QSS_Path = DEFAULT
 RecentPath_0 = /home/mwork/mworkcnc/configs/mdragon/z2003938789578_733d441e8d2dcee3ee4e628cdeb1aeb1.nc
 last_saved_directory = /home/mwork/mworkcnc/configs/mdragon/gcode/teachingMode
@@ -145,7 +145,7 @@ statusadjustmentbar_4-hi-value = 75
 statusadjustmentbar_4-low-value = 25
 
 [CHOOSE_ACTUATOR]
-Nhan Test = 2076
+Nhan Test = 2102
 Type Actuator = 1
 scum_open_ex1_pin = 1
 scum_open_ex1_status = 1
