@@ -80,6 +80,7 @@ class Linuxcnc_cmd(threading.Thread):
 
     def run(self):
         global server_get
+        timebegin = 0
         while (1):
             if (server_get["status"]  == True):
                 print("havevari ",server_get["data"] )
@@ -89,7 +90,9 @@ class Linuxcnc_cmd(threading.Thread):
                     self.call_MDI(data["data"])
                 elif "tMDI" in data["sts"]:
                     self.call_tMDI(data["data"])
-                
+            if (time.time()-timebegin > 1):
+                timebegin =  time.time()
+                print("self.lcnc_cmd.wait_complete()",self.lcnc_cmd.wait_complete())    
 
     def call_MDI(self, cmd):
         print("Call MDI",cmd)

@@ -37,9 +37,32 @@ def m435remap(self):
     #print("lenghtArm %d-%d-%d-%d-%d-%d" %(lenghtArm[0],lenghtArm[1],lenghtArm[2],lenghtArm[3],lenghtArm[4],lenghtArm[5]))
     return INTERP_OK  
 
+def convertJoinMode(self):
+    global offsetPosi
+    global AxisJoint
+    global CoordinateNumber
+    global CoordinateGcode
+    try:
+        value = hal.get_value("motion.switchkins-type")
+        XJoint = hal.get_value("joint.0.pos-cmd")
+        YJoint = hal.get_value("joint.1.pos-cmd")
+        if (value == 1):
+            self.execute("M66 E0 L0")
+        else:
+            SWITCHKINS_PIN = 3
+            kinstype = 1  
+            CoordinateNumber = self.params[5220]
+            self.execute("M129")  
+            self.execute("M68 E%d Q%d"%(SWITCHKINS_PIN,kinstype))
+            self.execute("M66 E0 L0")
+        return False
+    except Exception as e:
+        return False   
 
 def m439remap(self, **words): #convert to joint mode
-    global offsetPosi
+    if convertJoinMode(self):return INTERP_OK
+    return INTERP_ERROR
+    """global offsetPosi
     global AxisJoint
     global CoordinateNumber
     global CoordinateGcode
@@ -58,10 +81,46 @@ def m439remap(self, **words): #convert to joint mode
         self.execute("M66 E0 L0")
         #return INTERP_OK
     except Exception as e:
-        return INTERP_ERROR   
-    
-def m438remap(self, **words): # convert to world mode
+        return INTERP_ERROR"""   
+def convertWorldMode(self):   
     global offsetPosi
+    global AxisJoint
+    global CoordinateNumber
+    global CoordinateGcode
+    try:
+        value = hal.get_value("motion.switchkins-type")
+        angleX = hal.get_value("axis.x.pos-cmd") 
+        angleY = hal.get_value("axis.y.pos-cmd")
+        print("M438 Tesst ",value)
+        if (value == 0):
+            self.execute("M66 E0 L0")
+        elif (float(angleY)>= 0):
+            info= "Error SwitchKins M439 3001 - YJoint >= 0 degree " + str(angleY)
+            print(info)
+            self.set_errormsg(info)
+        else:
+            print("M438 Tesst 1 ",value)
+            numberCoor = int(CoordinateNumber-1)
+            if (numberCoor > 8):
+                print("M439 Numcoor Error")
+                pass
+            else:
+                self.execute(CoordinateGcode[numberCoor]) # return CoordinateGcode
+            print("M438 Tesst 2",value)
+            SWITCHKINS_PIN = 3
+            kinstype = 0
+            self.execute("M128")
+            self.execute("M68 E%d Q%d"%(SWITCHKINS_PIN,kinstype))
+            self.execute("M66 E0 L0")
+        return True
+    except Exception as e:
+        print("REMAP - Error M428 Exception:{}".format(e.error_message))
+        return False
+
+def m438remap(self, **words): # convert to world mode
+    if convertWorldMode(self):return INTERP_OK
+    return INTERP_ERROR
+    """global offsetPosi
     global AxisJoint
     global CoordinateNumber
     global CoordinateGcode
@@ -93,7 +152,7 @@ def m438remap(self, **words): # convert to world mode
         self.execute("M66 E0 L0")
     except Exception as e:
         print("REMAP - Error M428 Exception:{}".format(e.error_message))
-        return INTERP_ERROR
+        return INTERP_ERROR"""
     #return INTERP_OK
 
 
@@ -147,7 +206,8 @@ def g01remapskins(self, **words):
     try:
         value = hal.get_value("motion.switchkins-type")
         if (value == 0):
-            m439remap(self)
+            convertJoinMode(self)
+            #m439remap(self)
             #self.execute("M439",lineno())
         print("G01 ",  "value begin",value)
         self.execute("M66 E0 L0")
@@ -183,8 +243,10 @@ def g01remapskins(self, **words):
         check_coords(self, 'z', anglepos[2])
         print("G01 ",  "value ",value)
         if (value==0):
-            m438remap(self)
+            convertWorldMode(self)
+            #m438remap(self)
         self.execute("M66 E0 L0")
+        yield INTERP_EXECUTE_FINISH
     except Exception as e:
         self.set_errormsg(e)
         return INTERP_ERROR

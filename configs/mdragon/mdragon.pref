@@ -58,7 +58,7 @@ catch_errors = True
 desktop_notify = True
 shutdown_check = True
 sound_player_on = False
-mainwindow_geometry = 3 29 1360 760
+mainwindow_geometry = 3 92 1360 760
 notify_max_msgs = 5
 overlay_play_sound = False
 overlay_sound_type = RING
@@ -145,7 +145,7 @@ statusadjustmentbar_4-hi-value = 75
 statusadjustmentbar_4-low-value = 25
 
 [CHOOSE_ACTUATOR]
-Nhan Test = 2102
+Nhan Test = 2142
 Type Actuator = 1
 scum_open_ex1_pin = 1
 scum_open_ex1_status = 1
