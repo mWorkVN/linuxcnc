@@ -76,8 +76,11 @@ class Linuxcnc_cmd(threading.Thread):
     def __init__(self,lcnc_star,lcnc_cmd):
         self.lcnc_star = lcnc_star
         self.lcnc_cmd = lcnc_cmd
+        self.state = 0
         threading.Thread.__init__(self)
 
+
+        
     def run(self):
         global server_get
         timebegin = 0
@@ -88,19 +91,29 @@ class Linuxcnc_cmd(threading.Thread):
                 server_get["status"] = False
                 if "MDI" in data["sts"]:
                     self.call_MDI(data["data"])
+                elif "RST" in data["sts"]:
+                    self.state = 0
                 elif "tMDI" in data["sts"]:
                     self.call_tMDI(data["data"])
+            if (self.state == 1):
+                if self.lcnc_cmd.wait_complete() != -1:
+                    self.state = 2
+            elif (self.state == 2):
+                self.sendBack_server("Done\n")
+                self.state = 0
             if (time.time()-timebegin > 1):
                 timebegin =  time.time()
                 print("self.lcnc_cmd.wait_complete()",self.lcnc_cmd.wait_complete())    
 
     def call_MDI(self, cmd):
-        print("Call MDI",cmd)
-        self.lcnc_cmd.mdi(cmd)
-        while self.lcnc_cmd.wait_complete() == -1:
-            pass
-        self.sendBack_server("Done\n")
-
+        if self.state == 0:  
+            print("Call MDI",cmd)
+            self.lcnc_cmd.mdi(cmd)
+            self.state = 1
+        else:
+            print("Wait")   
+            self.sendBack_server("Wait\n")
+            
     def call_tMDI(self, cmd):
         print("Call MDI",cmd)
 
