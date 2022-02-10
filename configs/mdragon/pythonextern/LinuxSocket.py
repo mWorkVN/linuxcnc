@@ -15,15 +15,20 @@ sudo lsof -t -i tcp:8080 | xargs kill -9
 """
 server_get = {"status":False,"data":""}
 handler = None
-
+data=""
 class EchoHandler(asyncore.dispatcher_with_send):
-    data=""
+    
     def handle_read(self):
         global server_get
-        data = self.recv(1024)
-        if data:
-            #self.send(data)
-            str_data = data.decode("utf8")
+        global data
+        rev = self.recv(1)
+        rev = rev.decode("utf8")
+        print("SERVER",rev)
+        if rev!='\n':
+            data += rev
+        else:
+            str_data = data #.decode("utf8")
+            data = ''
             server_get["status"] = True
             server_get["data"]=str_data
 
@@ -95,9 +100,12 @@ class Linuxcnc_cmd(threading.Thread):
                     self.state = 0
                 elif "tMDI" in data["sts"]:
                     self.call_tMDI(data["data"])
+            
             if (self.state == 1):
-                if self.lcnc_cmd.wait_complete() != -1:
+                print("TIME B",time.time())
+                if self.lcnc_cmd.wait_complete(0.1) != -1:
                     self.state = 2
+                print("TIME E",time.time())
             elif (self.state == 2):
                 self.sendBack_server("Done\n")
                 self.state = 0
@@ -109,6 +117,7 @@ class Linuxcnc_cmd(threading.Thread):
         if self.state == 0:  
             print("Call MDI",cmd)
             self.lcnc_cmd.mdi(cmd)
+            print("End Call MDI",cmd)
             self.state = 1
         else:
             print("Wait")   
