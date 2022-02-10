@@ -29,6 +29,7 @@ class EchoHandler(asyncore.dispatcher_with_send):
         else:
             str_data = data #.decode("utf8")
             data = ''
+
             server_get["status"] = True
             server_get["data"]=str_data
 
@@ -39,7 +40,7 @@ class EchoHandler(asyncore.dispatcher_with_send):
         self.close()
         print("CLOSE")
 
-class EchoServer(asyncore.dispatcher):
+"""class EchoServer(asyncore.dispatcher):
     
     def __init__(self, host, port):
         asyncore.dispatcher.__init__(self)
@@ -55,14 +56,19 @@ class EchoServer(asyncore.dispatcher):
         if pair is not None:
             sock, addr = pair
             print ('Incoming connection from %s' % repr(addr))
-            handler = EchoHandler(sock)
+            handler = EchoHandler(sock)"""
 
 
-class AsyncoreRunner(threading.Thread):
+class AsyncoreRunner(threading.Thread,asyncore.dispatcher):
     def __init__(self):
-        self.server = EchoServer('0.0.0.0', 8080)
         threading.Thread.__init__(self)
-
+        #self.server = EchoServer('0.0.0.0', 8080)
+        asyncore.dispatcher.__init__(self)
+        #socket.TCPServer.allow_reuse_address = True
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.set_reuse_addr()
+        self.bind(('0.0.0.0', 8080))
+        self.listen(5)
     def ping(self):
         pass
 
@@ -70,6 +76,14 @@ class AsyncoreRunner(threading.Thread):
         print (' thread start')
         asyncore.loop()
         print (' thread stop')
+
+    def handle_accept(self):
+        global handler
+        pair = self.accept()
+        if pair is not None:
+            sock, addr = pair
+            print ('Incoming connection from %s' % repr(addr))
+            handler = EchoHandler(sock)
 
     def close(self):
         self.server.close()
@@ -122,7 +136,7 @@ class Linuxcnc_cmd(threading.Thread):
         else:
             print("Wait")   
             self.sendBack_server("Wait\n")
-            
+
     def call_tMDI(self, cmd):
         print("Call MDI",cmd)
 
