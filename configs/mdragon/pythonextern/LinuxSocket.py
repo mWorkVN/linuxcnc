@@ -124,17 +124,14 @@ class Linuxcnc_cmd(threading.Thread):
                     self.call_tMDI(data["data"])
             
             if (self.state == 1):
-                #print("TIME B",time.time())
                 if self.lcnc_cmd.wait_complete(0.001) != -1:
                     self.state = 2
-                #print("TIME E",time.time())
             elif (self.state == 2):
                 self.sendBack_server("Done\n")
                 self.state = 0
             if (time.time()-timebegin > 1):
                 timebegin =  time.time()
-                #print("self.lcnc_cmd.wait_complete()",self.lcnc_cmd.wait_complete(0.1))    
-
+                
     def call_MDI(self, cmd):
         if self.state == 0:  
             self.lcnc_cmd.mdi(cmd)
@@ -142,13 +139,38 @@ class Linuxcnc_cmd(threading.Thread):
         else:
             print("Wait")   
             self.sendBack_server("Wait\n")
-
-
-    #{"sts":"SET","data":"mode","arg":"MODE_MDI"} ->c.mode(linuxcnc.MODE_MDI)
-    #{"sts":"SET","data":"mode","arg":"MODE_AUTO"} -c.mode(linuxcnc.MODE_AUTO)
-    #{"sts":"SET","data":"mode","arg":"MODE_MANUAL"} -c.mode(linuxcnc.MODE_MANUAL)
+    #{"sts":"SET","data":"mode","arg":["MODE_MDI",1,2.1]}
+    #{"sts":"SET","data":"mode","arg":"MODE_MDI"}   ->c.mode(linuxcnc.MODE_MDI)
+    #{"sts":"SET","data":"mode","arg":"MODE_AUTO"}  ->c.mode(linuxcnc.MODE_AUTO)
+    #{"sts":"SET","data":"mode","arg":"MODE_MANUAL"}->c.mode(linuxcnc.MODE_MANUAL)
     def call_Set(self, cmd,arg):
-        getattr(self.lcnc_cmd, cmd)(getattr(self.linuxcncs,arg))
+        size = len(arg)
+        print(" ARG have size : ",size)
+        listpara = [None] * size
+        for s in arg:
+            print("The type is : ",s,"is", type(s).__name__)
+            #type(i) is int  ->True
+        for x in range(size):
+            print("The type rais : ",arg[x],"is", type(arg[x]).__name__)
+            if type(arg[x]) is str:
+                listpara[x]=getattr(self.linuxcncs,arg[x])
+            else:
+                listpara[x]=arg[x]
+
+        if self.state == 0:
+            if (size == 0):
+                getattr(self.lcnc_cmd, cmd)
+            else:
+                getattr(self.lcnc_cmd, cmd)(*listpara)
+            self.state = 1
+        else:
+            print("Wait")   
+            self.sendBack_server("Wait\n")       
+
+    def fun(self,samp_list):
+        return ",".join(samp_list)         
+    def get_listpara(self,arg):
+        pass    
 
     def call_tMDI(self, cmd):
         print("Call MDI",cmd)
