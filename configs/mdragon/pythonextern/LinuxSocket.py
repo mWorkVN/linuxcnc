@@ -23,13 +23,12 @@ class EchoHandler(asyncore.dispatcher_with_send):
         global data
         rev = self.recv(1)
         rev = rev.decode("utf8")
-        print("SERVER",rev)
         if rev!='\n':
             data += rev
         else:
+            print("SERVER",data)
             str_data = data #.decode("utf8")
             data = ''
-
             server_get["status"] = True
             server_get["data"]=str_data
 
@@ -92,50 +91,64 @@ class AsyncoreRunner(threading.Thread,asyncore.dispatcher):
 
 class Linuxcnc_cmd(threading.Thread):
     
-    def __init__(self,lcnc_star,lcnc_cmd):
-        self.lcnc_star = lcnc_star
-        self.lcnc_cmd = lcnc_cmd
+    def __init__(self,linuxc):
+        #self.lcnc_star = lcnc_star
+        #self.lcnc_cmd = lcnc_cmd
         self.state = 0
         threading.Thread.__init__(self)
-
+        self.linuxcncs = linuxc
+        self.lcnc_star = self.linuxcncs.stat() # create a connection to the status channel
+        self.lcnc_cmd = self.linuxcncs.command()
 
         
     def run(self):
         global server_get
         timebegin = 0
         while (1):
+           
             if (server_get["status"]  == True):
                 print("havevari ",server_get["data"] )
-                data = json.loads(server_get["data"])
                 server_get["status"] = False
+                try:
+                    data = json.loads(server_get["data"])
+                except Exception as e:
+                    print(e)
+                    continue
                 if "MDI" in data["sts"]:
                     self.call_MDI(data["data"])
                 elif "RST" in data["sts"]:
                     self.state = 0
+                elif "SET" in data["sts"]:
+                    self.call_Set(data["data"],data["arg"])
                 elif "tMDI" in data["sts"]:
                     self.call_tMDI(data["data"])
             
             if (self.state == 1):
-                print("TIME B",time.time())
-                if self.lcnc_cmd.wait_complete(0.1) != -1:
+                #print("TIME B",time.time())
+                if self.lcnc_cmd.wait_complete(0.001) != -1:
                     self.state = 2
-                print("TIME E",time.time())
+                #print("TIME E",time.time())
             elif (self.state == 2):
                 self.sendBack_server("Done\n")
                 self.state = 0
             if (time.time()-timebegin > 1):
                 timebegin =  time.time()
-                print("self.lcnc_cmd.wait_complete()",self.lcnc_cmd.wait_complete())    
+                #print("self.lcnc_cmd.wait_complete()",self.lcnc_cmd.wait_complete(0.1))    
 
     def call_MDI(self, cmd):
         if self.state == 0:  
-            print("Call MDI",cmd)
             self.lcnc_cmd.mdi(cmd)
-            print("End Call MDI",cmd)
             self.state = 1
         else:
             print("Wait")   
             self.sendBack_server("Wait\n")
+
+
+    #{"sts":"SET","data":"mode","arg":"MODE_MDI"} ->c.mode(linuxcnc.MODE_MDI)
+    #{"sts":"SET","data":"mode","arg":"MODE_AUTO"} -c.mode(linuxcnc.MODE_AUTO)
+    #{"sts":"SET","data":"mode","arg":"MODE_MANUAL"} -c.mode(linuxcnc.MODE_MANUAL)
+    def call_Set(self, cmd,arg):
+        getattr(self.lcnc_cmd, cmd)(getattr(self.linuxcncs,arg))
 
     def call_tMDI(self, cmd):
         print("Call MDI",cmd)
@@ -147,13 +160,11 @@ class Linuxcnc_cmd(threading.Thread):
         handler.sendData(cmd)
 
 if __name__ == '__main__':
-    s = linuxcnc.stat() # create a connection to the status channel
-    #s.poll() # get current values
-    c = linuxcnc.command()
+
     ar = AsyncoreRunner()
     ar.daemon = True
     ar.start()
-    li = Linuxcnc_cmd(s,c)
+    li = Linuxcnc_cmd(linuxcnc)
     li.daemon = True
     li.start()
     def exit_handler():
