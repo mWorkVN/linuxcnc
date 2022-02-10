@@ -144,33 +144,27 @@ class Linuxcnc_cmd(threading.Thread):
     #{"sts":"SET","data":"mode","arg":"MODE_AUTO"}  ->c.mode(linuxcnc.MODE_AUTO)
     #{"sts":"SET","data":"mode","arg":"MODE_MANUAL"}->c.mode(linuxcnc.MODE_MANUAL)
     def call_Set(self, cmd,arg):
-        size = len(arg)
-        print(" ARG have size : ",size)
-        listpara = [None] * size
-        for s in arg:
-            print("The type is : ",s,"is", type(s).__name__)
-            #type(i) is int  ->True
-        for x in range(size):
-            print("The type rais : ",arg[x],"is", type(arg[x]).__name__)
-            if type(arg[x]) is str:
-                listpara[x]=getattr(self.linuxcncs,arg[x])
+        try:
+            size = len(arg)
+            listpara = [None] * size
+            for x in range(size):
+                print("The type rais : ",arg[x],"is", type(arg[x]).__name__)
+                if type(arg[x]) is str:
+                    listpara[x]=getattr(self.linuxcncs,arg[x])
+                else:
+                    listpara[x]=arg[x]
+            if self.state == 0:
+                if (size == 0):
+                    getattr(self.lcnc_cmd, cmd)
+                else:
+                    getattr(self.lcnc_cmd, cmd)(*listpara)
+                self.state = 1
             else:
-                listpara[x]=arg[x]
-
-        if self.state == 0:
-            if (size == 0):
-                getattr(self.lcnc_cmd, cmd)
-            else:
-                getattr(self.lcnc_cmd, cmd)(*listpara)
-            self.state = 1
-        else:
-            print("Wait")   
-            self.sendBack_server("Wait\n")       
-
-    def fun(self,samp_list):
-        return ",".join(samp_list)         
-    def get_listpara(self,arg):
-        pass    
+                print("Wait")   
+                self.sendBack_server("Wait\n")       
+        except Exception as e:
+            print(e)
+       
 
     def call_tMDI(self, cmd):
         print("Call MDI",cmd)
