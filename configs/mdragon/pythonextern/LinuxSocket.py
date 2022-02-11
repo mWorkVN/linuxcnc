@@ -6,6 +6,7 @@ import time
 import queue
 import json
 import linuxcnc
+import subprocess
 queue  = queue.Queue(10)
 #sudo netstat -ap | grep :8080
 
@@ -61,19 +62,36 @@ class EchoHandler(asyncore.dispatcher_with_send):
 class AsyncoreRunner(threading.Thread,asyncore.dispatcher):
     def __init__(self):
         threading.Thread.__init__(self)
-        #self.server = EchoServer('0.0.0.0', 8080)
+        self.stsBind = False
         asyncore.dispatcher.__init__(self)
         #socket.TCPServer.allow_reuse_address = True
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.set_reuse_addr()
-        self.bind(('0.0.0.0', 8080))
-        self.listen(5)
+        try:
+            self.bind(('0.0.0.0', 8080))
+            self.listen(5)
+            self.stsBind = True
+        except Exception as e:
+            print("ERROR - BIND SOCKET",e)
     def ping(self):
         pass
 
     def run(self):
         print (' thread start')
-        asyncore.loop()
+        while (1):
+            if self.stsBind:
+                asyncore.loop(timeout=1, count=1)
+            else:
+                try:
+                    #subprocess.call(['sudo netstat -ap | grep :8080'])
+                    os.system('sudo netstat -ap | grep :8080')
+                    time.sleep(2)
+                    self.bind(('0.0.0.0', 8080))
+                    self.listen(5)
+                    self.stsBind = True
+                except Exception as e:
+                    self.stsBind = False
+                    print("ERROR - BIND SOCKET",e)
         print (' thread stop')
 
     def handle_accept(self):
@@ -148,7 +166,6 @@ class Linuxcnc_cmd(threading.Thread):
             size = len(arg)
             listpara = [None] * size
             for x in range(size):
-                print("The type rais : ",arg[x],"is", type(arg[x]).__name__)
                 if type(arg[x]) is str:
                     listpara[x]=getattr(self.linuxcncs,arg[x])
                 else:
