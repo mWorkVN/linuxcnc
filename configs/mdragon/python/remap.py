@@ -74,22 +74,17 @@ def convertWorldMode(self):
         value = hal.get_value("motion.switchkins-type")
         angleX = hal.get_value("axis.x.pos-cmd") 
         angleY = hal.get_value("axis.y.pos-cmd")
-        print("M438 Tesst ",value)
         if (value == 0):
             self.execute("M66 E0 L0")
         elif (float(angleY)>= 0):
             info= "Error SwitchKins M439 3001 - YJoint >= 0 degree " + str(angleY)
-            print(info)
             self.set_errormsg(info)
         else:
-            print("M438 Tesst 1 ",value)
             numberCoor = int(CoordinateNumber-1)
             if (numberCoor > 8):
-                print("M439 Numcoor Error")
                 pass
             else:
                 self.execute(CoordinateGcode[numberCoor]) # return CoordinateGcode
-            print("M438 Tesst 2",value)
             SWITCHKINS_PIN = 3
             kinstype = 0
             self.execute("M128")
@@ -139,11 +134,11 @@ def check_coords(self, axis, wanted):
     actual = getattr(self, "current_%s" % axis)
     wanted = float(wanted)
     if abs(actual - wanted) > 0.000001:
-        print("(ERROR  %s:  %0.1f != %0.1f)" % (axis, actual, wanted))
+        #print("(ERROR  %s:  %0.1f != %0.1f)" % (axis, actual, wanted))
         self.execute("(ERROR  %s:  %0.1f != %0.1f)" % (axis, actual, wanted))
     else:
         self.execute("(%s: %0.1f = %0.1f)" % (axis, actual, wanted))
-        print("(%s: %0.1f = %0.1f)" % (axis, actual, wanted))
+        #print("(%s: %0.1f = %0.1f)" % (axis, actual, wanted))
 
 def g01remapskins(self, **words):
     global lenghtArm
@@ -189,7 +184,7 @@ def g01remapskins(self, **words):
         self.execute(gcodecmd )
         #yield INTERP_EXECUTE_FINISH
         check_coords(self, 'z', anglepos[2])
-        print("G01 ",  "value ",value)
+        #print("G01 ",  "value ",value)
         if (value==0):
             convertWorldMode(self)
             #m438remap(self)
