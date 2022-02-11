@@ -145,7 +145,7 @@ statusadjustmentbar_4-hi-value = 75
 statusadjustmentbar_4-low-value = 25
 
 [CHOOSE_ACTUATOR]
-Nhan Test = 2142
+Nhan Test = 2144
 Type Actuator = 1
 scum_open_ex1_pin = 1
 scum_open_ex1_status = 1
