@@ -13,7 +13,9 @@ from mWork_actuator import *
 
 import inspect
 import numpy as np
-xold = xyol = 0
+
+xold = 0
+xyol = 0
 throw_exceptions = 1
 offsetPosi = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0]
 AxisJoint = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0]
@@ -62,26 +64,7 @@ def convertJoinMode(self):
 def m439remap(self, **words): #convert to joint mode
     if convertJoinMode(self):return INTERP_OK
     return INTERP_ERROR
-    """global offsetPosi
-    global AxisJoint
-    global CoordinateNumber
-    global CoordinateGcode
-    try:
-        value = hal.get_value("motion.switchkins-type")
-        XJoint = hal.get_value("joint.0.pos-cmd")
-        YJoint = hal.get_value("joint.1.pos-cmd")
-        if (value == 1):
-            self.execute("M66 E0 L0")
-            return INTERP_OK
-        SWITCHKINS_PIN = 3
-        kinstype = 1  
-        CoordinateNumber = self.params[5220]
-        self.execute("M129")  
-        self.execute("M68 E%d Q%d"%(SWITCHKINS_PIN,kinstype))
-        self.execute("M66 E0 L0")
-        #return INTERP_OK
-    except Exception as e:
-        return INTERP_ERROR"""   
+
 def convertWorldMode(self):   
     global offsetPosi
     global AxisJoint
@@ -120,41 +103,6 @@ def convertWorldMode(self):
 def m438remap(self, **words): # convert to world mode
     if convertWorldMode(self):return INTERP_OK
     return INTERP_ERROR
-    """global offsetPosi
-    global AxisJoint
-    global CoordinateNumber
-    global CoordinateGcode
-    try:
-        value = hal.get_value("motion.switchkins-type")
-        angleX = hal.get_value("axis.x.pos-cmd") 
-        angleY = hal.get_value("axis.y.pos-cmd")
-        print("M438 Tesst ",value)
-        if (value == 0):
-            self.execute("M66 E0 L0")
-            return INTERP_OK
-        if (float(angleY)>= 0):
-            info= "Error SwitchKins M439 3001 - YJoint >= 0 degree " + str(angleY)
-            print(info)
-            self.set_errormsg(info)
-            return INTERP_ERROR
-        print("M438 Tesst 1 ",value)
-        numberCoor = int(CoordinateNumber-1)
-        if (numberCoor > 8):
-            print("M439 Numcoor Error")
-            pass
-        else:
-            self.execute(CoordinateGcode[numberCoor]) # return CoordinateGcode
-        print("M438 Tesst 2",value)
-        SWITCHKINS_PIN = 3
-        kinstype = 0
-        self.execute("M128")
-        self.execute("M68 E%d Q%d"%(SWITCHKINS_PIN,kinstype))
-        self.execute("M66 E0 L0")
-    except Exception as e:
-        print("REMAP - Error M428 Exception:{}".format(e.error_message))
-        return INTERP_ERROR"""
-    #return INTERP_OK
-
 
 def g01testskins(self, **words):
     global lenghtArm
