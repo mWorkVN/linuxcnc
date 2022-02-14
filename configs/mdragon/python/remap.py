@@ -142,7 +142,8 @@ def check_coords(self, axis, wanted):
 
 def g01remapskins(self, **words):
     global lenghtArm
-    global xold, yold
+    global xold
+    global yold
     pos={'x':0,'y':0,'z':0,'c':0}
     fcmd =""
     hasF = False

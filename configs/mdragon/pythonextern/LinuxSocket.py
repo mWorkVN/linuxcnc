@@ -27,6 +27,9 @@ class EchoHandler(asyncore.dispatcher_with_send):
         if rev!='\n':
             data += rev
         else:
+            if (len(data)<15):
+                data = ''
+                return
             print("SERVER",data)
             str_data = data #.decode("utf8")
             data = ''
@@ -109,15 +112,15 @@ class AsyncoreRunner(threading.Thread,asyncore.dispatcher):
 
 class Linuxcnc_cmd(threading.Thread):
     
-    def __init__(self,linuxc):
+    def __init__(self):
         #self.lcnc_star = lcnc_star
         #self.lcnc_cmd = lcnc_cmd
         self.state = 0
         threading.Thread.__init__(self)
-        self.linuxcncs = linuxc
+        self.linuxcncs = linuxcnc
         self.lcnc_star = self.linuxcncs.stat() # create a connection to the status channel
         self.lcnc_cmd = self.linuxcncs.command()
-
+        print("LCNC init DONE")
         
     def run(self):
         global server_get
@@ -131,6 +134,7 @@ class Linuxcnc_cmd(threading.Thread):
                     data = json.loads(server_get["data"])
                 except Exception as e:
                     print(e)
+                    self.sendBack_server("JsonFail\n")
                     continue
                 if "MDI" in data["sts"]:
                     self.call_MDI(data["data"])
@@ -138,6 +142,8 @@ class Linuxcnc_cmd(threading.Thread):
                     self.state = 0
                 elif "SET" in data["sts"]:
                     self.call_Set(data["data"],data["arg"])
+                elif "NEWCNC" in data["sts"]:
+                    self.initCNC()
                 elif "tMDI" in data["sts"]:
                     self.call_tMDI(data["data"])
             
@@ -149,7 +155,11 @@ class Linuxcnc_cmd(threading.Thread):
                 self.state = 0
             if (time.time()-timebegin > 1):
                 timebegin =  time.time()
-                
+    def initCNC(self):
+        self.lcnc_star = self.linuxcncs.stat() # create a connection to the status channel
+        self.lcnc_cmd = self.linuxcncs.command()
+        self.state = 0
+        self.sendBack_server("Dinit\n")
     def call_MDI(self, cmd):
         if self.state == 0:  
             self.lcnc_cmd.mdi(cmd)
@@ -197,7 +207,7 @@ if __name__ == '__main__':
     ar = AsyncoreRunner()
     ar.daemon = True
     ar.start()
-    li = Linuxcnc_cmd(linuxcnc)
+    li = Linuxcnc_cmd()
     li.daemon = True
     li.start()
     def exit_handler():
