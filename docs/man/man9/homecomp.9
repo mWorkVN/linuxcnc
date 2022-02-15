@@ -1,0 +1,54 @@
+.TH HOMECOMP "9" "2022-02-14" "LinuxCNC Documentation" "HAL Component"
+.de TQ
+.br
+.ns
+.TP \\$1
+..
+
+.SH NAME
+
+homecomp \- homing module template
+.SH SYNOPSIS
+.HP
+Custom Homing module loaded with \fB[EMCMOT]HOMEMOD=homecomp\fR
+
+.SH DESCRIPTION
+
+
+Example of a homing module buildable with halcompile.
+Demonstrates required code for #includes, function definitions, etc.
+
+An  actual homing scheme is \fBnot\fR implemented but all necessary
+functions are included as skeleton code.   (All joints are
+effectively homed at all times and cannot be unhomed).
+
+See the source code file: src/emc/motion/homing.c for the baseline
+implementation that includes all functions for the default \fBhomemod\fR
+module.
+
+To avoid updates that overwrite homecomp.comp, best practice is
+to rename the file and its component name (example:
+\fBuser_homecomp.comp, user_homecomp\fR).
+
+The (renamed) component can be built and installed with
+halcompile and then substituted for the default homing module
+(\fBhomemod\fR) using:
+
+  $ linuxcnc \fB-m user_homecomp\fR someconfig.ini
+
+or by inifile setting: \fB[EMCMOT]HOMEMOD=user_homecomp\fR
+
+\fBNote:\fRIf using a deb install:
+
+1) halcompile is provided by the package linuxcnc-dev
+
+2) This source file for BRANCHNAME (master,2.9,etc) is downloadable from github:
+
+https://github.com/LinuxCNC/linuxcnc/blob/BRANCHNAME/src/hal/components/homecomp.comp
+
+.SH PINS
+.TP
+.B homecomp.\fIN\fB.is-module\fR bit out \fR(default: \fI1\fR)
+.SH LICENSE
+
+GPL

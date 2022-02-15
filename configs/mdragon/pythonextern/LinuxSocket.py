@@ -88,9 +88,9 @@ class AsyncoreRunner(threading.Thread,asyncore.dispatcher):
                 try:
                     #subprocess.call(['sudo netstat -ap | grep :8080'])
                     os.system('sudo netstat -ap | grep :8080')
-                    time.sleep(2)
-                    self.bind(('0.0.0.0', 8080))
-                    self.listen(5)
+                    #time.sleep(2)
+                    #self.bind(('0.0.0.0', 8080))
+                    #self.listen(5)
                     self.stsBind = True
                 except Exception as e:
                     self.stsBind = False
@@ -113,20 +113,49 @@ class AsyncoreRunner(threading.Thread,asyncore.dispatcher):
 class Linuxcnc_cmd(threading.Thread):
     
     def __init__(self):
-        #self.lcnc_star = lcnc_star
-        #self.lcnc_cmd = lcnc_cmd
+        #self.emcstat = emcstat
+        #self.emccommand = emccommand
         self.state = 0
         threading.Thread.__init__(self)
-        self.linuxcncs = linuxcnc
-        self.lcnc_star = self.linuxcncs.stat() # create a connection to the status channel
-        self.lcnc_cmd = self.linuxcncs.command()
+        self.emc = linuxcnc
+        self.emcstat = self.emc.stat() # create a connection to the status channel
+        self.emccommand = self.emc.command()
+        #self.lcnc_error = self.linuxcncs.error_channel()
         print("LCNC init DONE")
-        
+        self.return_to_mode = 0
+
     def run(self):
         global server_get
         timebegin = 0
+        timeprint = time.time()
         while (1):
-           
+            #self.linuxcncs = linuxcnc
+            #self.emcstat = self.linuxcncs.stat() # create a connection to the status channel
+            #self.emccommand = self.linuxcncs.command()
+            try:
+                self.emcstat.poll() # get current values
+            except Exception as e:
+                if  time.time() - timeprint > 1:
+                    timeprint= time.time() 
+                    print ("error", e.args)
+                
+
+            try:
+                lcnc_error = linuxcnc.error_channel()
+                error = lcnc_error.poll()
+                if error:
+                    kind, text = error
+                    if kind in (linuxcnc.NML_ERROR, linuxcnc.OPERATOR_ERROR):
+                        typus = "error"
+                    else:
+                        typus = "info"
+                        #print (typus, text)
+            except Exception as e:
+                if "Error buffer invalid" in e.args:
+                    if  time.time() - timeprint > 1:
+                        timeprint= time.time() 
+                        print("Exit")
+            
             if (server_get["status"]  == True):
                 print("havevari ",server_get["data"] )
                 server_get["status"] = False
@@ -142,27 +171,71 @@ class Linuxcnc_cmd(threading.Thread):
                     self.state = 0
                 elif "SET" in data["sts"]:
                     self.call_Set(data["data"],data["arg"])
+
+                elif "GET" in data["sts"]:
+                    self.call_Get(data["data"],data["arg"])
                 elif "NEWCNC" in data["sts"]:
                     self.initCNC()
                 elif "tMDI" in data["sts"]:
                     self.call_tMDI(data["data"])
             
             if (self.state == 1):
-                if self.lcnc_cmd.wait_complete(0.001) != -1:
+                if self.emccommand.wait_complete(0.001) != -1:
                     self.state = 2
             elif (self.state == 2):
                 self.sendBack_server("Done\n")
                 self.state = 0
             if (time.time()-timebegin > 1):
                 timebegin =  time.time()
+
+    def ok_for_mdi(self):
+        self.emcstat.poll()
+        s = self.emcstat
+        return not s.estop and s.enabled and s.homed and \
+            (s.interp_state == self.emc.INTERP_IDLE)
+
+    def set_manual_mode(self):
+        self.emcstat.poll()
+        if self.emcstat.task_mode != self.emc.MODE_MANUAL:
+            self.emccommand.mode(self.emc.MODE_MANUAL)
+            self.emccommand.wait_complete()
+
+    def set_mdi_mode(self):
+        self.emcstat.poll()
+        if self.emcstat.task_mode != self.emc.MODE_MDI:
+            self.emccommand.mode(self.emc.MODE_MDI)
+            self.emccommand.wait_complete()
+
+    def periodic(self):
+        # return mode back to preset variable, when idle
+        if self.return_to_mode > -1:
+            self.emcstat.poll()
+            if self.emcstat.interp_state == self.emc.INTERP_IDLE:
+                self.emccommand.mode(self.return_to_mode)
+                self.return_to_mode = -1
+
+    def set_auto_mode(self):
+        self.emcstat.poll()
+        if self.emcstat.task_mode != self.emc.MODE_AUTO:
+            self.emccommand.mode(self.emc.MODE_AUTO)
+            self.emccommand.wait_complete()
+
+    def get_mode(self):
+        self.emcstat.poll()
+        return self.emcstat.task_mode
+
     def initCNC(self):
-        self.lcnc_star = self.linuxcncs.stat() # create a connection to the status channel
-        self.lcnc_cmd = self.linuxcncs.command()
-        self.state = 0
+        """self.emc = linuxcnc
+        self.emcstat = self.emc.stat() # create a connection to the status channel
+        self.emccommand = self.emc.command()
+        self.state = 0"""
         self.sendBack_server("Dinit\n")
+
     def call_MDI(self, cmd):
-        if self.state == 0:  
-            self.lcnc_cmd.mdi(cmd)
+        if self.state == 0: 
+            self.set_mdi_mode() 
+            data = self.emccommand.mdi(cmd)
+            print("MDI returnb",data)
             self.state = 1
         else:
             print("Wait")   
@@ -173,6 +246,7 @@ class Linuxcnc_cmd(threading.Thread):
     #{"sts":"SET","data":"mode","arg":"MODE_MANUAL"}->c.mode(linuxcnc.MODE_MANUAL)
     def call_Set(self, cmd,arg):
         try:
+            self.emccommand.mode(self.emc.MODE_MANUAL)
             size = len(arg)
             listpara = [None] * size
             for x in range(size):
@@ -182,16 +256,24 @@ class Linuxcnc_cmd(threading.Thread):
                     listpara[x]=arg[x]
             if self.state == 0:
                 if (size == 0):
-                    getattr(self.lcnc_cmd, cmd)
+                    getattr(self.emccommand, cmd)
                 else:
-                    getattr(self.lcnc_cmd, cmd)(*listpara)
+                    getattr(self.emccommand, cmd)(*listpara)
                 self.state = 1
             else:
                 print("Wait")   
                 self.sendBack_server("Wait\n")       
         except Exception as e:
-            print(e)
+            print("SER " ,e)
        
+    def call_Get(self, cmd,arg):
+        valueReturn = ""
+        if "Mode" in cmd:
+            valueReturn = self.get_mode()
+        elif "statusServer" in cmd:
+            valueReturn = self.state 
+        self.sendBack_server(str(valueReturn) + "\n")      
+        
 
     def call_tMDI(self, cmd):
         print("Call MDI",cmd)
