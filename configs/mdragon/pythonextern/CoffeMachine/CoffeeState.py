@@ -20,6 +20,9 @@ class Item:
 class State:
     def scan(self):
         pass
+    def mprint(self,msg):
+
+        print(msg,flush=True)
 
 class WaitChooseItemState(State):
   
@@ -28,11 +31,11 @@ class WaitChooseItemState(State):
         self.machine = machine
 
     def checkAndChangeState(self):
-        print("Switching to WaitChooseItemState",flush=True)
+        self.mprint("Switching to WaitChooseItemState")
         selected = input('select item: ')
         if self.containsItem(selected):
             self.machine.item = self.getItem(selected)
-            self.machine.state = self.machine.insertAmountForItemState
+            self.machine.state = self.machine.waitMoneyToBuyState
 
     def containsItem(self, wanted):
         ret = False
@@ -51,37 +54,35 @@ class WaitChooseItemState(State):
         return ret
 
 class showItemsState(State):
-  
-    """constructor for AM state class"""
     def __init__(self, machine):      
         self.machine = machine
 
     def checkAndChangeState(self):
-        print("Switching to showItemsState",flush=True)
-        print('\nitems available \n***************')
+        self.mprint("Switching to showItemsState")
+        self.mprint('\nitems available \n***************')
 
         for item in self.machine.items: # for each item in this vending machine
             if item.stock == 0: # if the stock of this item is 0
                 self.machine.items.remove(item) # remove this item from being displayed
         for item in self.machine.items:
-            print(item.name + ": " "R", item.price) # otherwise print this item and show its price
+            self.mprint(item.name + " Gia: "+ str(item.price) + " + SL :" + str(item.stock)) # otherwise self.mprint this item and show its price
 
-        print('***************\n',flush=True)
+        self.mprint('***************\n')
         self.machine.state = self.machine.WaitChooseItemState
 
 
-class insertAmountForItemState(State):
+class waitMoneyToBuyState(State):
   
     """constructor for AM state class"""
     def __init__(self, machine):      
         self.machine = machine
 
     def checkAndChangeState(self):
-        print("Switching to insertAmountForItemState",flush=True)
         price = self.machine.item.price
-        while self.machine.amount < price:
-                self.machine.amount = self.machine.amount + float(input('insert ' + str(price - self.machine.amount) + ': '))
-        self.machine.state = self.machine.buyItemState
+        if self.machine.amount < price:
+            self.machine.amount = self.machine.amount + float(input('insert ' + str(price - self.machine.amount) + ': '))
+        else:
+            self.machine.state = self.machine.buyItemState
 
 class buyItemState(State):
   
@@ -91,13 +92,13 @@ class buyItemState(State):
 
     def checkAndChangeState(self):
         if self.machine.amount < self.machine.item.price:
-            print('You can\'t buy this item. Insert more coins.') # then obvs you cant buy this item
+            self.mprint('You can\'t buy this item. Insert more coins.') # then obvs you cant buy this item
         else:
             self.machine.amount -= self.machine.item.price # subtract item price from available cash
             self.machine.item.buyFromStock() # call this function to decrease the item inventory by 1
             # (what if we buy more than one?)
-            print('You got ' +self.machine.item.name)
-            print('Cash remaining: ' + str(self.machine.amount))
+            self.mprint('You got ' +self.machine.item.name)
+            self.mprint('Cash remaining: ' + str(self.machine.amount))
         self.machine.state = self.machine.checkRefundState
 
 class checkRefundState(State):
@@ -108,33 +109,29 @@ class checkRefundState(State):
 
     def checkAndChangeState(self):
         if self.machine.amount > 0:
-            print(str(self.machine.amount) + " refunded.")
+            self.mprint(str(self.machine.amount) + " refunded.")
             self.machine.amount = 0
-        print('Thank you, have a nice day!\n')
+        self.mprint('Thank you, have a nice day!\n')
 
-        print("Switching to checkRefundState",flush=True)
+        self.mprint("Switching to checkRefundState")
         self.machine.state = self.machine.showItemsState
 
 class Machine:
  
     def __init__(self):
-          
-        """We have an AM state and an FM state"""
+        self.amount = 0
+        self.items = [] # all items contained in this list right here
+        self.item=None         
         self.showItemsState = showItemsState(self)
         self.WaitChooseItemState = WaitChooseItemState(self)
-        self.insertAmountForItemState = insertAmountForItemState(self)
+        self.waitMoneyToBuyState = waitMoneyToBuyState(self)
         self.checkRefundState = checkRefundState(self)
         self.buyItemState = buyItemState(self)
         self.state = self.showItemsState
-        self.amount = 0
-        self.items = [] # all items contained in this list right here
-        self.item=None
 
-    """method to toggle the switch"""
-    def toggle_amfm(self):
+    def run(self):
         self.state.checkAndChangeState()
-  
-    """method to scan """
+
     def scan(self):
         self.state.scan()
 
@@ -159,7 +156,7 @@ def vend():
     machine.addItem(item6)
     continueToBuy = True
     while continueToBuy == True:
-        machine.toggle_amfm()
+        machine.run()
         machine.scan()
 
 vend()
