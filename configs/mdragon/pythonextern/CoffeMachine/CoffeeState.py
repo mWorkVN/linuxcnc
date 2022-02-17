@@ -2,8 +2,46 @@
 import time ,os
 import logging
 import logging.handlers
+from PyQt5 import uic,QtCore
+from PyQt5.QtCore import Qt,QTimer
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QIntValidator ,QDoubleValidator
 #import linuxcnc
+from gtts import gTTS
+from playsound import playsound
+import pyttsx3
+import sys
+"""
+engine = pyttsx3.init()
 
+
+rate = engine.getProperty('rate')   # getting details of current speaking rate
+print (rate)                        #printing current voice rate
+engine.setProperty('rate', 125)     # setting up new voice rate
+
+
+volume = engine.getProperty('volume')   #getting to know current volume level (min=0 and max=1)
+print (volume)                          #printing current volume level
+engine.setProperty('volume',1.0)    # setting up volume level  between 0 and 1
+
+voices = engine.getProperty('voices')       #getting details of current voice
+#engine.setProperty('voice', voices[0].id)  #changing index, changes voices. o for male
+engine.setProperty('voice', voices[1].id)   #changing index, changes voices. 1 for female
+
+engine.say("Xin Chào các bạn")
+engine.say('My current speaking rate is ' + str(rate))
+engine.runAndWait()
+engine.stop()
+"""
+#tts = gTTS(text='Nhìn mặt thằng này biết ế nên khỏi trả 50000 VND', lang='vi')
+tts = gTTS(text='Hu Hu', lang='vi')
+tts.save('Ninza.mp3')
+playsound('Ninza.mp3')
+
+"""
+pip install pyttsx3
+install espeak ffmpeg libespeak1
+"""
 LOG_FILENAME = 'mylog.log'
 my_logger = logging.getLogger('MyLogger')
 my_logger.setLevel(logging.DEBUG)
@@ -244,10 +282,119 @@ def vend():
     machine.addItem(item4)
     machine.addItem(item5)
     machine.addItem(item6)
-    continueToBuy = True
+    continueToBuy = True        
 
     while continueToBuy == True:
         machine.run()
         machine.scan()
 
-vend()
+class MyGUI(QMainWindow):
+    def __init__(self):
+        super(MyGUI, self).__init__()
+        uic.loadUi('vendding.ui', self)
+        self.show()
+        robot=RobotControl()
+        self.machine = Machine(robot)
+        #              name     ,        giá,   số lượng,   file
+        item1 = Item('caffe d'  ,      15000,    88,  "caffeden.ngc" )
+        item2 = Item('caffe s'  ,      20000,    1 ,  "caffesua.ngc")
+        item3 = Item('12'       ,      20000,    3 ,  "nuocngot.ngc")
+        item4 = Item('23'       ,      10000,    1 ,  "nuocngot.ngc")
+        item5 = Item('45'       ,      10000,    3 ,  "nuocngot.ngc")
+        item6 = Item('milkshake',      15000,    5 ,  "nuocngot.ngc")
+
+        self.machine.addItem(item1)
+        self.machine.addItem(item2)
+        self.machine.addItem(item3)
+        self.machine.addItem(item4)
+        self.machine.addItem(item5)
+        self.machine.addItem(item6)
+        continueToBuy = True
+    def paintEvent(self, event):
+        self.machine.run()
+        self.update()
+#vend()
+
+class Model:
+    def __init__(self):
+        self.username = ""
+        self.password = ""
+
+    def verify_password(self):
+        return self.username == "USER" and self.password == "PASS"
+
+
+class View(QMainWindow):
+    verifySignal = QtCore.pyqtSignal()
+
+    def __init__(self):
+        super(View, self).__init__()
+        self.username = ""
+        self.password = ""
+        self.initUi()
+
+    def initUi(self):
+        uic.loadUi('vendding.ui', self)
+        self.show()
+        """
+        self.loginButton.clicked.connect(self.verifySignal)
+        hoặc để tạo connect
+        self.verifySignal.emit(value)
+        """
+
+    def clear(self):
+        self.usernameInput.clear()
+        self.passwordInput.clear()
+
+    def showMessage(self):
+        pass
+        """messageBox = QtWidgets.QMessageBox(self)
+        messageBox.setText("your credentials are valid\n Welcome")
+        messageBox.exec_()
+        self.close()
+        """
+    def showError(self):
+        pass
+
+
+class Controller:
+    def __init__(self):
+        self._app = QApplication(sys.argv)
+        self._model = Model()
+        self._view = View()
+        self.init()
+
+    def init(self):
+        self._view.verifySignal.connect(self.verify_credentials)
+
+    def verify_credentials(self):
+        self._model.username = self._view.username
+        self._model.password = self._view.password
+        self._view.clear()
+        if self._model.verify_password():
+            self._view.showMessage()
+        else:
+            self._view.showError()
+
+    def run(self):
+        self._view.show()
+        return self._app.exec_()
+
+
+if __name__ == '__main__':
+    c = Controller()
+    sys.exit(c.run())
+
+
+
+
+
+
+
+
+########################################################
+"""if __name__ == '__main__':
+	app = QApplication(sys.argv)
+	window = MyGUI()
+	#window.show()
+	sys.exit(app.exec_())"""
