@@ -159,59 +159,61 @@ net tool-prep-loop iocontrol.0.tool-prepare iocontrol.0.tool-prepared
 net tool-change-loop iocontrol.0.tool-change iocontrol.0.tool-changed
 
 
-
 # add motion controller functions to servo thread
 
-setp hm2_[HOSTMOT2](BOARD).0.gpio.034.is_output true  #1
-setp hm2_[HOSTMOT2](BOARD).0.gpio.036.is_output true  #2
-setp hm2_[HOSTMOT2](BOARD).0.gpio.038.is_output true  #3
-setp hm2_[HOSTMOT2](BOARD).0.gpio.040.is_output true  #4
-setp hm2_[HOSTMOT2](BOARD).0.gpio.042.is_output true  #5
-setp hm2_[HOSTMOT2](BOARD).0.gpio.043.is_output true  #6
-setp hm2_[HOSTMOT2](BOARD).0.gpio.044.is_output true  #7
-setp hm2_[HOSTMOT2](BOARD).0.gpio.045.is_output true  #8
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.034.is_output true  #1
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.036.is_output true  #2
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.038.is_output true  #3
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.040.is_output true  #4
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.042.is_output true  #5
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.043.is_output true  #6
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.044.is_output true  #7
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.045.is_output true  #8
 #setp hm2_[HOSTMOT2](BOARD).0.gpio.046.is_output true
 #setp hm2_[HOSTMOT2](BOARD).0.gpio.047.is_output true
 #setp hm2_[HOSTMOT2](BOARD).0.gpio.048.is_output true
 #setp hm2_[HOSTMOT2](BOARD).0.gpio.049.is_output true
 #setp hm2_[HOSTMOT2](BOARD).0.gpio.050.is_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.035.is_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.037.is_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.039.is_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.041.is_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.034.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.035.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.036.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.037.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.038.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.039.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.040.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.041.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.042.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.043.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.044.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.gpio.045.invert_output true
-#setp hm2_[HOSTMOT2](BOARD).0.gpio.040.invert_output true
-#setp hm2_[HOSTMOT2](BOARD).0.gpio.040.invert_output true
-#setp hm2_[HOSTMOT2](BOARD).0.gpio.048.invert_output true
-#setp hm2_[HOSTMOT2](BOARD).0.gpio.049.invert_output true
-#setp hm2_[HOSTMOT2](BOARD).0.gpio.050.invert_output true
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.035.is_output true
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.037.is_output true
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.039.is_output true
+#setp hm2_[HOSTMOT2](BOARD).0.gpio.041.is_output true
+
+setp hm2_[HOSTMOT2](BOARD).0.gpio.051.is_output true  #1
+setp hm2_[HOSTMOT2](BOARD).0.gpio.053.is_output true  #2
+setp hm2_[HOSTMOT2](BOARD).0.gpio.055.is_output true  #3
+setp hm2_[HOSTMOT2](BOARD).0.gpio.057.is_output true  #4
+setp hm2_[HOSTMOT2](BOARD).0.gpio.059.is_output true  #5
+setp hm2_[HOSTMOT2](BOARD).0.gpio.060.is_output true  #6
+setp hm2_[HOSTMOT2](BOARD).0.gpio.061.is_output true  #7
+setp hm2_[HOSTMOT2](BOARD).0.gpio.062.is_output true  #8
+setp hm2_[HOSTMOT2](BOARD).0.gpio.063.is_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.064.is_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.065.is_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.066.is_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.067.is_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.052.is_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.054.is_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.056.is_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.058.is_output true
+
+
 net xena joint.0.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.00.enable
-net xena => hm2_[HOSTMOT2](BOARD).0.gpio.034.out
+net xena => hm2_[HOSTMOT2](BOARD).0.gpio.051.out
 net yena joint.1.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.01.enable
-net yena joint.1.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.036.out
+net yena joint.1.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.053.out
 net zena joint.2.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.02.enable
-net zena joint.2.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.038.out
+net zena joint.2.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.055.out
 net aena joint.3.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.03.enable
-net aena joint.3.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.040.out
+net aena joint.3.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.057.out
 
 # Cai home pin 
-net homeswitchesX <= hm2_[HOSTMOT2](BOARD).0.gpio.046.in
+net homeswitchesX <= hm2_[HOSTMOT2](BOARD).0.gpio.034.in
 net homeswitchesX => joint.0.home-sw-in
 #net homeswitchesX => joint.0.neg-lim-sw-in
 #net homeswitchesX => joint.0.pos-lim-sw-in
 
-net homeswitchesY <= hm2_[HOSTMOT2](BOARD).0.gpio.047.in
+net homeswitchesY <= hm2_[HOSTMOT2](BOARD).0.gpio.036.in
 net homeswitchesY => joint.1.home-sw-in
 #net homeswitchesX => joint.0.neg-lim-sw-in
 #net homeswitchesX => joint.0.pos-lim-sw-in
@@ -221,6 +223,7 @@ net xflt joint.0.amp-fault-in
 net yflt joint.1.amp-fault-in
 net zflt joint.2.amp-fault-in
 net aflt joint.3.amp-fault-in
+
 
 
 #loadusr -W mworkscaragui
@@ -235,56 +238,12 @@ net aflt joint.3.amp-fault-in
 #net j2 joint.2.pos-fb scaragui.joint2
 #net j3 joint.3.pos-fb scaragui.joint3
 
-#setp motion.switchkins-type 1
 net :kinstype-select <= motion.analog-out-03 => motion.switchkins-type
-#net :kinstype-select <= motion.analog-out-03 => motion.switchkins-type 
-#net :kinstype.is-0 <= kinstype.is-0 => pyvcp.multilabel.0.legend0
-#net :kinstype.is-1 <= kinstype.is-1 => pyvcp.multilabel.0.legend1
-#net :kinstype.is-2 <= kinstype.is-2 => pyvcp.multilabel.0.legend2
 
-#net signal-name motion.digital-in-00 <= parport.0.pin10-in
-net pinOut1 motion.digital-out-01 => hm2_[HOSTMOT2](BOARD).0.gpio.042.out
-net pinOut0 motion.digital-out-00 => hm2_[HOSTMOT2](BOARD).0.gpio.043.out
-net pinOut2 motion.digital-out-02 => hm2_[HOSTMOT2](BOARD).0.gpio.044.out
-#net outprogramrun halui.program.is-running => hm2_[HOSTMOT2](BOARD).0.gpio.043.out
+net pinOut1 motion.digital-out-01 => hm2_[HOSTMOT2](BOARD).0.gpio.058.out
+net pinOut0 motion.digital-out-00 => hm2_[HOSTMOT2](BOARD).0.gpio.059.out
+net pinOut2 motion.digital-out-02 => hm2_[HOSTMOT2](BOARD).0.gpio.060.out
 
 #net cyclestart <= hm2_[HOSTMOT2](BOARD).0.gpio.048.in => halui.program.run
-net pinIn1 <= hm2_[HOSTMOT2](BOARD).0.gpio.048.in => motion.digital-in-01
-net pinIn0 <= hm2_[HOSTMOT2](BOARD).0.gpio.049.in => motion.digital-in-00
-
-#                                 halui.program.run  IN
-#Owner   Type  Dir         Value  Name
-#    10  bit   IN          FALSE  halui.mode.auto
-#    10  bit   OUT         FALSE  halui.mode.is-auto
-#    10  bit   OUT          TRUE  halui.mode.is-joint
-#    10  bit   OUT          TRUE  halui.mode.is-manual
-#    10  bit   OUT         FALSE  halui.mode.is-mdi
-#    10  bit   OUT         FALSE  halui.mode.is-teleop
-#    10  bit   IN          FALSE  halui.mode.joint
-#    10  bit   IN          FALSE  halui.mode.manual
-#    10  bit   IN          FALSE  halui.mode.mdi
-#    10  bit   IN          FALSE  halui.mode.teleop
-#Owner   Type  Dir         Value  Name
-#    10  bit   IN          FALSE  halui.estop.activate
-#    10  bit   OUT          TRUE  halui.estop.is-activated
-#    10  bit   IN          FALSE  halui.estop.reset
-#Owner   Type  Dir         Value  Name
-#    10  bit   OUT         FALSE  halui.machine.is-on
-#    10  bit   IN          FALSE  halui.machine.off
-#    10  bit   IN          FALSE  halui.machine.on
-#    10  float OUT             1  halui.machine.units-per-mm
-#Owner   Type  Dir         Value  Name
-#    10  bit   OUT          TRUE  halui.program.block-delete.is-on
-#    10  bit   IN          FALSE  halui.program.block-delete.off
-#    10  bit   IN          FALSE  halui.program.block-delete.on
-#    10  bit   OUT          TRUE  halui.program.is-idle
-#    10  bit   OUT         FALSE  halui.program.is-paused
-#    10  bit   OUT         FALSE  halui.program.is-running
-#    10  bit   OUT          TRUE  halui.program.optional-stop.is-on
-#    10  bit   IN          FALSE  halui.program.optional-stop.off
-#    10  bit   IN          FALSE  halui.program.optional-stop.on
-#    10  bit   IN          FALSE  halui.program.pause
-#    10  bit   IN          FALSE  halui.program.resume
-#    10  bit   IN          FALSE  halui.program.run
-#    10  bit   IN          FALSE  halui.program.step
-#    10  bit   IN          FALSE  halui.program.stop
+net pinIn1 <= hm2_[HOSTMOT2](BOARD).0.gpio.038.in => motion.digital-in-01
+net pinIn0 <= hm2_[HOSTMOT2](BOARD).0.gpio.040.in => motion.digital-in-00
