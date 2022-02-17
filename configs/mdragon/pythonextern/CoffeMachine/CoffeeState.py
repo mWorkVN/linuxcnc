@@ -3,23 +3,14 @@ import time ,os
 import logging
 import logging.handlers
 #import linuxcnc
-#https://stackoverflow.com/questions/39442558/logging-rewrite-if-size-gets-too-big
-
-"""
-logging.basicConfig(level=logging.DEBUG, filename="newfile.log",format='%(asctime)s - %(levelname)s -%(message)s', filemode='w')
-"""
 
 LOG_FILENAME = 'mylog.log'
 my_logger = logging.getLogger('MyLogger')
 my_logger.setLevel(logging.DEBUG)
-#formatter = logging.basicConfig(level=logging.DEBUG, filename=LOG_FILENAME,format='%(asctime)s - %(levelname)s -%(message)s', filemode='w')
-handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=1024*1024, backupCount=5)
+handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=5*1024*1024, backupCount=5)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-
 handler.setFormatter(formatter)
 my_logger.addHandler(handler)
-for i in range(2000):
-    my_logger.debug('ihhhhhhhhhhhhhhhhhhhhhhhh = %d' % i)
 
 class Item:
     def __init__(self, name, price, stock ,controlfile):
@@ -41,13 +32,15 @@ class Item:
 class State:
 
     def scan(self):
-        self.mprint("Current Name State  " + self.name)
+        #self.mprint("Current Name State  " + self.name)
         pass
 
     def mprint(self,msg):
-        #'nt'  # for Linux and Mac it prints 'posix'
-        if (os.name == 'nt'): print(msg,flush=True)
-        else: print(msg)
+        if (os.name == 'nt'): print(msg,flush=True) # win
+        elif (os.name == 'posix'): print(msg) # linux 
+
+    def logdata(self,level,msg):
+        getattr(my_logger,level)(msg)
 
 class RobotControl(State):
     def __init__(self):
@@ -82,8 +75,7 @@ class WaitChooseItemState(State):
             if self.machine.item.stock < int(sl):
                 self.mprint(self.machine.item.name + ' sold out')
             else: self.machine.state = self.machine.WaitMoneyToBuyState
-            my_logger.info('***************\n')
-            my_logger.info('Switching to WaitChooseItemState')
+            self.logdata("info",'***************\nSwitching to WaitChooseItemState')
 
     def containsItem(self, wanted):
         ret = False
@@ -123,14 +115,21 @@ class WaitMoneyToBuyState(State):
     def __init__(self, machine,namestate):
         self.name = namestate     
         self.machine = machine
+        self.moneypre = 0
 
     def checkAndChangeState(self):
         price = self.machine.item.price * self.machine.item.numBuy
+        
         if self.machine.moneyGet < price:
             self.machine.moneyGet = self.machine.moneyGet + float(input('Need ' + str(price  - self.machine.moneyGet) + ' (VND) to pay, inser NOW ->'))
+            if (self.moneypre != self.machine.moneyGet):
+                self.moneypre = self.machine.moneyGet
+                self.logdata("info",'oder: ' + str(self.machine.orderNum + 1) + ' Get: ' + str(self.machine.moneyGet))
         else:
             self.machine.state = self.machine.BuyItemState
-            my_logger.info('Get Money: ' + str(self.machine.moneyGet))
+            self.machine.orderNum += 1 
+            self.moneypre = 0
+            self.logdata("info",'oder: ' + str(self.machine.orderNum) + ' B: ' +self.machine.item.name + ' Cash: ' + str(self.machine.moneyGet) + " Done")
 
 class BuyItemState(State):
     def __init__(self, machine,namestate):
@@ -144,28 +143,43 @@ class BuyItemState(State):
         else:
             self.machine.moneyGet -= (self.machine.item.price * self.machine.item.numBuy) # subtract item price from available cash
             self.machine.item.buyFromStock() # call this function to decrease the item inventory by 1
-            # (what if we buy more than one?)
             self.mprint('You got ' +self.machine.item.name)
             self.mprint('Cash remaining: ' + str(self.machine.moneyGet))
             self.machine.state = self.machine.TakeCoffeeState
-            my_logger.info('BuyItemState ')
+            self.logdata("info",'oder: ' + str(self.machine.orderNum) + 'Buy: ' +self.machine.item.name + " Success")
+
 class TakeCoffeeState(State):
     def __init__(self, machine,namestate):
         self.name = namestate        
         self.machine = machine
+        self.stateRobot = "init"
+        self.gcode = []
+        self.numLine = 0
 
     def checkAndChangeState(self):
-        gcode = []
-        self.mprint('Control Robot to '+str(self.machine.item.controlfile))
-        f = open("./gcode/" + self.machine.item.controlfile, "r")
-        for line in f.readlines():
-            gcode.append(line)
-        self.mprint(gcode)
-        f.close()
-        #for x in gcode:
-        #    self.mprint(x)
-        my_logger.info('Robot take ')
-        self.machine.state = self.machine.CheckRefundState
+        if (self.stateRobot == "init"):
+            self.mprint('Control Robot to '+str(self.machine.item.controlfile))
+            f = open("./gcode/" + self.machine.item.controlfile, "r")
+            self.numLine =0
+            for line in f.readlines():
+                self.gcode.append(line)
+                self.numLine += 1
+            f.close()
+            self.gcode.reverse()
+            self.stateRobot = "Control"
+
+        elif (self.stateRobot == "Control"):
+
+            self.numLine = self.numLine - 1
+            self.mprint(self.gcode[self.numLine])
+            if (self.numLine == 0):
+                self.stateRobot = "finish"
+                self.mprint("Line End")            
+        elif (self.stateRobot == "finish"):
+            self.stateRobot = "init"
+            self.logdata("info",'Robot take')
+            self.machine.state = self.machine.CheckRefundState
+
 
 class CheckRefundState(State):
     def __init__(self, machine,namestate):
@@ -174,12 +188,12 @@ class CheckRefundState(State):
 
     def checkAndChangeState(self):
         self.mprint("Switching to checkRefundState")
-        my_logger.info('CheckRefundState '+ str(self.machine.moneyGet)  )
+        self.logdata("info",'Refunded oder: ' + str(self.machine.orderNum) + 'Buy:' +self.machine.item.name + 'Refund:' + str(self.machine.moneyGet) + " Success")
         if self.machine.moneyGet > 0:
             self.mprint(str(self.machine.moneyGet) + " refunded.")
             self.machine.moneyGet = 0
         self.machine.item.numBuy = 0
-        my_logger.info('CheckRefundState OK ' )
+        self.logdata("info",'CheckRefundState OK ' )
         self.mprint('Thank you, have a nice day!\n')
         self.machine.state = self.machine.ShowItemsState
 
@@ -192,6 +206,7 @@ class Machine:
         self.items = [] # all items contained in this list right here
         self.item=None 
         self.timeout = 10 
+        self.orderNum = 0
 
         self.ShowItemsState = ShowItemsState(self,"SHOW STATE")
         self.WaitChooseItemState = WaitChooseItemState(self,"Wait Select State")
