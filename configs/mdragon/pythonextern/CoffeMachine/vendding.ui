@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>648</width>
-    <height>494</height>
+    <width>1022</width>
+    <height>573</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,14 +17,14 @@
    <widget class="QStackedWidget" name="stackedWidget">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>10</x>
       <y>10</y>
-      <width>641</width>
-      <height>451</height>
+      <width>951</width>
+      <height>501</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="stackedWidgetPage1">
      <widget class="QWidget" name="verticalLayoutWidget">
@@ -33,7 +33,7 @@
         <x>20</x>
         <y>40</y>
         <width>281</width>
-        <height>391</height>
+        <height>461</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -592,7 +592,7 @@
      <widget class="QLabel" name="imageAc_22">
       <property name="geometry">
        <rect>
-        <x>180</x>
+        <x>330</x>
         <y>0</y>
         <width>261</width>
         <height>31</height>
@@ -628,7 +628,7 @@
        <number>0</number>
       </property>
       <property name="text">
-       <string>Chn Sản Pham</string>
+       <string>Chọn Sản Phảm</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -639,8 +639,8 @@
        <rect>
         <x>310</x>
         <y>40</y>
-        <width>281</width>
-        <height>391</height>
+        <width>301</width>
+        <height>461</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -1014,6 +1014,373 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="verticalLayoutWidget_3">
+      <property name="geometry">
+       <rect>
+        <x>620</x>
+        <y>40</y>
+        <width>301</width>
+        <height>461</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_10">
+       <property name="leftMargin">
+        <number>5</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>5</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_10">
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_11">
+           <property name="leftMargin">
+            <number>5</number>
+           </property>
+           <property name="topMargin">
+            <number>5</number>
+           </property>
+           <property name="rightMargin">
+            <number>5</number>
+           </property>
+           <property name="bottomMargin">
+            <number>5</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="nameID1_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
+             <property name="lineWidth">
+              <number>0</number>
+             </property>
+             <property name="text">
+              <string>Nước Ngọt</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="imageID1_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>120</width>
+               <height>120</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>250</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
+             <property name="lineWidth">
+              <number>2</number>
+             </property>
+             <property name="text">
+              <string>Chon</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="imageAc_23">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
+             <property name="lineWidth">
+              <number>0</number>
+             </property>
+             <property name="text">
+              <string>Loại</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="numSlID1_4">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>80</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>500</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="ID" stdset="0">
+              <number>1</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>Nước Suối</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>COCA</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>PEPSI</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_12">
+           <property name="leftMargin">
+            <number>5</number>
+           </property>
+           <property name="topMargin">
+            <number>5</number>
+           </property>
+           <property name="rightMargin">
+            <number>5</number>
+           </property>
+           <property name="bottomMargin">
+            <number>5</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="imageAc_24">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
+             <property name="lineWidth">
+              <number>0</number>
+             </property>
+             <property name="text">
+              <string>Giá Tiền</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTextEdit" name="totalCoinID1_5">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_11">
+             <property name="leftMargin">
+              <number>5</number>
+             </property>
+             <property name="topMargin">
+              <number>5</number>
+             </property>
+             <property name="rightMargin">
+              <number>5</number>
+             </property>
+             <property name="bottomMargin">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="imageAc_25">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>10</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>150</width>
+                 <height>250</height>
+                </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::Box</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>SL</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="numSlID1_5">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>80</width>
+                 <height>35</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>500</width>
+                 <height>35</height>
+                </size>
+               </property>
+               <property name="ID" stdset="0">
+                <number>1</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>2</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnBuyID1_3">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>40</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Buy</string>
+             </property>
+             <property name="ID" stdset="0">
+              <number>1</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
     <widget class="QWidget" name="stackedWidgetPage2">
      <widget class="QLabel" name="imageAc_11">
@@ -1064,8 +1431,8 @@
      <widget class="QPushButton" name="btn_naptien">
       <property name="geometry">
        <rect>
-        <x>420</x>
-        <y>120</y>
+        <x>550</x>
+        <y>170</y>
         <width>121</width>
         <height>40</height>
        </rect>
@@ -1083,8 +1450,8 @@
      <widget class="QLineEdit" name="lblmoneyNap">
       <property name="geometry">
        <rect>
-        <x>420</x>
-        <y>80</y>
+        <x>550</x>
+        <y>120</y>
         <width>121</width>
         <height>31</height>
        </rect>
@@ -1096,7 +1463,7 @@
      <widget class="QFrame" name="verticalFrame_2">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>80</x>
         <y>50</y>
         <width>331</width>
         <height>171</height>
@@ -1458,8 +1825,8 @@
      <widget class="QLabel" name="imageAc_13">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>250</y>
+        <x>90</x>
+        <y>260</y>
         <width>601</width>
         <height>80</height>
        </rect>
@@ -1547,7 +1914,7 @@
      <widget class="QLabel" name="imageAc_19">
       <property name="geometry">
        <rect>
-        <x>80</x>
+        <x>240</x>
         <y>30</y>
         <width>401</width>
         <height>81</height>
@@ -1583,7 +1950,7 @@
        <number>0</number>
       </property>
       <property name="text">
-       <string>Xin Vui Long Chờ</string>
+       <string>Xin Vui Lòng Chờ</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -1592,8 +1959,8 @@
      <widget class="QLabel" name="imageAc_21">
       <property name="geometry">
        <rect>
-        <x>0</x>
-        <y>140</y>
+        <x>160</x>
+        <y>190</y>
         <width>581</width>
         <height>111</height>
        </rect>
@@ -1639,10 +2006,10 @@
      <widget class="QLabel" name="imageAc_15">
       <property name="geometry">
        <rect>
-        <x>60</x>
+        <x>170</x>
         <y>30</y>
         <width>481</width>
-        <height>20</height>
+        <height>60</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -1686,7 +2053,7 @@
      <widget class="QLabel" name="imageAc_16">
       <property name="geometry">
        <rect>
-        <x>170</x>
+        <x>280</x>
         <y>120</y>
         <width>251</width>
         <height>20</height>
@@ -1731,8 +2098,8 @@
      <widget class="QLabel" name="moneyFrefund">
       <property name="geometry">
        <rect>
-        <x>240</x>
-        <y>160</y>
+        <x>350</x>
+        <y>180</y>
         <width>120</width>
         <height>40</height>
        </rect>
@@ -1776,8 +2143,8 @@
      <widget class="QLabel" name="imageAc_18">
       <property name="geometry">
        <rect>
-        <x>60</x>
-        <y>280</y>
+        <x>160</x>
+        <y>310</y>
         <width>481</width>
         <height>60</height>
        </rect>
@@ -1828,7 +2195,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>648</width>
+     <width>1022</width>
      <height>22</height>
     </rect>
    </property>
