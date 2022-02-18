@@ -203,6 +203,9 @@
                <height>30</height>
               </size>
              </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
@@ -468,6 +471,9 @@
                <width>300</width>
                <height>30</height>
               </size>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -745,22 +751,6 @@
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QTextEdit" name="lblmoneyNap">
-      <property name="geometry">
-       <rect>
-        <x>420</x>
-        <y>80</y>
-        <width>121</width>
-        <height>30</height>
-       </rect>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>30</height>
-       </size>
-      </property>
-     </widget>
      <widget class="QPushButton" name="btn_naptien">
       <property name="geometry">
        <rect>
@@ -778,6 +768,19 @@
       </property>
       <property name="text">
        <string>Nap</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lblmoneyNap">
+      <property name="geometry">
+       <rect>
+        <x>420</x>
+        <y>80</y>
+        <width>121</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="readOnly">
+       <bool>false</bool>
       </property>
      </widget>
     </widget>
