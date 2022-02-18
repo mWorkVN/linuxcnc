@@ -273,8 +273,8 @@
                  <height>35</height>
                 </size>
                </property>
-               <property name="name" stdset="0">
-                <string>va_open_stacked2</string>
+               <property name="ID" stdset="0">
+                <number>1</number>
                </property>
                <item>
                 <property name="text">
@@ -539,8 +539,8 @@
                  <height>35</height>
                 </size>
                </property>
-               <property name="name" stdset="0">
-                <string>va_open_stacked2</string>
+               <property name="ID" stdset="0">
+                <number>2</number>
                </property>
                <item>
                 <property name="text">
