@@ -16,42 +16,6 @@ try:
 except ImportError: #py2
     import Queue as queue
 
-"""
-engine = pyttsx3.init()
-rate = engine.getProperty('rate')   # getting details of current speaking rate
-print (rate)                        #printing current voice rate
-engine.setProperty('rate', 125)     # setting up new voice rate
-volume = engine.getProperty('volume')   #getting to know current volume level (min=0 and max=1)
-print (volume)                          #printing current volume level
-engine.setProperty('volume',1.0)    # setting up volume level  between 0 and 1
-voices = engine.getProperty('voices')       #getting details of current voice
-#engine.setProperty('voice', voices[0].id)  #changing index, changes voices. o for male
-engine.setProperty('voice', voices[1].id)   #changing index, changes voices. 1 for female
-engine.say("Xin Chào các bạn")
-engine.say('My current speaking rate is ' + str(rate))
-engine.runAndWait()
-engine.stop()
-"""
-
-"""
-tts = gTTS(text='Hu Hu', lang='vi')
-tts.save('Ninza.mp3')
-playsound('Ninza.mp3')
-os.remove('Ninza.mp3')
-"""
-
-"""
-pip install pyttsx3
-install espeak ffmpeg libespeak1
-"""
-
-LOG_FILENAME = 'mylog.log'
-my_logger = logging.getLogger('MyLogger')
-my_logger.setLevel(logging.DEBUG)
-handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=5*1024*1024, backupCount=5)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-my_logger.addHandler(handler)
 
 class Item:
     def __init__(self,id, name, price, stock ,controlfile):
@@ -84,7 +48,8 @@ class State:
         elif (os.name == 'posix'): print(msg) # linux 
 
     def logdata(self,level,msg):
-        getattr(my_logger,level)(msg)
+        pass
+        #getattr(self.my_logger,level)(msg)
     
 
     def speak1(self,msg):
@@ -305,9 +270,9 @@ class CheckRefundState(State):
 
 class Machine:
  
-    def __init__(self,robot):
+    def __init__(self,my_logger=None):
         super().__init__()
-        self.myrobot= robot
+        self.my_logger = my_logger
         self.moneyGet = 0
         self.items = [] # all items contained in this list right here
         self.item=None 
@@ -324,6 +289,17 @@ class Machine:
         self.state = self.ShowItemsState
         self.state.speak("S")
 
+        self.myrobot=RobotControl()
+        #              name     ,        giá,   số lượng,   file
+        item1 = Item(1,'caffe sữa'  ,      15000,    88,  "caffeden.ngc" )
+        item2 = Item(2,'caffe đen'  ,      20000,    1 ,  "caffesua.ngc")
+        item3 = Item(3,'caffe Kem'  ,      25000,    88,  "caffeden.ngc" )
+        item4 = Item(4,'Nước Suối'  ,      10000,    1 ,  "caffesua.ngc")
+        self.addItem(item1)
+        self.addItem(item2)
+        self.addItem(item3)
+        self.addItem(item4)
+
     def run(self,data = [0,0]):
         self.state.checkAndChangeState(data)
 
@@ -332,8 +308,7 @@ class Machine:
 
     def addItem(self, item):
         self.items.append(item) 
-    # Takes Signal from UI
-    @pyqtSlot(int)
+
     def getOrder(self, value,sl):
         self.WaitChooseItemState.haveOrder(value,sl)
         print("get Order From Ui",flush=True)
@@ -348,118 +323,3 @@ class Machine:
     def SendMoney(self, money):
         self.WaitMoneyToBuyState.increMoney(money)
 
-
-class MyGUI(QMainWindow):
-    
-    def __init__(self):
-        super(MyGUI, self).__init__()
-        uic.loadUi('vendding.ui', self)
-        self.show()
-        robot=RobotControl()
-        self.machine = Machine(robot)
-        #              name     ,        giá,   số lượng,   file
-        item1 = Item(1,'caffe sữa'  ,      15000,    88,  "caffeden.ngc" )
-        item2 = Item(2,'caffe đen'  ,      20000,    1 ,  "caffesua.ngc")
-        item3 = Item(3,'caffe Kem'  ,      25000,    88,  "caffeden.ngc" )
-        item4 = Item(4,'Nước Suối'  ,      10000,    1 ,  "caffesua.ngc")
-        self.machine.addItem(item1)
-        self.machine.addItem(item2)
-        self.machine.addItem(item3)
-        self.machine.addItem(item4)
-        continueToBuy = True
-        self.initEvent()
-        self.initUi()
-        self.preState = "0"
-
-    def paintEvent(self, event):
-        self.machine.run()
-        if (self.preState != self.machine.scan()):
-            self.preState = self.machine.scan()
-            print("STATE NEW",self.preState,flush=True)
-            getattr(self, 'stackedWidget').setCurrentIndex(int(self.preState) - 1)
-            self.updateUi()
-        self.update()
-
-    def setImage(self,id):
-        nameimage=str(id)+'.jpg'
-        mainpath = os.path.dirname(os.path.abspath(__file__))
-        goal_dir = os.path.join(mainpath, 'res',nameimage)
-        goal_dir = os.path.abspath(goal_dir)
-        pixmap = QPixmap(goal_dir)
-        pixmap = pixmap.scaled(120, 120, Qt.KeepAspectRatio, Qt.FastTransformation)
-        getattr(self, 'imageID' +str(id) ).setPixmap(pixmap)
-        getattr(self, 'imageID' +str(id)).resize(pixmap.width(), pixmap.height())        
-
-    def initUi(self):
-        self.setImage(1)
-        self.setImage(2)
-        self.setImage(3)
-        self.setImage(4)
-
-    def updateUi(self):
-        if self.preState == "0":
-            self.TotalMoney.setText("0")
-            self.nameID.setText("")
-            self.slID.setText("0")
-            self.moneyGet.setText("0")
-        elif self.preState == "2":
-            money = self.machine.item.numBuy * self.machine.item.price
-            self.TotalMoney.setText(str(money))
-            self.nameID.setText(self.machine.item.name)
-            self.slID.setText(str(self.machine.item.numBuy))
-            self.moneyGet.setText(str(self.machine.moneyGet))
-        elif self.preState == "5":
-            money = self.machine.item.numBuy * self.machine.item.price
-            self.moneyFrefund.setText(str(self.machine.moneyGet))
-
-    def initEvent(self):
-
-        self.btnBuyID1.clicked.connect(self.haveOrder)
-        self.btnBuyID2.clicked.connect(self.haveOrder)
-        self.numSlID1.currentTextChanged.connect(self.slOrderChange)
-        self.numSlID2.currentTextChanged.connect(self.slOrderChange)
-        self.btn_naptien.clicked.connect(self.naptien_click)
-
-    def naptien_click(self):
-        money = int(self.lblmoneyNap.text())
-        self.machine.SendMoney(money)
-        self.moneyGet.setText(str(self.machine.moneyGet))
-
-    def getPrice(self,ID):
-        return self.machine.getPrice(ID)
-
-    def slOrderChange(self):
-        nameStacked = self.sender().property('ID')
-        sata = str(self.getPrice(nameStacked))
-        position = int(self.sender().currentIndex())
-        total = int(sata)*position
-        getattr(self, 'totalCoinID' + str(nameStacked)).setText(str(total))
-        print("have slOrderChange",flush=True)
-
-    def haveOrder(self):
-        id = self.sender().property('ID')
-        sl = int(getattr(self, 'numSlID' +str(id) ).currentIndex())
-        self.machine.getOrder(id,sl)
-        print("have order",flush=True)
-#vend()
-
-
-"""
-
-if __name__ == '__main__':
-    c = Controller()
-    sys.exit(c.run())
-
-"""
-
-
-
-
-
-
-########################################################
-if __name__ == '__main__':
-	app = QApplication(sys.argv)
-	window = MyGUI()
-	#window.show()
-	sys.exit(app.exec_())
