@@ -111,7 +111,7 @@
                <number>0</number>
               </property>
               <property name="text">
-               <string>Caffe Sua</string>
+               <string>Cà Phê Sua</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -385,7 +385,7 @@
                <number>0</number>
               </property>
               <property name="text">
-               <string>Caffe Đá</string>
+               <string>Cà Phê Đá</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -727,7 +727,7 @@
               <number>0</number>
              </property>
              <property name="text">
-              <string>Caffe KEM</string>
+              <string>Cà Phê KEM</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
