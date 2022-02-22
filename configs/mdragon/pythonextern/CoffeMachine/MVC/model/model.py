@@ -54,11 +54,11 @@ class State:
                 msg = self.machine.Que.get() 
                 if (msg == "END"):continue
                 print("Play ",str(filename),flush=True)
-                tts = gTTS(text=msg, lang='vi')
-                tts.save(filename)
-                audio_file =filename
-                playsound(audio_file)
-                os.remove(audio_file)
+                #tts = gTTS(text=msg, lang='vi')
+                #tts.save(filename)
+                #audio_file =filename
+                #playsound(audio_file)
+                #os.remove(audio_file)
 
     def speak(self,msg):
         t = Thread(target=self.speak1, args=(msg,))
@@ -73,6 +73,7 @@ class RobotControl(State):
         self.emccommand = self.emc.command()
         self.myRobot=None 
         self.mprint("Init STATE")   
+        self.state = 0
 
     def moveToPos(self):
         pass
@@ -98,13 +99,11 @@ class RobotControl(State):
         return self.emccommand.wait_complete(0.001)
 
     def sendMDI(self,msg):
-        if self.state == 0: 
-            self.set_mdi_mode() 
-            data  = self.emccommand.mdi(msg)
-            print("MDI returnb",data)
-            self.state = 1
-        else:
-            print("Wait")   
+        self.set_mdi_mode() 
+        data  = self.emccommand.mdi(msg)
+        print("MDI returnb",time.time(),data)
+        self.state = 1
+ 
         
 
 class WaitChooseItemState(State):
@@ -229,9 +228,11 @@ class TakeCoffeeState(State):
 
     def checkAndChangeState(self,data = [0,0]):
         if (self.stateRobot == "init"):
+            self.gcode = []
+            self.numLine = 0
             self.mprint('Control Robot to '+str(self.machine.item.controlfile))
             f = open("./gcode/" + self.machine.item.controlfile, "r")
-            self.numLine =0
+            
             for line in f.readlines():
                 self.gcode.append(line)
                 self.numLine += 1
@@ -239,14 +240,21 @@ class TakeCoffeeState(State):
             self.gcode.reverse()
             self.stateRobot = "Control"
             self.machine.myrobot.init()
-            
+            self.mprint(self.gcode)
+            self.mprint(self.numLine) 
         elif (self.stateRobot == "Control"):
-            if (self.machine.myrobot.checkStatusDoneMDI() == -1):
-                self.numLine = self.numLine - 1
-                self.mprint(self.gcode[self.numLine])
-                self.machine.myrobot.sendMDI(self.gcode[self.numLine])
-                time.sleep(1)
+            if (self.machine.myrobot.checkStatusDoneMDI() != -1):
                 if (self.numLine == 0):
+                    self.stateRobot = "finish"
+                    self.mprint("Line End") 
+                    return
+                self.numLine = self.numLine - 1
+                self.mprint(str(time.time())+ " " + self.gcode[self.numLine])
+                self.machine.myrobot.sendMDI(self.gcode[self.numLine])
+                while (self.machine.myrobot.checkStatusDoneMDI() == -1):
+                    pass
+                self.mprint('MDI: '+ str(time.time()) + " CODE " + str(self.gcode[self.numLine]) + " STAT" + str(self.machine.myrobot.checkStatusDoneMDI()))
+            elif (self.numLine == 0):
                     self.stateRobot = "finish"
                     self.mprint("Line End")   
 
