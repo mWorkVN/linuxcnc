@@ -1,11 +1,7 @@
 # coding: utf8
 import sys, time ,os
-import logging
-import logging.handlers
-from PyQt5 import uic
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSlot, Qt, QTimer, QObject
-from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator
+#import logging
+#import logging.handlers
 #import linuxcnc
 from gtts import gTTS
 from playsound import playsound
@@ -49,7 +45,7 @@ class State:
 
     def logdata(self,level,msg):
         pass
-        #getattr(self.my_logger,level)(msg)
+        getattr(self.machine.my_logger,level)(msg)
     
 
     def speak1(self,msg):
@@ -110,6 +106,8 @@ class WaitChooseItemState(State):
                 self.logdata("info",'***************\nSwitching to WaitChooseItemState')  
 
     def haveOrder(self,id,sl = 1):
+        if sl==0:
+            return
         if self.containsItem(id):
             self.machine.item = self.getItem(id)
             self.machine.item.numBuy = sl
@@ -190,7 +188,7 @@ class BuyItemState(State):
     def checkAndChangeState(self,data = [0,0]):
         if self.machine.moneyGet < self.machine.item.price:
             self.mprint('You can\'t buy this item. Insert more coins.') # then obvs you cant buy this item
-            self.machine.state = self.machine.WaitMoneyToBuyState
+            self.machine.state = self.machine.WaitChooseItemState
         else:
             self.machine.moneyGet -= (self.machine.item.price * self.machine.item.numBuy) # subtract item price from available cash
             self.machine.item.buyFromStock() # call this function to decrease the item inventory by 1
