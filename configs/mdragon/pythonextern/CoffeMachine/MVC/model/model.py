@@ -2,7 +2,7 @@
 import sys, time ,os
 #import logging
 #import logging.handlers
-#import linuxcnc
+import linuxcnc
 from gtts import gTTS
 from playsound import playsound
 import pyttsx3
@@ -46,7 +46,6 @@ class State:
     def logdata(self,level,msg):
         pass
         getattr(self.machine.my_logger,level)(msg)
-    
 
     def speak1(self,msg):
         while(1):
@@ -69,9 +68,9 @@ class State:
 
 class RobotControl(State):
     def __init__(self):
-        #self.emc = linuxcnc
-        #self.emcstat = self.emc.stat() # create a connection to the status channel
-        #self.emccommand = self.emc.command()
+        self.emc = linuxcnc
+        self.emcstat = self.emc.stat() # create a connection to the status channel
+        self.emccommand = self.emc.command()
         self.myRobot=None 
         self.mprint("Init STATE")   
 
@@ -84,6 +83,29 @@ class RobotControl(State):
     def goHome(self):
         pass
 
+    def init(self):
+        self.emc = linuxcnc
+        self.emcstat = self.emc.stat() # create a connection to the status channel
+        self.emccommand = self.emc.command()
+
+    def set_mdi_mode(self):
+        self.emcstat.poll()
+        if self.emcstat.task_mode != self.emc.MODE_MDI:
+            self.emccommand.mode(self.emc.MODE_MDI)
+            self.emccommand.wait_complete()
+
+    def checkStatusDoneMDI(self):
+        return self.emccommand.wait_complete(0.001)
+
+    def sendMDI(self,msg):
+        if self.state == 0: 
+            self.set_mdi_mode() 
+            data  = self.emccommand.mdi(msg)
+            print("MDI returnb",data)
+            self.state = 1
+        else:
+            print("Wait")   
+        
 
 class WaitChooseItemState(State):
     def __init__(self, machine,namestate):
@@ -216,15 +238,18 @@ class TakeCoffeeState(State):
             f.close()
             self.gcode.reverse()
             self.stateRobot = "Control"
-
+            self.machine.myrobot.init()
+            
         elif (self.stateRobot == "Control"):
+            if (self.machine.myrobot.checkStatusDoneMDI() == -1):
+                self.numLine = self.numLine - 1
+                self.mprint(self.gcode[self.numLine])
+                self.machine.myrobot.sendMDI(self.gcode[self.numLine])
+                time.sleep(1)
+                if (self.numLine == 0):
+                    self.stateRobot = "finish"
+                    self.mprint("Line End")   
 
-            self.numLine = self.numLine - 1
-            self.mprint(self.gcode[self.numLine])
-            time.sleep(1)
-            if (self.numLine == 0):
-                self.stateRobot = "finish"
-                self.mprint("Line End")            
         elif (self.stateRobot == "finish"):
             self.stateRobot = "init"
             self.logdata("info",'Robot take')
