@@ -16,9 +16,14 @@ class MainController(QObject):
             self.preState = self._machine.scan()
             return self.preState
         return "0"
+
     def setOrder(self,id,sl):
         self._machine.getOrder(id,sl)
         pass
+
     def setMoneyGet(self,money):
         self._machine.SendMoney(money)
+
+    def getCurrentState(self):
+        return self.preState
        
