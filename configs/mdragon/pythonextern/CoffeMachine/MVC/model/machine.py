@@ -3,15 +3,17 @@ import sys, time ,os
 #import logging
 #import logging.handlers
 import linuxcnc
-from gtts import gTTS
-from playsound import playsound
-import pyttsx3
-from threading import Thread
+#from gtts import gTTS
+#from playsound import playsound
+#import pyttsx3
+#from threading import Thread
+from model.state import State
+from model.robotControl import RobotControl
 try: 
     import queue
 except ImportError: #py2
     import Queue as queue
-
+import imp
 
 class Item:
     def __init__(self,id, name, price, stock ,controlfile):
@@ -32,78 +34,9 @@ class Item:
         self.stock -= self.numBuy # else stock of item decreases by 1
 
 
-class State:
-
-    def scan(self):
-        #self.mprint("Current Name State  " + self.name)
-        return self.name
-        pass
-
-    def mprint(self,msg):
-        if (os.name == 'nt'): print(msg,flush=True) # win
-        elif (os.name == 'posix'): print(msg) # linux 
-
-    def logdata(self,level,msg):
-        pass
-        getattr(self.machine.my_logger,level)(msg)
-
-    def speak1(self,msg):
-        while(1):
-            if (self.machine.Que.empty() == False):
-                filename = "talk"+str(int(time.time()))+".mp3"
-                msg = self.machine.Que.get() 
-                if (msg == "END"):continue
-                print("Play ",str(filename),flush=True)
-                #tts = gTTS(text=msg, lang='vi')
-                #tts.save(filename)
-                #audio_file =filename
-                #playsound(audio_file)
-                #os.remove(audio_file)
-
-    def speak(self,msg):
-        t = Thread(target=self.speak1, args=(msg,))
-        t.setDaemon(True); 
-        t.start()
 
 
-class RobotControl(State):
-    def __init__(self):
-        self.emc = linuxcnc
-        self.emcstat = self.emc.stat() # create a connection to the status channel
-        self.emccommand = self.emc.command()
-        self.myRobot=None 
-        self.mprint("Init STATE")   
-        self.state = 0
 
-    def moveToPos(self):
-        pass
-    def controlPin(self):
-        pass
-    def waitTime(self):
-        pass
-    def goHome(self):
-        pass
-
-    def init(self):
-        self.emc = linuxcnc
-        self.emcstat = self.emc.stat() # create a connection to the status channel
-        self.emccommand = self.emc.command()
-
-    def set_mdi_mode(self):
-        self.emcstat.poll()
-        if self.emcstat.task_mode != self.emc.MODE_MDI:
-            self.emccommand.mode(self.emc.MODE_MDI)
-            self.emccommand.wait_complete()
-
-    def checkStatusDoneMDI(self):
-        return self.emccommand.wait_complete(0.001)
-
-    def sendMDI(self,msg):
-        self.set_mdi_mode() 
-        data  = self.emccommand.mdi(msg)
-        print("MDI returnb",time.time(),data)
-        self.state = 1
- 
         
 
 class WaitChooseItemState(State):
@@ -259,6 +192,7 @@ class TakeCoffeeState(State):
                     self.mprint("Line End")   
 
         elif (self.stateRobot == "finish"):
+
             self.stateRobot = "init"
             self.logdata("info",'Robot take')
             self.machine.state = self.machine.CheckRefundState

@@ -5,7 +5,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSlot, Qt, QTimer, QObject
 from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator
-from model.model import Machine
+from model.machine import Machine
 from controller.control import MainController
 from view.view import MyGUI
 import logging
