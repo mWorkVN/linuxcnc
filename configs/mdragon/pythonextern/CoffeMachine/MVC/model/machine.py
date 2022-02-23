@@ -50,8 +50,11 @@ class WaitChooseItemState(State):
             if self.machine.item.stock < int(self.machine.item.numBuy):
                 pass
             elif self.status == 1:
-                self.machine.Que.put("Bạn Sẽ Mua " + str(self.machine.item.name) + " số lượng " + str(self.machine.item.numBuy))
-                self.machine.Que.put("Tổng Tiền Cần thanh toán là" + str(self.machine.item.price * self.machine.item.numBuy))
+                self.machine.Que.put("Bạn Sẽ Mua " + \
+                                    str(self.machine.item.name) + \
+                                    " số lượng " + str(self.machine.item.numBuy))
+                self.machine.Que.put("Tổng Tiền Cần thanh toán là" + \
+                                        str(self.machine.item.price * self.machine.item.numBuy))
                 self.machine.Que.put("END")
                 self.status = 2
             elif self.machine.Que.empty():
@@ -120,17 +123,21 @@ class WaitMoneyToBuyState(State):
         if self.machine.moneyGet < price:
             if (self.moneypre != self.machine.moneyGet):
                 self.moneypre = self.machine.moneyGet
-                self.logdata("info",'oder: ' + str(self.machine.orderNum + 1) + ' Get: ' + str(self.machine.moneyGet))
+                self.logdata("info",'oder: ' + str(self.machine.orderNum + 1)\
+                             + ' Get: ' + str(self.machine.moneyGet))
         elif self.machine.Que.empty():
             self.machine.state = self.machine.BuyItemState
             self.machine.orderNum += 1 
             self.moneypre = 0
-            self.logdata("info",'oder: ' + str(self.machine.orderNum) + ' B: ' + str(self.machine.item.id) + ' Cash: ' + str(self.machine.moneyGet) + " Done")
+            self.logdata("info",'oder: ' + str(self.machine.orderNum) + \
+                        ' B: ' + str(self.machine.item.id) + ' Cash: ' + \
+                        str(self.machine.moneyGet) + " Done")
 
     def increMoney(self, moneyGet):
         if (moneyGet !=0):
             self.machine.moneyGet = self.machine.moneyGet + int(moneyGet)
-            self.machine.Que.put("Bạn Vừa Nạp" + str(moneyGet) + " Tổng Tiền là" + str(self.machine.moneyGet))
+            self.machine.Que.put("Bạn Vừa Nạp" + str(moneyGet) + \
+                                " Tổng Tiền là" + str(self.machine.moneyGet))
             self.machine.Que.put("END")
             #self.speak(" ")
 
@@ -186,7 +193,9 @@ class TakeCoffeeState(State):
                 self.machine.myrobot.sendMDI(self.gcode[self.numLine])
                 while (self.machine.myrobot.checkStatusDoneMDI() == -1):
                     pass
-                self.mprint('MDI: '+ str(time.time()) + " CODE " + str(self.gcode[self.numLine]) + " STAT" + str(self.machine.myrobot.checkStatusDoneMDI()))
+                self.mprint('MDI: '+ str(time.time()) + " CODE " +\
+                             str(self.gcode[self.numLine]) + " STAT" +\
+                             str(self.machine.myrobot.checkStatusDoneMDI()))
             elif (self.numLine == 0):
                     self.stateRobot = "finish"
                     self.mprint("Line End")   
@@ -217,9 +226,11 @@ class CheckRefundState(State):
             self.machine.Que.put("Số Tiền thừa là " + str(self.machine.moneyGet) + "VND")
 
             if (self.machine.moneyGet == 4000):
-                self.machine.Que.put("Nhìn quý khách là biết ế lâu năm nên thôi khỏi thối lại")
+                self.machine.Que.put("Nhìn quý khách là biết ế lâu năm nên\
+                                     thôi khỏi thối lại")
             elif (self.machine.moneyGet == 5000):
-                self.machine.Que.put("Quý khách lần này đẹp trai nên thối hẳn cho 10000")
+                self.machine.Que.put("Quý khách lần này đẹp trai nên thối hẳn \
+                                    cho 10000")
             self.machine.Que.put("Chúc quý khách ngon miệng")
         elif self.machine.Que.empty():
             self.state = 0
