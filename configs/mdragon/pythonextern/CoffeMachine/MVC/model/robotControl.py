@@ -93,4 +93,13 @@ class RobotControl(State):
         data  = self.emccommand.mdi(msg)
         print("MDI returnb",time.time(),data)
         self.state = 1
- 
+
+    def running(self, do_poll=True):
+        '''
+        check wether interpreter is running.
+        If so, cant switch to MDI mode.
+        '''
+        if do_poll:
+            self.emcstat.poll()
+        return (self.emcstat.task_mode == linuxcnc.MODE_AUTO and
+                self.emcstat.interp_state != linuxcnc.INTERP_IDLE)
