@@ -656,6 +656,7 @@ install-kernel-indep: install-dirs
 	$(EXE) ../scripts/sim_pin $(DESTDIR)$(bindir)
 	$(FILE) ../*.png ../*.gif $(DESTDIR)$(datadir)/linuxcnc
 	$(FILE) ../lib/hallib/*   $(DESTDIR)$(datadir)/linuxcnc/hallib
+	$(FILE) ../tcl/*.png $(DESTDIR)$(tcldir)
 
 	# install all the sample configs, including subdirs (tar is required on debian systems, and common on others)
 	$(DIR) $(DESTDIR)$(sampleconfsdir)
@@ -972,6 +973,7 @@ hostmot2-objs :=			  \
     hal/drivers/mesa-hostmot2/resolver.o  \
     hal/drivers/mesa-hostmot2/sserial.o   \
     hal/drivers/mesa-hostmot2/ssr.o       \
+    hal/drivers/mesa-hostmot2/outm.o      \
     hal/drivers/mesa-hostmot2/stepgen.o   \
     hal/drivers/mesa-hostmot2/tp_pwmgen.o \
     hal/drivers/mesa-hostmot2/tram.o	  \

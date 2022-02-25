@@ -458,8 +458,8 @@ Suggestion: Split this in to an Error and a Status flag register..
 	EMCMOT_JOINT_FLAG flag;	/* see above for bit details */
 	double coarse_pos;	/* trajectory point, before interp */
 	double pos_cmd;		/* commanded joint position */
-	double vel_cmd;		/* comanded joint velocity */
-	double acc_cmd;		/* comanded joint acceleration */
+	double vel_cmd;		/* commanded joint velocity */
+	double acc_cmd;		/* commanded joint acceleration */
 	double backlash_corr;	/* correction for backlash */
 	double backlash_filt;	/* filtered backlash correction */
 	double backlash_vel;	/* backlash velocity variable */
@@ -552,7 +552,7 @@ Suggestion: Split this in to an Error and a Status flag register..
 
     typedef struct {
 	double pos_cmd;		/* commanded axis position */
-	double teleop_vel_cmd;		/* comanded axis velocity */
+	double teleop_vel_cmd;		/* commanded axis velocity */
 	double max_pos_limit;	/* upper soft limit on axis pos */
 	double min_pos_limit;	/* lower soft limit on axis pos */
 	double vel_limit;	/* upper limit of axis speed */
@@ -571,7 +571,7 @@ Suggestion: Split this in to an Error and a Status flag register..
     } emcmot_axis_t;
 
     typedef struct {
-	double teleop_vel_cmd;		/* comanded axis velocity */
+	double teleop_vel_cmd;		/* commanded axis velocity */
 	double max_pos_limit;	/* upper soft limit on axis pos */
 	double min_pos_limit;	/* lower soft limit on axis pos */
     } emcmot_axis_status_t;
@@ -594,8 +594,6 @@ Suggestion: Split this in to an Error and a Status flag register..
 */
 
     typedef struct emcmot_status_t {
-	emcmot_joint_t joints[EMCMOT_MAX_JOINTS];	/* joint data */
-	emcmot_axis_t  axes[EMCMOT_MAX_AXIS];	    /* axis data */
 	unsigned char head;	/* flag count for mutex detect */
 	/* these three are updated only when a new command is handled */
 	cmd_code_t commandEcho;	/* echo of input command */
@@ -635,7 +633,7 @@ Suggestion: Split this in to an Error and a Status flag register..
 	EmcPose probedPos;	/* Axis positions stored as soon as possible
 				   after last probeTripped */
 
-	
+
 	int synch_di[EMCMOT_MAX_DIO]; /* inputs to the motion controller, queried by G-code */
 	int synch_do[EMCMOT_MAX_DIO]; /* outputs to the motion controller, queried by G-code */
 	double analog_input[EMCMOT_MAX_AIO]; /* inputs to the motion controller, queried by G-code */
