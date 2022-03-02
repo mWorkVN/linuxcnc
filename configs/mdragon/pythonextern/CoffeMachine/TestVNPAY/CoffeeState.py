@@ -231,7 +231,7 @@ class WaitMoneyToBuyState(State,vnpay):
         self.idCheck = 0
         self.dateCheck = 0
         self.timeLoop = 0
-
+        self.msg = ""
     def checkAndChangeState(self,data = [0,0]):
         price = self.machine.item.price * self.machine.item.numBuy
         if (self.state == 0):
@@ -240,23 +240,27 @@ class WaitMoneyToBuyState(State,vnpay):
             self.machine.orderNum = str(datetime.datetime.timestamp(timebegin))
             self.payment(price,self.machine.orderNum)
             self.timeLoop = time.time()
+            
         elif (self.state == 1):
             if (self.machine.queueWeb.empty() == False):
-                msg = self.machine.queueWeb.get()
-                print (msg)
-                self.state = 0
-                if msg["order"] == self.machine.orderNum :
+                self.msg = self.machine.queueWeb.get()
+                print (self.msg)
+                self.timeLoop = time.time()
+                self.state = 2
+
+        elif (self.state == 2):
+            if time.time() - self.timeLoop >10:
+                if self.msg["order"] == self.machine.orderNum :
                     print("DUNG ORDER")
-                    if msg["sts"] == "00":
+                    if self.msg["sts"] == "00":
                         self.machine.moneyGet = price
                         self.machine.state = self.machine.BuyItemState
                     else:
                         self.machine.state = self.machine.ShowItemsState
                 else:
                     self.machine.state = self.machine.ShowItemsState
-
-
-
+                self.state = 0
+                self.msg = ''
         if self.machine.moneyGet < price:
             if (self.moneypre != self.machine.moneyGet):
                 self.moneypre = self.machine.moneyGet

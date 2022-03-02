@@ -1,12 +1,6 @@
 # coding: utf8
 import sys, time ,os
-#import logging
-#import logging.handlers
 import linuxcnc
-#from gtts import gTTS
-#from playsound import playsound
-#import pyttsx3
-#from threading import Thread
 from model.state import State
 from model.robotControl import RobotControl
 try: 
@@ -14,7 +8,10 @@ try:
 except ImportError: #py2
     import Queue as queue
 import imp
-
+from vnpay import vnpay
+import datetime
+import settings
+from PyQt5.QtCore import QObject, pyqtSignal
 class Item:
     def __init__(self,id, name, price, stock ,controlfile):
         self.id = id
@@ -32,12 +29,6 @@ class Item:
             # raise not item exception
             pass
         self.stock -= self.numBuy # else stock of item decreases by 1
-
-
-
-
-
-        
 
 class WaitChooseItemState(State):
     def __init__(self, machine,namestate):
@@ -111,35 +102,132 @@ class ShowItemsState(State):
         self.machine.state = self.machine.WaitChooseItemState
 
 
-class WaitMoneyToBuyState(State):
+class WaitMoneyToBuyState(State,vnpay,QObject):
+    even_odd_changed = pyqtSignal(str)
     def __init__(self, machine,namestate):
         self.name = namestate     
         self.machine = machine
         self.moneypre = 0
-
+        self.state= 0
+        self.idCheck = 0
+        self.dateCheck = 0
+        self.timeLoop = 0
+        self.msg = ""
     def checkAndChangeState(self,data = [0,0]):
         price = self.machine.item.price * self.machine.item.numBuy
-        
+        if (self.state == 0):
+            self.state = 1
+            timebegin = datetime.datetime.now()
+            self.machine.orderNum = str(datetime.datetime.timestamp(timebegin))
+            self.payment(price,self.machine.orderNum)
+            self.timeLoop = time.time()
+            
+        elif (self.state == 1):
+            if (self.machine.queueWeb.empty() == False):
+                self.msg = self.machine.queueWeb.get()
+                print (self.msg)
+                self.timeLoop = time.time()
+                self.state = 2
+
+        elif (self.state == 2):
+            if time.time() - self.timeLoop >10:
+                if self.msg["order"] == self.machine.orderNum :
+                    print("DUNG ORDER")
+                    if self.msg["sts"] == "00":
+                        self.machine.moneyGet = price
+                        self.machine.state = self.machine.BuyItemState
+                    else:
+                        self.machine.state = self.machine.ShowItemsState
+                else:
+                    self.machine.state = self.machine.ShowItemsState
+                self.state = 0
+                self.msg = ''
         if self.machine.moneyGet < price:
             if (self.moneypre != self.machine.moneyGet):
                 self.moneypre = self.machine.moneyGet
-                self.logdata("info",'oder: ' + str(self.machine.orderNum + 1)\
-                             + ' Get: ' + str(self.machine.moneyGet))
+                self.logdata("info",'oder: ' + str(self.machine.orderNum + 1) + ' Get: ' + str(self.machine.moneyGet))
         elif self.machine.Que.empty():
+            self.state = 0
             self.machine.state = self.machine.BuyItemState
-            self.machine.orderNum += 1 
+            #self.machine.orderNum += 1 
             self.moneypre = 0
-            self.logdata("info",'oder: ' + str(self.machine.orderNum) + \
-                        ' B: ' + str(self.machine.item.id) + ' Cash: ' + \
-                        str(self.machine.moneyGet) + " Done")
+            self.logdata("info",'oder: ' + str(self.machine.orderNum) + ' B: ' + str(self.machine.item.id) + ' Cash: ' + str(self.machine.moneyGet) + " Done")
+
 
     def increMoney(self, moneyGet):
         if (moneyGet !=0):
             self.machine.moneyGet = self.machine.moneyGet + int(moneyGet)
-            self.machine.Que.put("Bạn Vừa Nạp" + str(moneyGet) + \
-                                " Tổng Tiền là" + str(self.machine.moneyGet))
+            self.machine.Que.put("B?n V?a N?p" + str(moneyGet) + " T?ng Ti?n là" + str(self.machine.moneyGet))
             self.machine.Que.put("END")
             #self.speak(" ")
+
+
+    def payment(self,price,orderID):
+        order_type ='1'
+        amount = price
+        order_desc = 'Testr'
+        bank_code = ''
+        language = 'vn'
+        ipaddr = '127.0.0.1'
+        # Build URL Payment
+        
+        timebegin = datetime.datetime.now()
+        time_change = datetime.timedelta(minutes=1)
+        timeend = timebegin + time_change
+        order_id = orderID
+        self.idCheck = order_id
+        self.dateCheck=timebegin.strftime('%Y%m%d%H%M%S')
+        vnp = vnpay()
+        vnp.requestData['vnp_Version'] = '2.1.0'
+        vnp.requestData['vnp_Command'] = 'pay'
+        vnp.requestData['vnp_TmnCode'] = 'AGM2PN7X'
+        vnp.requestData['vnp_Amount'] = amount * 100
+        vnp.requestData['vnp_CurrCode'] = 'VND'
+        vnp.requestData['vnp_TxnRef'] = self.idCheck
+        vnp.requestData['vnp_OrderInfo'] = order_desc
+        vnp.requestData['vnp_OrderType'] = order_type
+        # Check language, default: vn
+        if language and language != '':
+            vnp.requestData['vnp_Locale'] = language
+        else:
+            vnp.requestData['vnp_Locale'] = 'vn'
+            # Check bank_code, if bank_code is empty, customer will be selected bank on VNPAY
+        if bank_code and bank_code != "":
+            vnp.requestData['vnp_BankCode'] = bank_code
+        
+        vnp.requestData['vnp_CreateDate'] = self.dateCheck   # 20150410063022
+        vnp.requestData['vnp_ExpireDate'] = timeend.strftime('%Y%m%d%H%M%S')
+        vnp.requestData['vnp_IpAddr'] = ipaddr
+        vnp.requestData['vnp_ReturnUrl'] = settings.VNPAY_RETURN_URL
+        vnpay_payment_url = vnp.get_payment_url(settings.VNPAY_PAYMENT_URL, settings.VNPAY_HASH_SECRET_KEY)
+        print(vnpay_payment_url)
+        #self.machine.view.webView.load(QUrl(vnpay_payment_url))
+        self.machine.even_odd_changed.emit(vnpay_payment_url)
+    def query(self):
+        vnp = vnpay()
+        vnp.requestData = {}
+        vnp.requestData['vnp_Command'] = 'querydr'
+        vnp.requestData['vnp_Version'] = '2.1.0'
+        vnp.requestData['vnp_TmnCode'] = settings.VNPAY_TMN_CODE
+        vnp.requestData['vnp_TxnRef'] = self.idCheck
+        vnp.requestData['vnp_OrderInfo'] = 'Kiem tra ket qua GD OrderId:' + self.idCheck
+        vnp.requestData['vnp_TransDate'] = self.dateCheck  # 20150410063022
+        vnp.requestData['vnp_CreateDate'] = datetime.datetime.now().strftime('%Y%m%d%H%M%S')  # 20150410063022
+        vnp.requestData['vnp_IpAddr'] = '127.0.0.1'
+        requestUrl = vnp.get_payment_url(settings.VNPAY_API_URL, settings.VNPAY_HASH_SECRET_KEY)
+        responseData = urllib.request.urlopen(requestUrl).read().decode()
+        print('RequestURL:' + requestUrl)
+        print('VNPAY Response:' + responseData)
+        if 'Request_is_duplicate' in responseData:
+            return
+        data = responseData.split('&')
+        for x in data:
+            tmp = x.split('=')
+            if len(tmp) == 2:
+                vnp.responseData[tmp[0]] = urllib.parse.unquote(tmp[1]).replace('+', ' ')
+        print('Validate data from VNPAY:' + str(vnp.validate_response(settings.VNPAY_HASH_SECRET_KEY)))
+
+
 
 class BuyItemState(State):
     def __init__(self, machine,namestate):
@@ -244,9 +332,9 @@ class CheckRefundState(State):
             time.sleep(2)
             self.machine.state = self.machine.ShowItemsState
 
-class Machine:
- 
-    def __init__(self,my_logger=None):
+class Machine(QObject):
+    even_odd_changed = pyqtSignal(str)
+    def __init__(self,my_logger,queueWEB):
         super().__init__()
         self.my_logger = my_logger
         self.moneyGet = 0
@@ -255,13 +343,14 @@ class Machine:
         self.timeout = 10 
         self.orderNum = 0
         self.Que = queue.Queue(5)
+        self.queueWeb = queueWEB
         self.ShowItemsState = ShowItemsState(self,"0")
         self.WaitChooseItemState = WaitChooseItemState(self,"1")
         self.WaitMoneyToBuyState = WaitMoneyToBuyState(self,"2")
         self.BuyItemState = BuyItemState(self,"3")
         self.TakeCoffeeState = TakeCoffeeState(self,"4")
         self.CheckRefundState = CheckRefundState(self,"5")
-        
+        #self.
         self.state = self.ShowItemsState
         self.state.speak("S")
 

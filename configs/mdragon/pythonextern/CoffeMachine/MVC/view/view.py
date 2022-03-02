@@ -4,7 +4,7 @@ import logging
 import logging.handlers
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSlot, Qt, QTimer, QObject
+from PyQt5.QtCore import pyqtSlot, Qt, QTimer, QObject ,pyqtSlot,QUrl
 from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator
 #import linuxcnc
 from gtts import gTTS
@@ -16,13 +16,19 @@ try:
 except ImportError: #py2
     import Queue as queue
 
+import variThreading
+
 class MyGUI(QMainWindow):
     
-    def __init__(self, machine, main_controller):
+    def __init__(self, machine, main_controller,server):
         super(MyGUI, self).__init__()
 
         self._machine = machine
         self._main_controller = main_controller
+        self.FlaskWeb = server()
+        self.FlaskWeb.setDaemon(True); 
+        self.FlaskWeb.start()
+        self._machine.even_odd_changed.connect(self.on_even_odd_changed)
         uic.loadUi('vendding.ui', self)
         self.show()
         continueToBuy = True
@@ -37,7 +43,13 @@ class MyGUI(QMainWindow):
             print("STATE NEW",flush=True)
             getattr(self, 'stackedWidget').setCurrentIndex(int(stat) - 1)
             self.updateUi()
+        
         self.update()
+
+    @pyqtSlot(str)
+    def on_even_odd_changed(self, value):
+        self.webView.load(QUrl(value))
+
 
     def setImage(self,id):
         nameimage=str(id)+'.jpg'

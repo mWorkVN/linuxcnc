@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 import sys, time ,os
 import threading
 
@@ -25,43 +27,34 @@ def log_in():
         pass
     else:
         vnp = vnpay()
-        print("data")
         x =  {"order":"","sts":""}
         order_id = request.args.get('vnp_TxnRef')
-        print("order_id",order_id)
         amount = int(request.args.get('vnp_Amount')) / 100
-        print("amount",str(amount))
         order_desc = request.args.get('vnp_OrderInfo')
-        print("order_desc",order_desc)
         vnp_TransactionNo = request.args.get('vnp_TransactionNo')
-        print("vnp_TransactionNo",vnp_TransactionNo)
         vnp_ResponseCode = request.args.get('vnp_ResponseCode')
-        print("vnp_ResponseCode",vnp_ResponseCode)
         vnp_TmnCode = request.args.get('vnp_TmnCode')
-        print("vnp_TmnCode",vnp_TmnCode)
         vnp_PayDate = request.args.get('vnp_PayDate')
-        print("vnp_PayDate",vnp_PayDate)
         vnp_BankCode = request.args.get('vnp_BankCode')
-        print("vnp_BankCode",vnp_BankCode)
         vnp_CardType = request.args.get('vnp_CardType')
-        print("vnp_CardType",vnp_CardType)
         vnp.responseData = request.args.to_dict()
         status = ""
-        print("aaa")
         x["order"]=order_id
         if vnp.validate_response(settings.VNPAY_HASH_SECRET_KEY):
             if vnp_ResponseCode == "00":
                 status = "TT THANH CONG"
-                print("TT THANH CONG")
             else:
                 status = "TT ERR"
-                print("TT Error")
             x["sts"]=vnp_ResponseCode
         else:
             x["sts"]=""
-            print("eeee")
         variThreading.queueVNPAY.put(x)
-        return "<p>Hello, World! " + status + "</p>"
+        return render_template("payment_return.html", title= "Kết Quả Thanh toán",
+                            result= "Thành công", order_id= order_id,
+                            amount= amount,
+                            order_desc=order_desc,
+                            vnp_TransactionNo= vnp_TransactionNo,
+                            vnp_ResponseCode= vnp_ResponseCode)
 
 
 
