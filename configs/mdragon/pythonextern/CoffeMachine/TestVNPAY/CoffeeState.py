@@ -1,21 +1,48 @@
-# coding: utf8
+#!/usr/bin/python
+# -*- coding: utf8 -*-
+#ch?y pip install waitress
+#    from waitress import serve
+#    serve(app, host="0.0.0.0", port=8080)
 import sys, time ,os
 import logging
 import logging.handlers
 from PyQt5 import uic
+#from PyQt5 import QtWebEngineWidgetsQtWebKitWidgets 
+
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSlot, Qt, QTimer, QObject
+from PyQt5.QtCore import pyqtSlot, Qt, QTimer, QObject , QUrl
 from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator
+#from PyQt5 import QtWebKitWidgets
+#from PyQt5.QtWebEngineWidgets import QWebEnginePage
+"""from PyQt5.QtWebEngineWidgets import QWebEnginePage
+from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView,QWebEnginePage as QWebPage
+from PyQt5.QtWebEngineWidgets import QWebEngineSettings as QWebSettings"""
+#from  PyQt5.QtWebKitWidget import *
+#pip install PyQtWebEngine
+#pip install PyQtWebKit
 #import linuxcnc
 from gtts import gTTS
 from playsound import playsound
 import pyttsx3
+import threading
 from threading import Thread
+from vnpay import vnpay
 try: 
     import queue
 except ImportError: #py2
     import Queue as queue
+import datetime
+import settings
+import urllib.request
+import urllib
+import urllib.parse
 
+from web import server
+import variThreading
+
+
+
+#import QUrl
 """
 engine = pyttsx3.init()
 rate = engine.getProperty('rate')   # getting details of current speaking rate
@@ -27,7 +54,7 @@ engine.setProperty('volume',1.0)    # setting up volume level  between 0 and 1
 voices = engine.getProperty('voices')       #getting details of current voice
 #engine.setProperty('voice', voices[0].id)  #changing index, changes voices. o for male
 engine.setProperty('voice', voices[1].id)   #changing index, changes voices. 1 for female
-engine.say("Xin Chào các bạn")
+engine.say("Xin Chào các b?n")
 engine.say('My current speaking rate is ' + str(rate))
 engine.runAndWait()
 engine.stop()
@@ -138,8 +165,8 @@ class WaitChooseItemState(State):
             if self.machine.item.stock < int(self.machine.item.numBuy):
                 pass
             elif self.status == 1:
-                self.machine.Que.put("Bạn Sẽ Mua " + str(self.machine.item.name) + " số lượng " + str(self.machine.item.numBuy))
-                self.machine.Que.put("Tổng Tiền Cần thanh toán là" + str(self.machine.item.price * self.machine.item.numBuy))
+                self.machine.Que.put("B?n S? Mua " + str(self.machine.item.name) + " s? lu?ng " + str(self.machine.item.numBuy))
+                self.machine.Que.put("T?ng Ti?n C?n thanh toán là" + str(self.machine.item.price * self.machine.item.numBuy))
                 self.machine.Que.put("END")
                 self.status = 2
             elif self.machine.Que.empty():
@@ -194,31 +221,128 @@ class ShowItemsState(State):
         self.machine.state = self.machine.WaitChooseItemState
 
 
-class WaitMoneyToBuyState(State):
+
+class WaitMoneyToBuyState(State,vnpay):
     def __init__(self, machine,namestate):
         self.name = namestate     
         self.machine = machine
         self.moneypre = 0
+        self.state= 0
+        self.idCheck = 0
+        self.dateCheck = 0
+        self.timeLoop = 0
 
     def checkAndChangeState(self,data = [0,0]):
         price = self.machine.item.price * self.machine.item.numBuy
-        
+        if (self.state == 0):
+            self.state = 1
+            timebegin = datetime.datetime.now()
+            self.machine.orderNum = str(datetime.datetime.timestamp(timebegin))
+            self.payment(price,self.machine.orderNum)
+            self.timeLoop = time.time()
+        elif (self.state == 1):
+            if (self.machine.queueWeb.empty() == False):
+                msg = self.machine.queueWeb.get()
+                print (msg)
+                self.state = 0
+                if msg["order"] == self.machine.orderNum :
+                    print("DUNG ORDER")
+                    if msg["sts"] == "00":
+                        self.machine.moneyGet = price
+                        self.machine.state = self.machine.BuyItemState
+                    else:
+                        self.machine.state = self.machine.ShowItemsState
+                else:
+                    self.machine.state = self.machine.ShowItemsState
+
+
+
         if self.machine.moneyGet < price:
             if (self.moneypre != self.machine.moneyGet):
                 self.moneypre = self.machine.moneyGet
                 self.logdata("info",'oder: ' + str(self.machine.orderNum + 1) + ' Get: ' + str(self.machine.moneyGet))
         elif self.machine.Que.empty():
+            self.state = 0
             self.machine.state = self.machine.BuyItemState
-            self.machine.orderNum += 1 
+            #self.machine.orderNum += 1 
             self.moneypre = 0
             self.logdata("info",'oder: ' + str(self.machine.orderNum) + ' B: ' + str(self.machine.item.id) + ' Cash: ' + str(self.machine.moneyGet) + " Done")
+
 
     def increMoney(self, moneyGet):
         if (moneyGet !=0):
             self.machine.moneyGet = self.machine.moneyGet + int(moneyGet)
-            self.machine.Que.put("Bạn Vừa Nạp" + str(moneyGet) + " Tổng Tiền là" + str(self.machine.moneyGet))
+            self.machine.Que.put("B?n V?a N?p" + str(moneyGet) + " T?ng Ti?n là" + str(self.machine.moneyGet))
             self.machine.Que.put("END")
             #self.speak(" ")
+
+
+    def payment(self,price,orderID):
+        order_type ='1'
+        amount = price
+        order_desc = 'Testr'
+        bank_code = ''
+        language = 'vn'
+        ipaddr = '127.0.0.1'
+        # Build URL Payment
+        
+        timebegin = datetime.datetime.now()
+        time_change = datetime.timedelta(minutes=1)
+        timeend = timebegin + time_change
+        order_id = orderID
+        self.idCheck = order_id
+        self.dateCheck=timebegin.strftime('%Y%m%d%H%M%S')
+        vnp = vnpay()
+        vnp.requestData['vnp_Version'] = '2.1.0'
+        vnp.requestData['vnp_Command'] = 'pay'
+        vnp.requestData['vnp_TmnCode'] = 'AGM2PN7X'
+        vnp.requestData['vnp_Amount'] = amount * 100
+        vnp.requestData['vnp_CurrCode'] = 'VND'
+        vnp.requestData['vnp_TxnRef'] = self.idCheck
+        vnp.requestData['vnp_OrderInfo'] = order_desc
+        vnp.requestData['vnp_OrderType'] = order_type
+        # Check language, default: vn
+        if language and language != '':
+            vnp.requestData['vnp_Locale'] = language
+        else:
+            vnp.requestData['vnp_Locale'] = 'vn'
+            # Check bank_code, if bank_code is empty, customer will be selected bank on VNPAY
+        if bank_code and bank_code != "":
+            vnp.requestData['vnp_BankCode'] = bank_code
+        
+        vnp.requestData['vnp_CreateDate'] = self.dateCheck   # 20150410063022
+        vnp.requestData['vnp_ExpireDate'] = timeend.strftime('%Y%m%d%H%M%S')
+        vnp.requestData['vnp_IpAddr'] = ipaddr
+        vnp.requestData['vnp_ReturnUrl'] = settings.VNPAY_RETURN_URL
+        vnpay_payment_url = vnp.get_payment_url(settings.VNPAY_PAYMENT_URL, settings.VNPAY_HASH_SECRET_KEY)
+        print(vnpay_payment_url)
+        self.machine.view.webView.load(QUrl(vnpay_payment_url))
+
+    def query(self):
+        vnp = vnpay()
+        vnp.requestData = {}
+        vnp.requestData['vnp_Command'] = 'querydr'
+        vnp.requestData['vnp_Version'] = '2.1.0'
+        vnp.requestData['vnp_TmnCode'] = settings.VNPAY_TMN_CODE
+        vnp.requestData['vnp_TxnRef'] = self.idCheck
+        vnp.requestData['vnp_OrderInfo'] = 'Kiem tra ket qua GD OrderId:' + self.idCheck
+        vnp.requestData['vnp_TransDate'] = self.dateCheck  # 20150410063022
+        vnp.requestData['vnp_CreateDate'] = datetime.datetime.now().strftime('%Y%m%d%H%M%S')  # 20150410063022
+        vnp.requestData['vnp_IpAddr'] = '127.0.0.1'
+        requestUrl = vnp.get_payment_url(settings.VNPAY_API_URL, settings.VNPAY_HASH_SECRET_KEY)
+        responseData = urllib.request.urlopen(requestUrl).read().decode()
+        print('RequestURL:' + requestUrl)
+        print('VNPAY Response:' + responseData)
+        if 'Request_is_duplicate' in responseData:
+            return
+        data = responseData.split('&')
+        for x in data:
+            tmp = x.split('=')
+            if len(tmp) == 2:
+                vnp.responseData[tmp[0]] = urllib.parse.unquote(tmp[1]).replace('+', ' ')
+        print('Validate data from VNPAY:' + str(vnp.validate_response(settings.VNPAY_HASH_SECRET_KEY)))
+
+
 
 class BuyItemState(State):
     def __init__(self, machine,namestate):
@@ -282,18 +406,19 @@ class CheckRefundState(State):
         self.name = namestate     
         self.machine = machine
         self.state = 0
+
     def checkAndChangeState(self,data = [0,0]):
         if (self.state == 0):
             self.state = 1
             self.mprint("Switching to checkRefundState")
             
-            self.machine.Que.put("Số Tiền thừa là " + str(self.machine.moneyGet) + "VND")
+            self.machine.Que.put("S? Ti?n th?a là " + str(self.machine.moneyGet) + "VND")
 
             if (self.machine.moneyGet == 4000):
-                self.machine.Que.put("Nhìn quý khách là biết ế lâu năm nên thôi khỏi thối lại")
+                self.machine.Que.put("Nhìn quý khách là bi?t ? lâu nam nên thôi kh?i th?i l?i")
             elif (self.machine.moneyGet == 5000):
-                self.machine.Que.put("Quý khách lần này đẹp trai nên thối hẳn cho 10000")
-            self.machine.Que.put("Chúc quý khách ngon miệng")
+                self.machine.Que.put("Quý khách l?n này d?p trai nên th?i h?n cho 10000")
+            self.machine.Que.put("Chúc quý khách ngon mi?ng")
         elif self.machine.Que.empty():
             self.state = 0
             self.logdata("info",'Refunded oder: ' + str(self.machine.orderNum)  + 'Refund:' + str(self.machine.moneyGet) + " Success")
@@ -308,8 +433,9 @@ class CheckRefundState(State):
 
 class Machine:
  
-    def __init__(self,robot):
+    def __init__(self,view,robot,queueWEB):
         super().__init__()
+        self.view=view
         self.myrobot= robot
         self.moneyGet = 0
         self.items = [] # all items contained in this list right here
@@ -317,6 +443,7 @@ class Machine:
         self.timeout = 10 
         self.orderNum = 0
         self.Que = queue.Queue(5)
+        self.queueWeb = queueWEB
         self.ShowItemsState = ShowItemsState(self,"0")
         self.WaitChooseItemState = WaitChooseItemState(self,"1")
         self.WaitMoneyToBuyState = WaitMoneyToBuyState(self,"2")
@@ -354,17 +481,18 @@ class Machine:
 
 class MyGUI(QMainWindow):
     
-    def __init__(self):
+    def __init__(self,server):
         super(MyGUI, self).__init__()
         uic.loadUi('vendding.ui', self)
         self.show()
         robot=RobotControl()
-        self.machine = Machine(robot)
-        #              name     ,        giá,   số lượng,   file
-        item1 = Item(1,'caffe sữa'  ,      15000,    88,  "caffeden.ngc" )
-        item2 = Item(2,'caffe đen'  ,      20000,    1 ,  "caffesua.ngc")
+        queueWEB = variThreading.init()
+        self.machine = Machine(self,robot,variThreading.queueVNPAY)
+        #              name     ,        giá,   s? lu?ng,   file
+        item1 = Item(1,'caffe s?a'  ,      15000,    88,  "caffeden.ngc" )
+        item2 = Item(2,'caffe den'  ,      20000,    1 ,  "caffesua.ngc")
         item3 = Item(3,'caffe Kem'  ,      25000,    88,  "caffeden.ngc" )
-        item4 = Item(4,'Nước Suối'  ,      10000,    1 ,  "caffesua.ngc")
+        item4 = Item(4,'Nu?c Su?i'  ,      10000,    1 ,  "caffesua.ngc")
         self.machine.addItem(item1)
         self.machine.addItem(item2)
         self.machine.addItem(item3)
@@ -373,6 +501,10 @@ class MyGUI(QMainWindow):
         self.initEvent()
         self.initUi()
         self.preState = "0"
+        self.FlaskWeb = server()
+        self.FlaskWeb.setDaemon(True); 
+        self.FlaskWeb.start()
+
 
     def paintEvent(self, event):
         self.machine.run()
@@ -448,7 +580,6 @@ class MyGUI(QMainWindow):
 
 
 """
-
 if __name__ == '__main__':
     c = Controller()
     sys.exit(c.run())
@@ -456,13 +587,10 @@ if __name__ == '__main__':
 """
 
 
-
-
-
-
 ########################################################
 if __name__ == '__main__':
+
 	app = QApplication(sys.argv)
-	window = MyGUI()
+	window = MyGUI(server)
 	#window.show()
 	sys.exit(app.exec_())
