@@ -27,7 +27,7 @@ def log_in():
         pass
     else:
         vnp = vnpay()
-        x =  {"order":"","sts":""}
+        x =  {"order":"","sts":"","amount":"","time":""}
         order_id = request.args.get('vnp_TxnRef')
         amount = int(request.args.get('vnp_Amount')) / 100
         order_desc = request.args.get('vnp_OrderInfo')
@@ -40,6 +40,8 @@ def log_in():
         vnp.responseData = request.args.to_dict()
         status = ""
         x["order"]=order_id
+        x["amount"]=str(amount)
+        x["time"]=vnp_PayDate
         if vnp.validate_response(settings.VNPAY_HASH_SECRET_KEY):
             if vnp_ResponseCode == "00":
                 status = "TT THANH CONG"

@@ -41,8 +41,9 @@ class MyGUI(QMainWindow):
         stat = self._main_controller.checkChangeState()
         if int(stat) != 0:
             print("STATE NEW",flush=True)
-            getattr(self, 'stackedWidget').setCurrentIndex(int(stat) - 1)
             self.updateUi()
+            getattr(self, 'stackedWidget').setCurrentIndex(int(stat) - 1)
+            
         
         self.update()
 
@@ -75,11 +76,24 @@ class MyGUI(QMainWindow):
             self.moneyGet.setText("0")
         elif self._main_controller.preState == "2":
             money = self._machine.item.numBuy * self._machine.item.price
-            self.TotalMoney.setText(str(money))
-            self.nameID.setText(self._machine.item.name)
-            self.slID.setText(str(self._machine.item.numBuy))
-            self.moneyGet.setText(str(self._machine.moneyGet))
-        elif self._main_controller.preState == "5":
+            #self.TotalMoney.setText(str(money))
+            #self.nameID.setText(self._machine.item.name)
+            #self.slID.setText(str(self._machine.item.numBuy))
+            #self.moneyGet.setText(str(self._machine.moneyGet))
+        #x =  {"order":"","sts":"","amount":"","time":""}
+        elif self._main_controller.preState == "4": #Success
+            self.lbl_orderID.setText(self._machine.vuluePAY["order"])
+            self.lbl_orderTime.setText(self._machine.vuluePAY["time"])
+            self.lbl_orderGET.setText(self._machine.vuluePAY["amount"])
+        
+ 
+            
+        elif self._main_controller.preState == "5": #Error
+            self.lbl_erID.setText(self._machine.vuluePAY["order"])
+            self.lbl_erCode.setText(self._machine.vuluePAY["sts"])
+            self.lbl_erAmount.setText(self._machine.vuluePAY["amount"])
+            
+        elif self._main_controller.preState == "6":
             money = self._machine.item.numBuy * self._machine.item.price
             self.moneyFrefund.setText(str(self._machine.moneyGet))
 
@@ -89,12 +103,13 @@ class MyGUI(QMainWindow):
         self.btnBuyID2.clicked.connect(self.haveOrder)
         self.numSlID1.currentTextChanged.connect(self.slOrderChange)
         self.numSlID2.currentTextChanged.connect(self.slOrderChange)
-        self.btn_naptien.clicked.connect(self.naptien_click)
+        #self.btn_naptien.clicked.connect(self.naptien_click)
 
     def naptien_click(self):
-        money = int(self.lblmoneyNap.text())
-        self._main_controller.setMoneyGet(money)
-        self.moneyGet.setText(str(self._machine.moneyGet))
+        pass
+        #money = int(self.lblmoneyNap.text())
+        #self._main_controller.setMoneyGet(money)
+        #self.moneyGet.setText(str(self._machine.moneyGet))
 
     def getPrice(self,ID):
         return self._machine.getPrice(ID)

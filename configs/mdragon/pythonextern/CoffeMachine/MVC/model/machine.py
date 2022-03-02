@@ -112,36 +112,37 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
         self.idCheck = 0
         self.dateCheck = 0
         self.timeLoop = 0
-        self.msg = ""
+
     def checkAndChangeState(self,data = [0,0]):
         price = self.machine.item.price * self.machine.item.numBuy
         if (self.state == 0):
             self.state = 1
             timebegin = datetime.datetime.now()
-            self.machine.orderNum = str(datetime.datetime.timestamp(timebegin))
+            #self.machine.orderNum = str(int(round(datetime.datetime.timestamp(timebegin))))
+            self.machine.orderNum = str(int(round(timebegin.timestamp())))
             self.payment(price,self.machine.orderNum)
             self.timeLoop = time.time()
             
         elif (self.state == 1):
             if (self.machine.queueWeb.empty() == False):
-                self.msg = self.machine.queueWeb.get()
-                print (self.msg)
+                self.machine.vuluePAY = self.machine.queueWeb.get()
+                print (self.machine.vuluePAY)
                 self.timeLoop = time.time()
                 self.state = 2
 
         elif (self.state == 2):
-            if time.time() - self.timeLoop >10:
-                if self.msg["order"] == self.machine.orderNum :
-                    print("DUNG ORDER")
-                    if self.msg["sts"] == "00":
-                        self.machine.moneyGet = price
-                        self.machine.state = self.machine.BuyItemState
-                    else:
-                        self.machine.state = self.machine.ShowItemsState
+            if self.machine.vuluePAY["order"] == self.machine.orderNum :
+                print("DUNG ORDER")
+                if self.machine.vuluePAY["sts"] == "00":
+                    self.machine.moneyGet = price
+                    self.machine.state = self.machine.BuyItemState
                 else:
-                    self.machine.state = self.machine.ShowItemsState
-                self.state = 0
-                self.msg = ''
+                    self.machine.state = self.machine.ErrorState
+            else:
+                self.machine.state = self.machine.ErrorState
+            self.state = 0
+            
+
         if self.machine.moneyGet < price:
             if (self.moneypre != self.machine.moneyGet):
                 self.moneypre = self.machine.moneyGet
@@ -227,14 +228,25 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
                 vnp.responseData[tmp[0]] = urllib.parse.unquote(tmp[1]).replace('+', ' ')
         print('Validate data from VNPAY:' + str(vnp.validate_response(settings.VNPAY_HASH_SECRET_KEY)))
 
-
+class ErrorState(State):
+    def __init__(self, machine,namestate):
+        self.name = namestate      
+        self.machine = machine
+        self.timeout = 0
+    def checkAndChangeState(self,data = [0,0]):
+        if self.timeout == 0:
+            self.timeout = time.time()
+        elif time.time() - self.timeout  > 8:
+            self.timeout = 0
+            self.machine.state = self.machine.ShowItemsState
 
 class BuyItemState(State):
     def __init__(self, machine,namestate):
         self.name = namestate      
         self.machine = machine
-
+        self.timeout = 0
     def checkAndChangeState(self,data = [0,0]):
+
         if self.machine.moneyGet < self.machine.item.price:
             self.mprint('You can\'t buy this item. Insert more coins.') # then obvs you cant buy this item
             self.machine.state = self.machine.WaitChooseItemState
@@ -340,6 +352,7 @@ class Machine(QObject):
         self.moneyGet = 0
         self.items = [] # all items contained in this list right here
         self.item=None 
+        self.vuluePAY = ''
         self.timeout = 10 
         self.orderNum = 0
         self.Que = queue.Queue(5)
@@ -349,7 +362,8 @@ class Machine(QObject):
         self.WaitMoneyToBuyState = WaitMoneyToBuyState(self,"2")
         self.BuyItemState = BuyItemState(self,"3")
         self.TakeCoffeeState = TakeCoffeeState(self,"4")
-        self.CheckRefundState = CheckRefundState(self,"5")
+        self.ErrorState = ErrorState(self,"5")
+        self.CheckRefundState = CheckRefundState(self,"6")
         #self.
         self.state = self.ShowItemsState
         self.state.speak("S")
