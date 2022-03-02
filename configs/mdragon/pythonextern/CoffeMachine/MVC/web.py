@@ -19,7 +19,7 @@ import json
 app = Flask(__name__)
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>"
+    return "<p>Vui Longf Cho Khoi Tao Giao Dich</p>"
 
 @app.route('/pay',methods=["GET"])
 def log_in():

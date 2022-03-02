@@ -120,6 +120,7 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
             timebegin = datetime.datetime.now()
             #self.machine.orderNum = str(int(round(datetime.datetime.timestamp(timebegin))))
             self.machine.orderNum = str(int(round(timebegin.timestamp())))
+            #self.machine.orderNum = "123"
             self.payment(price,self.machine.orderNum)
             self.timeLoop = time.time()
             
@@ -378,6 +379,10 @@ class Machine(QObject):
         self.addItem(item2)
         self.addItem(item3)
         self.addItem(item4)
+
+    def returnOrder(self):
+        self.state = self.ShowItemsState
+        self.WaitMoneyToBuyState.state = 0
 
     def run(self,data = [0,0]):
         self.state.checkAndChangeState(data)

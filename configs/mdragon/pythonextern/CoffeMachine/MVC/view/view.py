@@ -17,6 +17,7 @@ except ImportError: #py2
     import Queue as queue
 
 import variThreading
+import settings
 
 class MyGUI(QMainWindow):
     
@@ -75,6 +76,7 @@ class MyGUI(QMainWindow):
             self.slID.setText("0")
             self.moneyGet.setText("0")
         elif self._main_controller.preState == "2":
+            self.webView.load(QUrl("http://localhost:8081/"))
             money = self._machine.item.numBuy * self._machine.item.price
             #self.TotalMoney.setText(str(money))
             #self.nameID.setText(self._machine.item.name)
@@ -85,20 +87,16 @@ class MyGUI(QMainWindow):
             self.lbl_orderID.setText(self._machine.vuluePAY["order"])
             self.lbl_orderTime.setText(self._machine.vuluePAY["time"])
             self.lbl_orderGET.setText(self._machine.vuluePAY["amount"])
-        
- 
-            
         elif self._main_controller.preState == "5": #Error
             self.lbl_erID.setText(self._machine.vuluePAY["order"])
-            self.lbl_erCode.setText(self._machine.vuluePAY["sts"])
-            self.lbl_erAmount.setText(self._machine.vuluePAY["amount"])
-            
+            self.lbl_erCode.setText(settings.VNPAY_ERROR_CODE[self._machine.vuluePAY["sts"]])
+            #self.lbl_erAmount.setText(self._machine.vuluePAY["amount"])         
         elif self._main_controller.preState == "6":
             money = self._machine.item.numBuy * self._machine.item.price
             self.moneyFrefund.setText(str(self._machine.moneyGet))
 
     def initEvent(self):
-
+        self.btnReturn.clicked.connect(self.returnOrder)
         self.btnBuyID1.clicked.connect(self.haveOrder)
         self.btnBuyID2.clicked.connect(self.haveOrder)
         self.numSlID1.currentTextChanged.connect(self.slOrderChange)
@@ -110,6 +108,9 @@ class MyGUI(QMainWindow):
         #money = int(self.lblmoneyNap.text())
         #self._main_controller.setMoneyGet(money)
         #self.moneyGet.setText(str(self._machine.moneyGet))
+
+    def returnOrder(self):
+        self._machine.returnOrder()
 
     def getPrice(self,ID):
         return self._machine.getPrice(ID)
