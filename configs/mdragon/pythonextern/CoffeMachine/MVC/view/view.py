@@ -36,7 +36,7 @@ class MyGUI(QMainWindow):
         self.initEvent()
         self.initUi()
         self.numberGui = "0"
-        #self.showFullScreen()
+        self.showFullScreen()
     def paintEvent(self, event):
         self._main_controller.run()
         stat = self._main_controller.checkChangeState()
