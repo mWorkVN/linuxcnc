@@ -49,3 +49,4 @@ position.txt
 *.dat
 configs/mdragon/pythonextern/noupdate
 configs/mdragon/pythonextern/calibcamera/noupdate
+configs/mdragon/pythonextern/CoffeMachine/MVC/~$data.xlsx
