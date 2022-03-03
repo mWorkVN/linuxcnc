@@ -381,10 +381,10 @@ class Machine(QObject):
 
         self.myrobot=RobotControl()
         #              name     ,        giá,   số lượng,   file
-        item1 = Item(1,'caffe sữa'  ,      15000,    88,  "caffeden.ngc" )
-        item2 = Item(2,'caffe đen'  ,      20000,    1 ,  "caffesua.ngc")
-        item3 = Item(3,'caffe Kem'  ,      25000,    88,  "caffeden.ngc" )
-        item4 = Item(4,'Nước Suối'  ,      10000,    1 ,  "caffesua.ngc")
+        item1 = Item(1,'caffe sữa'  ,      15000,    8800000000,  "caffeden.ngc" )
+        item2 = Item(2,'caffe đen'  ,      20000,    1000000000 ,  "caffesua.ngc")
+        item3 = Item(3,'caffe Kem'  ,      25000,    8800000000,  "caffeden.ngc" )
+        item4 = Item(4,'Nước Suối'  ,      10000,    1000000000 ,  "caffesua.ngc")
         self.addItem(item1)
         self.addItem(item2)
         self.addItem(item3)

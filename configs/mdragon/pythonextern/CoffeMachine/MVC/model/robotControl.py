@@ -14,9 +14,9 @@ class exec10():
         self.robot = robot
         self.state = "wait"
         self.number = 0
-        pass
-    def run(self,pos,time):
-        if (time == "0" or time == 0 ):
+        
+    def run(self,pos,timewait):
+        if (timewait == "0" or timewait == 0 ):
             return True
         if self.state == "wait":
             self.state = "move"
@@ -30,14 +30,15 @@ class exec10():
                 self.number = 2
             elif (self.number ==2):
                 self.wait() 
-                self.number = 3
+                self.number = 4
             elif (self.number == 3):
                 self.goto("END_" + str(pos)) 
                 self.number = 4
-            elif (self.number == 5):
+            elif (self.number == 4):
                 self.goto(str(pos))
-                self.number = 6
-            elif (self.number == 6):
+                self.number = 5
+            elif (self.number == 5):
+                self.state = "wait"
                 self.number = 0
                 return True
             self.state = "waitdone"
@@ -46,14 +47,17 @@ class exec10():
                 if (self.robot.checkStatusDoneMDI() != -1):
                     self.state = "move"
             else:
-                time.sleep(time)
+                time.sleep(float(timewait))
+                self.state = "move"
         return False
 
     def goto(self,pos):
         pos = getattr(posRobot,'TAKE_' +str(pos))
+        print("RUN",pos)
         self.robot.sendMDI("G0.1 "+ pos)
-        while (self.robot.checkStatusDoneMDI() == -1):
-            pass
+        time.sleep(0.05)
+        #while (self.robot.checkStatusDoneMDI() == -1):
+        #    pass
         
     def wait(self):
         pass
@@ -74,19 +78,22 @@ class RobotControl(State):
 
     def run(self, data):
         stsDone = False
+        datareturn = 0
         if self.state == 0 :
             stsDone = self.exec.run("0","1")  #TAKE
         elif self.state < 11 :
             stsDone = self.exec.run(self.state,data[self.state+4])
+            
         elif self.state == 11 :
             stsDone = self.exec.run("11","1") #DUA RA
         elif self.state == 12 :
             stsDone = self.exec.run("12","1") #HOME
         if stsDone : self.state = self.state + 1
-        if self.state ==13:
+        print("CHECK",self.state,stsDone)
+        if self.state == 13:
             self.state = 0
-            data = 1
-        return data
+            datareturn = 1
+        return datareturn
 
 
     def moveToPos(self):
@@ -143,8 +150,8 @@ class RobotControl(State):
             return
         self.set_mdi_mode() 
         data  = self.emccommand.mdi(msg)
-        print("MDI returnb",time.time(),data)
-        self.state = 1
+        #print("MDI returnb",time.time(),data)
+        #self.state = 1
 
     def running(self, do_poll=True):
         '''
