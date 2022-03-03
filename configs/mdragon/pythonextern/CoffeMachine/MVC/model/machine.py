@@ -104,7 +104,7 @@ class ShowItemsState(State):
 
 
 class WaitMoneyToBuyState(State,vnpay,QObject):
-    even_odd_changed = pyqtSignal(str)
+    #even_odd_changed = pyqtSignal(str)
     def __init__(self, machine,namestate):
         self.name = namestate     
         self.machine = machine
@@ -205,7 +205,7 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
         vnpay_payment_url = vnp.get_payment_url(settings.VNPAY_PAYMENT_URL, settings.VNPAY_HASH_SECRET_KEY)
         print(vnpay_payment_url)
         #self.machine.view.webView.load(QUrl(vnpay_payment_url))
-        self.machine.even_odd_changed.emit(vnpay_payment_url)
+        self.machine.even_loadPAY.emit(vnpay_payment_url)
     def query(self):
         vnp = vnpay()
         vnp.requestData = {}
@@ -355,7 +355,7 @@ class CheckRefundState(State):
             self.machine.state = self.machine.ShowItemsState
 
 class Machine(QObject):
-    even_odd_changed = pyqtSignal(str)
+    even_loadPAY = pyqtSignal(str)
     def __init__(self,my_logger,queueWEB):
         super().__init__()
         self.mysql = mysql()

@@ -29,7 +29,7 @@ class MyGUI(QMainWindow):
         self.FlaskWeb = server()
         self.FlaskWeb.setDaemon(True); 
         self.FlaskWeb.start()
-        self._machine.even_odd_changed.connect(self.on_even_odd_changed)
+        self._machine.even_loadPAY.connect(self.on_even_loadPAY)
         uic.loadUi('vendding.ui', self)
         self.show()
         continueToBuy = True
@@ -37,6 +37,7 @@ class MyGUI(QMainWindow):
         self.initUi()
         self.numberGui = "0"
         #self.showFullScreen()
+        
     def paintEvent(self, event):
         self._main_controller.run()
         stat = self._main_controller.checkChangeState()
@@ -45,11 +46,11 @@ class MyGUI(QMainWindow):
             self.updateUi()
             getattr(self, 'stackedWidget').setCurrentIndex(int(stat) - 1)
             
-        
+        time.sleep(0.005)
         self.update()
 
     @pyqtSlot(str)
-    def on_even_odd_changed(self, value):
+    def on_even_loadPAY(self, value):
         self.webView.load(QUrl(value))
 
 
@@ -89,8 +90,7 @@ class MyGUI(QMainWindow):
             self.lbl_orderGET.setText(self._machine.vuluePAY["amount"])
         elif self._main_controller.preState == "5": #Error
             self.lbl_erID.setText(self._machine.vuluePAY["order"])
-            self.lbl_erCode.setText(settings.VNPAY_ERROR_CODE[self._machine.vuluePAY["sts"]])
-            #self.lbl_erAmount.setText(self._machine.vuluePAY["amount"])         
+            self.lbl_erCode.setText(settings.VNPAY_ERROR_CODE[self._machine.vuluePAY["sts"]])  
         elif self._main_controller.preState == "6":
             money = self._machine.item.numBuy * self._machine.item.price
             self.moneyFrefund.setText(str(self._machine.moneyGet))
@@ -101,13 +101,9 @@ class MyGUI(QMainWindow):
         self.btnBuyID2.clicked.connect(self.haveOrder)
         self.numSlID1.currentTextChanged.connect(self.slOrderChange)
         self.numSlID2.currentTextChanged.connect(self.slOrderChange)
-        #self.btn_naptien.clicked.connect(self.naptien_click)
 
     def naptien_click(self):
         pass
-        #money = int(self.lblmoneyNap.text())
-        #self._main_controller.setMoneyGet(money)
-        #self.moneyGet.setText(str(self._machine.moneyGet))
 
     def returnOrder(self):
         self._machine.returnOrder()

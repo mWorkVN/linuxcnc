@@ -39,6 +39,20 @@ def m435remap(self):
     #print("lenghtArm %d-%d-%d-%d-%d-%d" %(lenghtArm[0],lenghtArm[1],lenghtArm[2],lenghtArm[3],lenghtArm[4],lenghtArm[5]))
     return INTERP_OK  
 
+def m462OutAnDelay(self, **words):
+    """ remap function which does the equivalent of M62, but via Python """
+    print("begin",time.time())
+    p = int(words['p']) #pin OUT
+    q = int(words['q']) #delay time
+    SET_MOTION_OUTPUT_BIT(p)
+    self.execute("M180 P%d"%(q))
+    yield INTERP_EXECUTE_FINISH
+    CLEAR_MOTION_OUTPUT_BIT(p)
+    print("end",time.time())
+    return INTERP_OK
+
+
+
 def convertJoinMode(self):
     global offsetPosi
     global AxisJoint
