@@ -68,12 +68,15 @@ class RobotControl(State):
         startCmd = "/home/mwork/mworkcnc/scripts/linuxcnc /home/mwork/mworkcnc/configs/mdragon/scara.ini"
         self.cleanLinuxcnc()
         self.startLinuxcnc(startCmd)
+        self.isEMCRun = True
+        self.emc = linuxcnc
+        self.emcstat = self.emc.stat() # create a connection to the status channel
+        self.emccommand = self.emc.command()
         self.initLinuxcnc()
-        self.emccommand.mode(linuxcnc.MODE_MANUAL)
-        time.sleep(10)
+        self.set_manual_mode()
         for i in range(4):
             self.axis_home(i, self.emccommand, self.emcstat)
-        self.emccommand.mode(linuxcnc.MODE_MDI)
+        self.set_mdi_mode()
         time.sleep(1)
         #self.myRobot=None 
         print("Init STATE")   
@@ -94,7 +97,7 @@ class RobotControl(State):
         elif self.state == 12 :
             stsDone = self.exec.run("12","1") #HOME
         if stsDone : self.state = self.state + 1
-        print("CHECK",self.state,stsDone)
+        #print("CHECK",self.state,stsDone)
         if self.state == 13:
             self.state = 0
             datareturn = 1
@@ -136,7 +139,7 @@ class RobotControl(State):
         pass
         #self.delInit()
         #self.reload()
-        #self.checkEMC()
+        self.checkEMC()
 
     def set_mdi_mode(self):
         if self.isEMCRun ==False:
@@ -144,6 +147,14 @@ class RobotControl(State):
         self.emcstat.poll()
         if self.emcstat.task_mode != self.emc.MODE_MDI:
             self.emccommand.mode(self.emc.MODE_MDI)
+            self.emccommand.wait_complete()
+
+    def set_manual_mode(self):
+        if self.isEMCRun ==False:
+            return
+        self.emcstat.poll()
+        if self.emcstat.task_mode != self.emc.MODE_MANUAL:
+            self.emccommand.mode(self.emc.MODE_MANUAL)
             self.emccommand.wait_complete()
 
     def checkStatusDoneMDI(self):
@@ -178,9 +189,7 @@ class RobotControl(State):
             s.poll()
 
     def initLinuxcnc(self):
-        self.emc = linuxcnc
-        self.emcstat = self.emc.stat() # create a connection to the status channel
-        self.emccommand = self.emc.command()
+
         self.emcstat.poll()
         
         while self.emcstat.task_state == self.emc.STATE_ESTOP:
@@ -215,7 +224,7 @@ class RobotControl(State):
         #Wait 30s at maximum
         for i in range(30):
             time.sleep(1)
-            if self.checkProcess("axis") != False:
+            if (self.checkProcess("axis") != False) and (self.checkProcess("linuxcnc") != False):
                 print("check")
                 break
 

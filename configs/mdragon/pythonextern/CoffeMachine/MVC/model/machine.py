@@ -289,8 +289,6 @@ class TakeCoffeeState(State):
             self.gcode.reverse()"""
             self.stateRobot = "Control"
             self.machine.myrobot.init()
-            self.mprint(self.gcode)
-            self.mprint(self.numLine) 
 
         elif (self.stateRobot == "Control"):
             if (self.machine.myrobot.run(self.dataSQL) == 1):
