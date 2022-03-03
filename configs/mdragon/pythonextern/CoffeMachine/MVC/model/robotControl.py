@@ -75,11 +75,15 @@ class RobotControl(State):
     def run(self, data):
         stsDone = False
         if self.state == 0 :
-            stsDone = self.exec.run("0","1")
-        else:
+            stsDone = self.exec.run("0","1")  #TAKE
+        elif self.state < 11 :
             stsDone = self.exec.run(self.state,data[self.state+4])
+        elif self.state == 11 :
+            stsDone = self.exec.run("11","1") #DUA RA
+        elif self.state == 12 :
+            stsDone = self.exec.run("12","1") #HOME
         if stsDone : self.state = self.state + 1
-        if self.state ==10:
+        if self.state ==13:
             self.state = 0
             data = 1
         return data
