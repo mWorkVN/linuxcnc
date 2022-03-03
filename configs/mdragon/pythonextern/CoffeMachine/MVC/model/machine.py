@@ -12,6 +12,7 @@ from vnpay import vnpay
 import datetime
 import settings
 from PyQt5.QtCore import QObject, pyqtSignal
+from sql import mysql
 class Item:
     def __init__(self,id, name, price, stock ,controlfile):
         self.id = id
@@ -264,27 +265,35 @@ class TakeCoffeeState(State):
         self.name = namestate        
         self.machine = machine
         self.stateRobot = "init"
+        self.dataSQL = None
         self.gcode = []
         self.numLine = 0
 
     def checkAndChangeState(self,data = [0,0]):
         if (self.stateRobot == "init"):
             self.gcode = []
+            self.dataSQL=self.machine.mysql.getData(str(self.machine.item.id))
+            if self.dataSQL[15] != "END":
+                print("Sai Data")
             self.numLine = 0
-            self.mprint('Control Robot to '+str(self.machine.item.controlfile))
+            """self.mprint('Control Robot to '+str(self.machine.item.controlfile))
             f = open("./gcode/" + self.machine.item.controlfile, "r")
             
             for line in f.readlines():
                 self.gcode.append(line)
                 self.numLine += 1
             f.close()
-            self.gcode.reverse()
+            self.gcode.reverse()"""
             self.stateRobot = "Control"
             self.machine.myrobot.init()
             self.mprint(self.gcode)
             self.mprint(self.numLine) 
+
         elif (self.stateRobot == "Control"):
-            if (self.machine.myrobot.checkStatusDoneMDI() != -1):
+            if (self.machine.myrobot.run(self.dataSQL) == 1):
+                self.stateRobot = "finish"
+                self.mprint("Line End") 
+            """if (self.machine.myrobot.checkStatusDoneMDI() != -1):
                 if (self.numLine == 0):
                     self.stateRobot = "finish"
                     self.mprint("Line End") 
@@ -299,7 +308,7 @@ class TakeCoffeeState(State):
                              str(self.machine.myrobot.checkStatusDoneMDI()))
             elif (self.numLine == 0):
                     self.stateRobot = "finish"
-                    self.mprint("Line End")   
+                    self.mprint("Line End")"""   
 
         elif (self.stateRobot == "finish"):
 
@@ -349,6 +358,7 @@ class Machine(QObject):
     even_odd_changed = pyqtSignal(str)
     def __init__(self,my_logger,queueWEB):
         super().__init__()
+        self.mysql = mysql()
         self.my_logger = my_logger
         self.moneyGet = 0
         self.items = [] # all items contained in this list right here

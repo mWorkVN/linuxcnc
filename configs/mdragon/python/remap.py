@@ -53,15 +53,20 @@ def convertJoinMode(self):
         else:
             SWITCHKINS_PIN = 3
             kinstype = 1  
+            print("!")
             CoordinateNumber = self.params[5220]
+            print("1")
             self.execute("M129")  
+            print("2")
             self.execute("M68 E%d Q%d"%(SWITCHKINS_PIN,kinstype))
+            print("!")
             self.execute("M66 E0 L0")
-        return False
+        return True
     except Exception as e:
         return False   
 
 def m439remap(self, **words): #convert to joint mode
+    print("M439")
     if convertJoinMode(self):return INTERP_OK
     return INTERP_ERROR
 
@@ -96,6 +101,7 @@ def convertWorldMode(self):
         return False
 
 def m438remap(self, **words): # convert to world mode
+    print("M438")
     if convertWorldMode(self):return INTERP_OK
     return INTERP_ERROR
 

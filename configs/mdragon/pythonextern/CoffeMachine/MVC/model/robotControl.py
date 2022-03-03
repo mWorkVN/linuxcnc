@@ -4,9 +4,60 @@ import sys, time ,os
 #import logging.handlers
 import linuxcnc
 from model.state import State
-
 import imp
+import posRobot
 
+
+
+class exec10():
+    def __init__(self,robot):
+        self.robot = robot
+        self.state = "wait"
+        self.number = 0
+        pass
+    def run(self,pos,time):
+        if (time == "0" or time == 0 ):
+            return True
+        if self.state == "wait":
+            self.state = "move"
+        elif self.state == "move":
+            #move to pos
+            if (self.number ==0):
+                self.goto(str(pos)) # or self.goto("END_" + pos) 
+                self.number = 1
+            elif (self.number ==1):
+                self.goto("END_" + str(pos)) 
+                self.number = 2
+            elif (self.number ==2):
+                self.wait() 
+                self.number = 3
+            elif (self.number == 3):
+                self.goto("END_" + str(pos)) 
+                self.number = 4
+            elif (self.number == 5):
+                self.goto(str(pos))
+                self.number = 6
+            elif (self.number == 6):
+                self.number = 0
+                return True
+            self.state = "waitdone"
+        elif  self.state == "waitdone":  
+            if (self.number != 3):
+                if (self.robot.checkStatusDoneMDI() != -1):
+                    self.state = "move"
+            else:
+                time.sleep(time)
+        return False
+
+    def goto(self,pos):
+        pos = getattr(posRobot,'TAKE_' +str(pos))
+        self.robot.sendMDI("G0.1 "+ pos)
+        while (self.robot.checkStatusDoneMDI() == -1):
+            pass
+        
+    def wait(self):
+        pass
+        
 
 class RobotControl(State):
     def __init__(self):
@@ -17,27 +68,21 @@ class RobotControl(State):
         self.mprint("Init STATE")   
         self.state = 0
         self.isEMCRun = False
+        self.exec = exec10(self)
+        """for x in range(0, 12):
+            getattr(self, 'exec' +str(x)) = exec11() #getattr('exec' +str(x))()"""
 
-    """def is_homed():
-        '''Returns TRUE if all joints are homed.'''
-        stat.poll()
-        for joint in range(num_joints):
-            if not stat.joint[joint]['homed']:
-                return False
-        return True"""
-
-    """def checkReady(self):
-        self.emcstat.poll()
-        if self.emcstat.estop:
-            log.error("Can't issue MDI when estoped")
-        elif not self.emcstat.enabled:
-            log.error("Can't issue MDI when not enabled")
-        elif not no_force_homing if no_force_homing else not is_homed():
-            log.error("Can't issue MDI when not homed")
-        elif not self.emcstat.interp_state == linuxcnc.INTERP_IDLE:
-            log.error("Can't issue MDI when interpreter is not idle")
-        else:"""
-
+    def run(self, data):
+        stsDone = False
+        if self.state == 0 :
+            stsDone = self.exec.run("0","1")
+        else:
+            stsDone = self.exec.run(self.state,data[self.state+4])
+        if stsDone : self.state = self.state + 1
+        if self.state ==10:
+            self.state = 0
+            data = 1
+        return data
 
 
     def moveToPos(self):
@@ -106,6 +151,24 @@ class RobotControl(State):
             self.emcstat.poll()
         return (self.emcstat.task_mode == linuxcnc.MODE_AUTO and
                 self.emcstat.interp_state != linuxcnc.INTERP_IDLE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class myLinuxcnc:
