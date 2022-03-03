@@ -867,7 +867,7 @@ MODE</string>
                       <bool>true</bool>
                      </property>
                      <property name="checked">
-                      <bool>false</bool>
+                      <bool>true</bool>
                      </property>
                      <property name="indicator_option" stdset="0">
                       <bool>false</bool>
@@ -11611,7 +11611,7 @@ PLATE</string>
             <number>2</number>
            </property>
            <property name="text">
-            <string>02:56:25 AM</string>
+            <string>03:58:27 PM</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -12563,9 +12563,9 @@ PLATE</string>
  </slots>
  <buttongroups>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="page_buttonGroup"/>
   <buttongroup name="mpage_buttonGroup"/>
   <buttongroup name="mode_buttonGroup"/>
   <buttongroup name="swkins_buttonGroup"/>
-  <buttongroup name="page_buttonGroup"/>
  </buttongroups>
 </ui>

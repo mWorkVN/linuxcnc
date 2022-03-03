@@ -13,6 +13,9 @@ import datetime
 import settings
 from PyQt5.QtCore import QObject, pyqtSignal
 from sql import mysql
+import subprocess
+import linuxcnc
+
 class Item:
     def __init__(self,id, name, price, stock ,controlfile):
         self.id = id

@@ -112,6 +112,7 @@ class HandlerClass:
         STATUS.connect('override-limits-changed', lambda w, state, data: self._check_override_limits(state, data))
         STATUS.connect('homed', lambda w, joint,status="home": self._homelabel(joint,status))
         STATUS.connect('unhomed', lambda w, joint,status="unhome": self._homelabel(joint,status))
+        ACTION.SET_ESTOP_STATE(False)
         self.html = """<html>
 <head>
 <title>Test page for the download:// scheme</title>

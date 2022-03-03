@@ -6,7 +6,7 @@ import linuxcnc
 from model.state import State
 import imp
 import posRobot
-
+import subprocess
 
 
 class exec10():
@@ -65,16 +65,21 @@ class exec10():
 
 class RobotControl(State):
     def __init__(self):
-        self.emc = linuxcnc
-        self.emcstat = self.emc.stat() # create a connection to the status channel
-        self.emccommand = self.emc.command()
-        self.myRobot=None 
-        self.mprint("Init STATE")   
+        startCmd = "/home/mwork/mworkcnc/scripts/linuxcnc /home/mwork/mworkcnc/configs/mdragon/scara.ini"
+        self.cleanLinuxcnc()
+        self.startLinuxcnc(startCmd)
+        self.initLinuxcnc()
+        self.emccommand.mode(linuxcnc.MODE_MANUAL)
+        time.sleep(10)
+        for i in range(4):
+            self.axis_home(i, self.emccommand, self.emcstat)
+        self.emccommand.mode(linuxcnc.MODE_MDI)
+        time.sleep(1)
+        #self.myRobot=None 
+        print("Init STATE")   
         self.state = 0
         self.isEMCRun = False
         self.exec = exec10(self)
-        """for x in range(0, 12):
-            getattr(self, 'exec' +str(x)) = exec11() #getattr('exec' +str(x))()"""
 
     def run(self, data):
         stsDone = False
@@ -128,9 +133,10 @@ class RobotControl(State):
         
 
     def init(self):
-        self.delInit()
-        self.reload()
-        self.checkEMC()
+        pass
+        #self.delInit()
+        #self.reload()
+        #self.checkEMC()
 
     def set_mdi_mode(self):
         if self.isEMCRun ==False:
@@ -163,134 +169,107 @@ class RobotControl(State):
         return (self.emcstat.task_mode == linuxcnc.MODE_AUTO and
                 self.emcstat.interp_state != linuxcnc.INTERP_IDLE)
 
+    def axis_home(self, i, c, s):
+        c.home(i)
+        c.wait_complete(30.0) #This command without argument waits only 1 second.
+        while s.homed[i] != 1:
+            print("wait H")
+            time.sleep(1)
+            s.poll()
 
+    def initLinuxcnc(self):
+        self.emc = linuxcnc
+        self.emcstat = self.emc.stat() # create a connection to the status channel
+        self.emccommand = self.emc.command()
+        self.emcstat.poll()
+        
+        while self.emcstat.task_state == self.emc.STATE_ESTOP:
+            print("WAITING INITIALIZATION")
+            time.sleep(3)
+            self.emcstat.poll()
 
+        self.emccommand.state(linuxcnc.STATE_ESTOP_RESET)
+        time.sleep(1)
+        print("ESTOP RELEASED")
+        self.emcstat.poll()
+        
+        if self.emcstat.task_state == linuxcnc.STATE_ESTOP_RESET:
+            self.emccommand.state(linuxcnc.STATE_ON)
+            time.sleep(1)
+            print("ESTOP RESET")
+        else:
+            print("ESTOP RESET ERROR")
+        self.emcstat.poll()
 
+        if self.emcstat.task_state == linuxcnc.STATE_ON:
+            print("MACHINE IS READY")
+        else:
+            print("FAIL TO INITIALIZE THE MACHINE")	
+    
+    def startLinuxcnc(self, cmd):
+        #res = subprocess.Popen(cmd.split() ) #, stdout = subprocess.PIPE)
+        cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
+        proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT )
+        print("end")
 
+        #Wait 30s at maximum
+        for i in range(30):
+            time.sleep(1)
+            if self.checkProcess("axis") != False:
+                print("check")
+                break
 
+    def getProcesses(self, str):
+        processCommand = ["ps", "-A"]
+        checkProcess = ["grep", "-e", str]
+        
+        processExec = subprocess.Popen(processCommand, stdout = subprocess.PIPE)
+        checkExec = subprocess.Popen(checkProcess, stdin = processExec.stdout, stdout = subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        processesOut, processesErr = checkExec.communicate()
+        processSplit = processesOut.split()
+    
+        return processSplit
+    
+    def checkIo(self):
+        ioGrep = self.getProcesses("io")
+        for i in range(len(ioGrep) // 4):
+            if len(ioGrep[4*i + 3]) == 2:
+                return ioGrep[4*i + 3], ioGrep[4*i]
+    
+        return False
 
+    def checkProcess(self, str):
+        retVal = []
+    
+        strGrep = self.getProcesses(str)
+        for i in range(len(strGrep) // 4):
+            retVal.append([strGrep[4*i + 3], strGrep[4*i]])
+        return retVal
 
+    def killProcess(self, processId):
+        killCommand = ["pkill", processId]
+    
+        subprocess.Popen(killCommand)
+    
+    def cleanLinuxcnc(self):
+        if len(self.checkProcess("axis")) > 0:
+            for p in self.checkProcess("axis"):
+                self.killProcess(p[1])
+            time.sleep(20)
 
+        if len(self.checkProcess("linuxcnc")) > 0:
+            if len(self.checkProcess("milltask")) > 0:
+                for p in self.checkProcess("milltask"):
+                    self.killProcess(p[1])
+            
+            if self.checkIo() != False:
+                self.killProcess(self.checkIo()[1])
 
+            if len(self.checkProcess("rtapi")) > 0:
+                for p in self.checkProcess("rtapi"):
+                    self.killProcess(p[1])
 
-
-
-
-
-
-
-
-
-
-class myLinuxcnc:
-	def __init__(self):
-		startCmd = "/usr/bin/linuxcnc /home/machinekit/machinekit/configs/my_mill/my_mill.ini"
-		self.cleanLinuxcnc()
-		self.startLinuxcnc(startCmd)
-		self.initLinuxcnc()
-		self.c.mode(linuxcnc.MODE_MANUAL)
-		time.sleep(10)
-		for i in range(4):
-			self.axis_home(i, self.c, self.s)
-		self.c.mode(linuxcnc.MODE_MDI)
-		time.sleep(1)
-
-	def axis_home(self, i, c, s):
-		c.home(i)
-		c.wait_complete(30.0)	#This command without argument waits only 1 second.
-		while s.homed[i] != 1:
-			time.sleep(1)
-			s.poll()
-
-	def initLinuxcnc(self):
-		self.s = linuxcnc.stat()
-		self.c = linuxcnc.command()
-		self.s.poll()
-		
-		while self.s.task_state == linuxcnc.STATE_ESTOP:
-			print("WAITING INITIALIZATION")
-			time.sleep(3)
-			self.s.poll()
-
-		self.c.state(linuxcnc.STATE_ESTOP_RESET)
-		time.sleep(1)
-		print("ESTOP RELEASED")
-		self.s.poll()
-		
-		if self.s.task_state == linuxcnc.STATE_ESTOP_RESET:
-			self.c.state(linuxcnc.STATE_ON)
-			time.sleep(1)
-			print("ESTOP RESET")
-		else:
-			print("ESTOP RESET ERROR")
-		self.s.poll()
-
-		if self.s.task_state == linuxcnc.STATE_ON:
-			print("MACHINE IS READY")
-		else:
-			print("FAIL TO INITIALIZE THE MACHINE")	
-	
-	def startLinuxcnc(self, cmd):
-		res = subprocess.Popen(cmd.split(), stdout = subprocess.PIPE)
-		
-		#Wait 30s at maximum
-		for i in range(30):
-			time.sleep(1)
-			if self.checkProcess("axis") != False:
-				break
-
-	def getProcesses(self, str):
-		processCommand = ["ps", "-A"]
-		checkProcess = ["grep", "-e", str]
-		
-		processExec = subprocess.Popen(processCommand, stdout = subprocess.PIPE)
-		checkExec = subprocess.Popen(checkProcess, stdin = processExec.stdout, stdout = subprocess.PIPE, stderr=subprocess.PIPE)
-		
-		processesOut, processesErr = checkExec.communicate()
-		processSplit = processesOut.split()
-	
-		return processSplit
-	
-	def checkIo(self):
-		ioGrep = self.getProcesses("io")
-		for i in range(len(ioGrep) / 4):
-			if len(ioGrep[4*i + 3]) == 2:
-				return ioGrep[4*i + 3], ioGrep[4*i]
-	
-		return False
-
-	def checkProcess(self, str):
-		retVal = []
-	
-		strGrep = self.getProcesses(str)
-		for i in range(len(strGrep) / 4):
-			retVal.append([strGrep[4*i + 3], strGrep[4*i]])
-
-		return retVal
-
-	def killProcess(self, processId):
-		killCommand = ["kill", processId]
-	
-		subprocess.Popen(killCommand)
-	
-	def cleanLinuxcnc(self):
-		if len(self.checkProcess("axis")) > 0:
-			for p in self.checkProcess("axis"):
-				self.killProcess(p[1])
-			time.sleep(20)
-
-		if len(self.checkProcess("linuxcnc")) > 0:
-			if len(self.checkProcess("milltask")) > 0:
-				for p in self.checkProcess("milltask"):
-					self.killProcess(p[1])
-			
-			if len(self.checkIo()) != False:
-				self.killProcess(self.checkIo()[1])
-
-			if len(self.checkProcess("rtapi")) > 0:
-				for p in self.checkProcess("rtapi"):
-					self.killProcess(p[1])
-
-			if len(self.checkProcess("linuxcnc")) > 0:
-				for p in self.checkProcess("linuxcnc"):
-					self.killProcess(p[1])
+            if len(self.checkProcess("linuxcnc")) > 0:
+                for p in self.checkProcess("linuxcnc"):
+                    self.killProcess(p[1])

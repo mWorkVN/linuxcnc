@@ -21,6 +21,7 @@ except ImportError: #py2
     import Queue as queue
 from web import server    
 import variThreading
+
 LOG_FILENAME = 'mylog.log'
 my_logger = logging.getLogger('MyLogger')
 my_logger.setLevel(logging.DEBUG)
@@ -34,6 +35,7 @@ class App(QApplication):
     def __init__(self, sys_argv,server):
         super(App, self).__init__(sys_argv)
         queueWEB = variThreading.init()
+        
         self.Machine = Machine(my_logger,variThreading.queueVNPAY)
         self.main_controller = MainController(self.Machine)
         self.main_view = MyGUI(self.Machine, self.main_controller,server)
