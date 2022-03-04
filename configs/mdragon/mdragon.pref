@@ -48,7 +48,7 @@ desktop_notify = False
 notify_max_msgs = 1
 shutdown_check = True
 sound_player_on = False
-mainwindow_geometry = -427 352 1360 760
+mainwindow_geometry = 3 29 1360 760
 
 [MCH_MSG_OPTIONS]
 mchnMsg_play_sound = True
@@ -184,7 +184,7 @@ Pnp_SpeedZD = 0
 Pnp_InputBad = 0
 
 [CHOOSE_ACTUATOR]
-Nhan Test = 11
+Nhan Test = 12
 Type Actuator = 0
 scum_close_ex2_type = 0
 scum_open_ex2_type = 0

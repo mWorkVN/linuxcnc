@@ -27,143 +27,40 @@
      <number>0</number>
     </property>
     <widget class="QWidget" name="stackedWidgetPage1">
-     <widget class="QLabel" name="imageAc_22">
-      <property name="geometry">
-       <rect>
-        <x>330</x>
-        <y>0</y>
-        <width>261</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>20</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>1500</width>
-        <height>80</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>20</pointsize>
-       </font>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::Box</enum>
-      </property>
-      <property name="lineWidth">
-       <number>0</number>
-      </property>
-      <property name="text">
-       <string>Chọn Sản Phảm</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-     <widget class="TabWidget" name="tabwidget">
+     <widget class="QStackedWidget" name="main_tab_widget">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>0</y>
-        <width>961</width>
-        <height>681</height>
+        <y>60</y>
+        <width>971</width>
+        <height>641</height>
        </rect>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <stylestrategy>PreferAntialias</stylestrategy>
-        <kerning>true</kerning>
-       </font>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="tabShape">
-       <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <property name="iconSize">
-       <size>
-        <width>24</width>
-        <height>24</height>
-       </size>
-      </property>
-      <property name="elideMode">
-       <enum>Qt::ElideLeft</enum>
-      </property>
-      <property name="usesScrollButtons">
-       <bool>false</bool>
-      </property>
-      <property name="documentMode">
-       <bool>false</bool>
-      </property>
-      <property name="tabsClosable">
-       <bool>false</bool>
-      </property>
-      <property name="movable">
-       <bool>false</bool>
-      </property>
-      <property name="tabBarAutoHide">
-       <bool>false</bool>
-      </property>
-      <property name="tabSize" stdset="0">
-       <double>1.000000000000000</double>
-      </property>
-      <widget class="QWidget" name="tab">
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-         <kerning>false</kerning>
-        </font>
-       </property>
-       <attribute name="title">
-        <string>CAFFEE</string>
-       </attribute>
+      <widget class="QWidget" name="page_5">
        <widget class="QWidget" name="horizontalLayoutWidget">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>10</y>
+          <x>0</x>
+          <y>0</y>
           <width>931</width>
           <height>551</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_17">
          <property name="leftMargin">
-          <number>5</number>
+          <number>0</number>
          </property>
          <property name="topMargin">
-          <number>5</number>
+          <number>0</number>
          </property>
          <property name="rightMargin">
-          <number>5</number>
+          <number>0</number>
          </property>
          <property name="bottomMargin">
-          <number>5</number>
+          <number>0</number>
          </property>
          <item>
           <widget class="QFrame" name="verticalFrame_5">
@@ -402,6 +299,9 @@
                        <property name="ID" stdset="0">
                         <number>1</number>
                        </property>
+                       <attribute name="buttonGroup">
+                        <string notr="true">btn_buy_buttonGroup</string>
+                       </attribute>
                       </widget>
                      </item>
                     </layout>
@@ -527,7 +427,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QFrame" name="">
+                <widget class="QFrame" name="frame">
                  <property name="maximumSize">
                   <size>
                    <width>150</width>
@@ -614,6 +514,9 @@
                     <property name="ID" stdset="0">
                      <number>2</number>
                     </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">btn_buy_buttonGroup</string>
+                    </attribute>
                    </widget>
                   </item>
                  </layout>
@@ -862,6 +765,9 @@
                        <property name="ID" stdset="0">
                         <number>3</number>
                        </property>
+                       <attribute name="buttonGroup">
+                        <string notr="true">btn_buy_buttonGroup</string>
+                       </attribute>
                       </widget>
                      </item>
                     </layout>
@@ -1074,6 +980,9 @@
                     <property name="ID" stdset="0">
                      <number>4</number>
                     </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">btn_buy_buttonGroup</string>
+                    </attribute>
                    </widget>
                   </item>
                  </layout>
@@ -1088,15 +997,12 @@
         </layout>
        </widget>
       </widget>
-      <widget class="QWidget" name="tab_2">
-       <attribute name="title">
-        <string>NUOC EP</string>
-       </attribute>
+      <widget class="QWidget" name="page_6">
        <widget class="QScrollArea" name="scrollArea">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>10</y>
+          <x>0</x>
+          <y>0</y>
           <width>941</width>
           <height>581</height>
          </rect>
@@ -1117,7 +1023,7 @@
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-256</y>
+           <y>0</y>
            <width>925</width>
            <height>1018</height>
           </rect>
@@ -1393,6 +1299,9 @@
                            <property name="ID" stdset="0">
                             <number>5</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -1623,6 +1532,9 @@
                            <property name="ID" stdset="0">
                             <number>6</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -1853,6 +1765,9 @@
                            <property name="ID" stdset="0">
                             <number>7</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -2065,6 +1980,9 @@
                         <property name="ID" stdset="0">
                          <number>8</number>
                         </property>
+                        <attribute name="buttonGroup">
+                         <string notr="true">btn_buy_buttonGroup</string>
+                        </attribute>
                        </widget>
                       </item>
                      </layout>
@@ -2313,6 +2231,9 @@
                            <property name="ID" stdset="0">
                             <number>9</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -2543,6 +2464,9 @@
                            <property name="ID" stdset="0">
                             <number>10</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -2773,6 +2697,9 @@
                            <property name="ID" stdset="0">
                             <number>11</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -2985,6 +2912,9 @@
                         <property name="ID" stdset="0">
                          <number>12</number>
                         </property>
+                        <attribute name="buttonGroup">
+                         <string notr="true">btn_buy_buttonGroup</string>
+                        </attribute>
                        </widget>
                       </item>
                      </layout>
@@ -3003,15 +2933,12 @@
         </widget>
        </widget>
       </widget>
-      <widget class="QWidget" name="tab_3">
-       <attribute name="title">
-        <string>NUOC DONG CHAI</string>
-       </attribute>
+      <widget class="QWidget" name="page_7">
        <widget class="QScrollArea" name="scrollArea_2">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>10</y>
+          <x>0</x>
+          <y>0</y>
           <width>941</width>
           <height>621</height>
          </rect>
@@ -3032,7 +2959,7 @@
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-613</y>
+           <y>0</y>
            <width>925</width>
            <height>1218</height>
           </rect>
@@ -3308,6 +3235,9 @@
                            <property name="ID" stdset="0">
                             <number>13</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -3538,6 +3468,9 @@
                            <property name="ID" stdset="0">
                             <number>1</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -3768,6 +3701,9 @@
                            <property name="ID" stdset="0">
                             <number>15</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -3980,6 +3916,9 @@
                         <property name="ID" stdset="0">
                          <number>16</number>
                         </property>
+                        <attribute name="buttonGroup">
+                         <string notr="true">btn_buy_buttonGroup</string>
+                        </attribute>
                        </widget>
                       </item>
                      </layout>
@@ -4189,6 +4128,9 @@
                         <property name="ID" stdset="0">
                          <number>21</number>
                         </property>
+                        <attribute name="buttonGroup">
+                         <string notr="true">btn_buy_buttonGroup</string>
+                        </attribute>
                        </widget>
                       </item>
                      </layout>
@@ -4437,6 +4379,9 @@
                            <property name="ID" stdset="0">
                             <number>1</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -4667,6 +4612,9 @@
                            <property name="ID" stdset="0">
                             <number>1</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -4897,6 +4845,9 @@
                            <property name="ID" stdset="0">
                             <number>19</number>
                            </property>
+                           <attribute name="buttonGroup">
+                            <string notr="true">btn_buy_buttonGroup</string>
+                           </attribute>
                           </widget>
                          </item>
                         </layout>
@@ -5109,6 +5060,9 @@
                         <property name="ID" stdset="0">
                          <number>20</number>
                         </property>
+                        <attribute name="buttonGroup">
+                         <string notr="true">btn_buy_buttonGroup</string>
+                        </attribute>
                        </widget>
                       </item>
                      </layout>
@@ -5318,6 +5272,9 @@
                         <property name="ID" stdset="0">
                          <number>22</number>
                         </property>
+                        <attribute name="buttonGroup">
+                         <string notr="true">btn_buy_buttonGroup</string>
+                        </attribute>
                        </widget>
                       </item>
                      </layout>
@@ -5336,6 +5293,75 @@
         </widget>
        </widget>
       </widget>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>0</y>
+        <width>941</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_34">
+       <item>
+        <widget class="QPushButton" name="btn_tabCaffe">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>CAFFE</string>
+         </property>
+         <property name="index" stdset="0">
+          <number>0</number>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">page_buttonGroup</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_tabEp">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>NƯỚC ÉP</string>
+         </property>
+         <property name="index" stdset="0">
+          <number>1</number>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">page_buttonGroup</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_tabChai">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>NƯỚC CHAI</string>
+         </property>
+         <property name="index" stdset="0">
+          <number>2</number>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">page_buttonGroup</string>
+         </attribute>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
     <widget class="QWidget" name="stackedWidgetPage2">
@@ -6227,12 +6253,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TabWidget</class>
-   <extends>QTabWidget</extends>
-   <header>qtvcp.widgets.tab_widget</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>QWebView</class>
    <extends>QWidget</extends>
    <header>QtWebKitWidgets/QWebView</header>
@@ -6240,4 +6260,8 @@
  </customwidgets>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="btn_buy_buttonGroup"/>
+  <buttongroup name="page_buttonGroup"/>
+ </buttongroups>
 </ui>

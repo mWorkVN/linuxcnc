@@ -119,12 +119,16 @@ class MyGUI(QMainWindow):
             self.moneyFrefund.setText(str(self._machine.moneyGet))
 
     def initEvent(self):
+        self.page_buttonGroup.buttonClicked.connect(self.main_tab_changed)
+        self.btn_buy_buttonGroup.buttonClicked.connect(self.haveOrder)
         self.btnReturn.clicked.connect(self.returnOrder)
-        self.btnBuyID1.clicked.connect(self.haveOrder)
-        self.btnBuyID2.clicked.connect(self.haveOrder)
+        #self.btnBuyID1.clicked.connect(self.haveOrder)
+        #self.btnBuyID2.clicked.connect(self.haveOrder)
         #self.numSlID1.currentTextChanged.connect(self.slOrderChange)
         #self.numSlID2.currentTextChanged.connect(self.slOrderChange)
-
+    def main_tab_changed(self, btn):
+        index = btn.property("index")
+        self.main_tab_widget.setCurrentIndex(index)
     def naptien_click(self):
         pass
 
@@ -142,8 +146,8 @@ class MyGUI(QMainWindow):
         #getattr(self, 'totalCoinID' + str(nameStacked)).setText(str(total))
         print("have slOrderChange",flush=True)
 
-    def haveOrder(self):
-        id = self.sender().property('ID')
+    def haveOrder(self,btn):
+        id = btn.property('ID')
         sl = 1 #int(getattr(self, 'numSlID' +str(id) ).currentIndex())
         self._main_controller.setOrder(id,sl)
         print("have order",flush=True)
