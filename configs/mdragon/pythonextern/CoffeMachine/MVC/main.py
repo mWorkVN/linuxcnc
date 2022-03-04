@@ -1,19 +1,11 @@
 # coding: utf8
 import sys, time ,os
 from PyQt5.QtWidgets import QApplication
-from PyQt5 import uic
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSlot, Qt, QTimer, QObject
-from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator
 from model.machine import Machine
 from controller.control import MainController
 from view.view import MyGUI
 import logging
 import logging.handlers
-#import linuxcnc
-from gtts import gTTS
-from playsound import playsound
-import pyttsx3
 from threading import Thread
 try: 
     import queue
@@ -35,7 +27,6 @@ class App(QApplication):
     def __init__(self, sys_argv,server):
         super(App, self).__init__(sys_argv)
         queueWEB = variThreading.init()
-        
         self.Machine = Machine(my_logger,variThreading.queueVNPAY)
         self.main_controller = MainController(self.Machine)
         self.main_view = MyGUI(self.Machine, self.main_controller,server)

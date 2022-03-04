@@ -1,20 +1,20 @@
 # coding: utf8
 import sys, time ,os
 import linuxcnc
+from vnpay import vnpay
 from model.state import State
 from model.robotControl import RobotControl
 try: 
     import queue
 except ImportError: #py2
     import Queue as queue
-import imp
-from vnpay import vnpay
+#import imp
+
 import datetime
 import settings
 from PyQt5.QtCore import QObject, pyqtSignal
 from sql import mysql
 import subprocess
-import linuxcnc
 
 class Item:
     def __init__(self,id, name, price, stock ,controlfile):
@@ -107,7 +107,7 @@ class ShowItemsState(State):
 
 
 class WaitMoneyToBuyState(State,vnpay,QObject):
-    #even_odd_changed = pyqtSignal(str)
+    
     def __init__(self, machine,namestate):
         self.name = namestate     
         self.machine = machine
@@ -207,8 +207,10 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
         vnp.requestData['vnp_ReturnUrl'] = settings.VNPAY_RETURN_URL
         vnpay_payment_url = vnp.get_payment_url(settings.VNPAY_PAYMENT_URL, settings.VNPAY_HASH_SECRET_KEY)
         print(vnpay_payment_url)
+        del vnp
         #self.machine.view.webView.load(QUrl(vnpay_payment_url))
         self.machine.even_loadPAY.emit(vnpay_payment_url)
+        
     def query(self):
         vnp = vnpay()
         vnp.requestData = {}
@@ -231,7 +233,8 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
             tmp = x.split('=')
             if len(tmp) == 2:
                 vnp.responseData[tmp[0]] = urllib.parse.unquote(tmp[1]).replace('+', ' ')
-        print('Validate data from VNPAY:' + str(vnp.validate_response(settings.VNPAY_HASH_SECRET_KEY)))
+        del vnp
+        print('Validate data from VNPAY:' + str(vnp.validate_response(settings.VNPAY_HASH_SECRET_KEY))  )
 
 class ErrorState(State):
     def __init__(self, machine,namestate):
@@ -241,7 +244,7 @@ class ErrorState(State):
     def checkAndChangeState(self,data = [0,0]):
         if self.timeout == 0:
             self.timeout = time.time()
-        elif time.time() - self.timeout  > 8:
+        elif time.time() - self.timeout  > 4:
             self.timeout = 0
             self.machine.state = self.machine.ShowItemsState
 
@@ -276,7 +279,7 @@ class TakeCoffeeState(State):
         if (self.stateRobot == "init"):
             self.gcode = []
             self.dataSQL=self.machine.mysql.getData(str(self.machine.item.id))
-            if self.dataSQL[15] != "END":
+            if self.dataSQL[19] != "END":
                 print("Sai Data")
             self.numLine = 0
             """self.mprint('Control Robot to '+str(self.machine.item.controlfile))
@@ -381,15 +384,19 @@ class Machine(QObject):
         self.state.speak("S")
 
         self.myrobot=RobotControl()
+        self.totalItems = 2
+        for i in range(1,self.mysql.totalDevice):
+            dataget=self.mysql.getData(str(i))
+            self.addItem(Item(i,'caffe sữa'  ,      dataget[4],    8800000000,  "caffeden.ngc" ))
         #              name     ,        giá,   số lượng,   file
-        item1 = Item(1,'caffe sữa'  ,      15000,    8800000000,  "caffeden.ngc" )
+        """item1 = Item(1,'caffe sữa'  ,      15000,    8800000000,  "caffeden.ngc" )
         item2 = Item(2,'caffe đen'  ,      20000,    1000000000 ,  "caffesua.ngc")
         item3 = Item(3,'caffe Kem'  ,      25000,    8800000000,  "caffeden.ngc" )
         item4 = Item(4,'Nước Suối'  ,      10000,    1000000000 ,  "caffesua.ngc")
         self.addItem(item1)
         self.addItem(item2)
         self.addItem(item3)
-        self.addItem(item4)
+        self.addItem(item4)"""
 
     def returnOrder(self):
         self.state = self.ShowItemsState

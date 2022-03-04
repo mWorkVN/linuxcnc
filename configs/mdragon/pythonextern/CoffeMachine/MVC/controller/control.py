@@ -1,7 +1,8 @@
-from PyQt5.QtCore import QObject, pyqtSlot
- 
+from PyQt5.QtCore import QObject, pyqtSlot ,pyqtSignal
+
  
 class MainController(QObject):
+    state_robot_error = pyqtSignal(str)
     def __init__(self, Machine):
         super().__init__()
         self.preState = "0"
@@ -18,7 +19,11 @@ class MainController(QObject):
         return "0"
 
     def setOrder(self,id,sl):
-        self._machine.getOrder(id,sl)
+        self._machine.myrobot.checkError()
+        if self._machine.myrobot.checkEMC() == True:
+            self._machine.getOrder(id,sl)
+        else:
+            self.state_robot_error.emit("ERR")
         pass
 
     def setMoneyGet(self,money):

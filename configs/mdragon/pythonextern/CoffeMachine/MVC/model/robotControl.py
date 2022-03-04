@@ -9,7 +9,47 @@ import posRobot
 import subprocess
 
 
-class exec10():
+class stateWait():
+    def __init__(self,robot):
+        self.robot = robot
+        self.state = "wait"
+        self.number = 0
+    def run(self):
+        pass
+
+class stateRunToBegin():
+    def __init__(self,robot):
+        self.robot = robot
+        self.state = "wait"
+        self.number = 0
+    def run(self):
+        pass
+class stateRunToEnd():
+    def __init__(self,robot):
+        self.robot = robot
+        self.state = "wait"
+        self.number = 0
+    def run(self):
+        pass
+
+class stateControlAndWait():
+    def __init__(self,robot):
+        self.robot = robot
+        self.state = "wait"
+        self.number = 0
+    def run(self):
+        pass
+
+class stateWait():
+    def __init__(self,robot):
+        self.robot = robot
+        self.state = "wait"
+        self.number = 0
+    def run(self):
+        pass
+
+
+class exec():
     def __init__(self,robot):
         self.robot = robot
         self.state = "wait"
@@ -51,6 +91,15 @@ class exec10():
                 self.state = "move"
         return False
 
+    def move(self,statep,pos):
+        self.goto(str(pos)) # or self.goto("END_" + pos) 
+        statep =  statep +1
+        self.state = "waitdone"
+        if statep == 5:
+            self.state = "wait"
+            statep = 0
+        elif statep == 3:statep = 4
+
     def goto(self,pos):
         pos = getattr(posRobot,'TAKE_' +str(pos))
         print("RUN",pos)
@@ -65,6 +114,7 @@ class exec10():
 
 class RobotControl(State):
     def __init__(self):
+        self.isRUNLCNC = False
         startCmd = "/home/mwork/mworkcnc/scripts/linuxcnc /home/mwork/mworkcnc/configs/mdragon/scara.ini"
         self.cleanLinuxcnc()
         self.startLinuxcnc(startCmd)
@@ -82,19 +132,19 @@ class RobotControl(State):
         print("Init STATE")   
         self.state = 0
         self.isEMCRun = False
-        self.exec = exec10(self)
+        self.exec = exec(self)
 
     def run(self, data):
         stsDone = False
         datareturn = 0
         if self.state == 0 :
             stsDone = self.exec.run("0","1")  #TAKE
-        elif self.state < 11 :
+        elif self.state < 19 :
             stsDone = self.exec.run(self.state,data[self.state+4])
             
-        elif self.state == 11 :
+        elif self.state == 19 :
             stsDone = self.exec.run("11","1") #DUA RA
-        elif self.state == 12 :
+        elif self.state == 20 :
             stsDone = self.exec.run("12","1") #HOME
         if stsDone : self.state = self.state + 1
         #print("CHECK",self.state,stsDone)
@@ -106,12 +156,16 @@ class RobotControl(State):
 
     def moveToPos(self):
         pass
+        
     def controlPin(self):
         pass
+
     def waitTime(self):
         pass
+
     def goHome(self):
         pass
+
     def delInit(self):
         return
         del self.emc
@@ -120,7 +174,7 @@ class RobotControl(State):
 
     def checkEMC(self):
         try:
-            self.emcstat = self.emc.stat()
+            #self.emcstat = self.emc.stat()
             self.emcstat.poll()
             self.isEMCRun = True
         except linuxcnc.error as e:
@@ -130,7 +184,8 @@ class RobotControl(State):
         return self.isEMCRun 
 
     def reload(self):
-        imp.reload(linuxcnc)  
+        imp.reload(linuxcnc) 
+
         self.emc = linuxcnc
         self.emccommand = self.emc.command()
         
@@ -139,6 +194,9 @@ class RobotControl(State):
         pass
         #self.delInit()
         #self.reload()
+        self.checkEMC()
+
+    def checkError(self):
         self.checkEMC()
 
     def set_mdi_mode(self):
@@ -185,7 +243,7 @@ class RobotControl(State):
         c.wait_complete(30.0) #This command without argument waits only 1 second.
         while s.homed[i] != 1:
             print("wait H")
-            time.sleep(1)
+            time.sleep(0.1)
             s.poll()
 
     def initLinuxcnc(self):
@@ -194,7 +252,7 @@ class RobotControl(State):
         
         while self.emcstat.task_state == self.emc.STATE_ESTOP:
             print("WAITING INITIALIZATION")
-            time.sleep(3)
+            time.sleep(1)
             self.emcstat.poll()
 
         self.emccommand.state(linuxcnc.STATE_ESTOP_RESET)
@@ -209,7 +267,6 @@ class RobotControl(State):
         else:
             print("ESTOP RESET ERROR")
         self.emcstat.poll()
-
         if self.emcstat.task_state == linuxcnc.STATE_ON:
             print("MACHINE IS READY")
         else:
@@ -217,24 +274,23 @@ class RobotControl(State):
     
     def startLinuxcnc(self, cmd):
         #res = subprocess.Popen(cmd.split() ) #, stdout = subprocess.PIPE)
-        cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
-        proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT )
-        print("end")
+        if (self.isRUNLCNC == False):
+            cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
+            proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT )
+            print("end")
 
-        #Wait 30s at maximum
-        for i in range(30):
-            time.sleep(1)
-            if (self.checkProcess("axis") != False) and (self.checkProcess("linuxcnc") != False):
-                print("check")
-                break
+            #Wait 30s at maximum
+            for i in range(30):
+                time.sleep(1)
+                if (self.checkProcess("axis") != False) and (self.checkProcess("linuxcnc") != False):
+                    print("check")
+                    break
 
     def getProcesses(self, str):
         processCommand = ["ps", "-A"]
         checkProcess = ["grep", "-e", str]
-        
         processExec = subprocess.Popen(processCommand, stdout = subprocess.PIPE)
         checkExec = subprocess.Popen(checkProcess, stdin = processExec.stdout, stdout = subprocess.PIPE, stderr=subprocess.PIPE)
-        
         processesOut, processesErr = checkExec.communicate()
         processSplit = processesOut.split()
     
@@ -254,31 +310,56 @@ class RobotControl(State):
         strGrep = self.getProcesses(str)
         for i in range(len(strGrep) // 4):
             retVal.append([strGrep[4*i + 3], strGrep[4*i]])
+        print("CHECK", retVal)
         return retVal
 
     def killProcess(self, processId):
-        killCommand = ["pkill", processId]
-    
-        subprocess.Popen(killCommand)
-    
+        killCommand = ["kill", processId]
+        #subprocess.communicate()
+        sproc = subprocess.Popen(killCommand)
+        sproc.wait()
+        #subprocess.Popen(killCommand, stderr=subprocess.STDOUT )
+    def shutdown(self):
+        displayname = ""
+        #displayname = StatusItem.get_ini_data( only_section='DISPLAY', only_name='DISPLAY' )['data']['parameters'][0]['values']['value']
+        p = subprocess.Popen( ['pkill', displayname] , stderr=subprocess.STDOUT )
+
+
     def cleanLinuxcnc(self):
+        #displayname = StatusItem.get_ini_data( only_section='DISPLAY', only_name='DISPLAY' )['data']['parameters'][0]['values']['value']
+        #p = subprocess.Popen( ['pkill', displayname] , stderr=subprocess.STDOUT )
         if len(self.checkProcess("axis")) > 0:
             for p in self.checkProcess("axis"):
                 self.killProcess(p[1])
             time.sleep(20)
-
         if len(self.checkProcess("linuxcnc")) > 0:
-            if len(self.checkProcess("milltask")) > 0:
+            self.isRUNLCNC = True
+            """if len(self.checkProcess("milltask")) > 0:
                 for p in self.checkProcess("milltask"):
                     self.killProcess(p[1])
-            
             if self.checkIo() != False:
                 self.killProcess(self.checkIo()[1])
 
-            if len(self.checkProcess("rtapi")) > 0:
-                for p in self.checkProcess("rtapi"):
+            if len(self.checkProcess("rtapi_app")) > 0:
+                for p in self.checkProcess("rtapi_app"):
                     self.killProcess(p[1])
 
             if len(self.checkProcess("linuxcnc")) > 0:
                 for p in self.checkProcess("linuxcnc"):
                     self.killProcess(p[1])
+            if len(self.checkProcess("linuxcncsvr")) > 0:
+                for p in self.checkProcess("linuxcncsvr"):
+                    self.killProcess(p[1])"""                
+"""
+
+
+CHECK []
+CHECK [[b'linuxcnc', b'5363'], [b'linuxcncsvr', b'5415']]
+CHECK [[b'milltask', b'5465']]
+CHECK [[b'milltask', b'5465']]
+CHECK [[b'rtapi_app', b'5425']]
+CHECK [[b'rtapi_app', b'5425']]
+CHECK [[b'linuxcnc', b'5363'], [b'linuxcncsvr', b'5415']]
+CHECK [[b'linuxcnc', b'5363'], [b'linuxcncsvr', b'5415']]
+
+"""

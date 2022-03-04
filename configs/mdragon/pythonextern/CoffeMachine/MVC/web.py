@@ -17,6 +17,7 @@ import variThreading
 import json
 
 app = Flask(__name__)
+
 @app.route("/")
 def hello_world():
     return "<p>Vui Longf Cho Khoi Tao Giao Dich</p>"
@@ -51,15 +52,14 @@ def log_in():
         else:
             x["sts"]=""
         variThreading.queueVNPAY.put(x)
+        del vnp
+        return render_template("index.html")
         return render_template("payment_return.html", title= "Kết Quả Thanh toán",
                             result= "Thành công", order_id= order_id,
                             amount= amount,
                             order_desc=order_desc,
                             vnp_TransactionNo= vnp_TransactionNo,
                             vnp_ResponseCode= vnp_ResponseCode)
-
-
-
 
 class createVNPAY():
     def __init__(self):
