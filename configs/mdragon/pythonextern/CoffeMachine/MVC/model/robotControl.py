@@ -139,13 +139,13 @@ class RobotControl(State):
         datareturn = 0
         if self.state == 0 :
             stsDone = self.exec.run("0","1")  #TAKE
-        elif self.state < 19 :
+        elif self.state < 15 :
             stsDone = self.exec.run(self.state,data[self.state+4])
             
-        elif self.state == 19 :
-            stsDone = self.exec.run("11","1") #DUA RA
-        elif self.state == 20 :
-            stsDone = self.exec.run("12","1") #HOME
+        elif self.state == 15 :
+            stsDone = self.exec.run("15","1") #DUA RA
+        elif self.state == 16 :
+            stsDone = self.exec.run("16","1") #HOME
         if stsDone : self.state = self.state + 1
         #print("CHECK",self.state,stsDone)
         if self.state == 13:
