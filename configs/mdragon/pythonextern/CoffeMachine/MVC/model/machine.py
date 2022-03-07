@@ -386,7 +386,7 @@ class Machine(QObject):
         self.state = self.ShowItemsState
         self.state.speak("S")
 
-        self.myrobot=RobotControl()
+        self.myrobot=RobotControl(valveModbus)
         self.totalItems = 2
         for i in range(1,self.mysql.totalDevice):
             dataget=self.mysql.getData(str(i))

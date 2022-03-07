@@ -69,11 +69,14 @@ class exec():
                 self.goto("END_" + str(pos)) 
                 self.number = 2
             elif (self.number ==2):
-                self.wait() 
-                self.number = 4
+                self.robot.valveModbus.setData(1,6,(pos-1)*2,timewait)
+                if self.robot.valveModbus.getData(1,3,(pos-1)*2 + 1,(pos-1)*2 + 1) != 0:
+                    self.number = 3
             elif (self.number == 3):
-                self.goto("END_" + str(pos)) 
-                self.number = 4
+                if  self.robot.valveModbus.getData(1,3,(pos-1)*2 + 1,(pos-1)*2 + 1) != 1:
+                    self.robot.valveModbus.setData(1,6,(pos-1)*2 + 1,[0])
+                    self.number = 4 
+
             elif (self.number == 4):
                 self.goto(str(pos))
                 self.number = 5
@@ -113,7 +116,8 @@ class exec():
         
 
 class RobotControl(State):
-    def __init__(self):
+    def __init__(self,valveModbus):
+        self.valveModbus=valveModbus
         self.isRUNLCNC = False
         startCmd = "/home/mwork/mworkcnc/scripts/linuxcnc /home/mwork/mworkcnc/configs/mdragon/scara.ini"
         self.cleanLinuxcnc()
@@ -331,11 +335,11 @@ class RobotControl(State):
     def linuxCNCRun(self):
         # Check whether LinuxCNC is running.
         for lockname in ("/tmp/linuxcnc.lock", "/tmp/emc.lock"):
-            if fileExists(lockname):
+            if os.path.exists(lockname):
                 return True
-        if not opt_watchdog:
+        #if not opt_watchdog:
             # The check is disabled. Return success.
-            return True
+        #    return True
         return False
         #printError("LinuxCNC doesn't seem to be running. "\"(Use '--watchdog off' to disable this check.)")
         #raise "LINUXCNC NOT RUN"

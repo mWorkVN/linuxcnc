@@ -3,31 +3,22 @@ import serial
 import modbus_tk
 import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
-
-
-#PORT = '/dev/ttyp5'
-import serial as ser
 import serial.tools.list_ports as prtlst
-
-"""
-File "/home/mwork/.local/lib/python3.7/site-packages/modbus_tk/modbus_rtu.py", line 46, in parse_response
-    raise ModbusInvalidResponseError("Response length is invalid {0}".format(len(response)))
-modbus_tk.exceptions.ModbusInvalidResponseError: Response length is invalid 0
-
-
-
-"""
 
 
 class modbuspull():
     def __init__(self):    
         
+        self.initCom()
+        self.settings(1.0)
+
+    def initCom(self):
         PORT = self.getCOMs()
         print(PORT)
         self.master = modbus_rtu.RtuMaster(
             serial.Serial(port=PORT, baudrate=9600, bytesize=8, parity='N', stopbits=1, xonxoff=0)
         )
-        self.settings(2.0)
+        #self.settings(1.0)
 
     def settings(self,set_timeout):
         self.master.set_timeout(set_timeout)
@@ -48,16 +39,17 @@ class modbuspull():
             'data':''
         }
         try:
-            dataJ['data'] = self.master.execute(id, function, begin, end)
-        
-            
+            dataJ['data'] = self.master.execute(id, function, begin, end)          
         except modbus_tk.modbus.ModbusError as e:
-            print("%s- Code=%d" % (e, e.get_exception_code()))
             dataJ['status'] = 'ER'
+            dataJ['status'] = '01'
         except modbus_tk.modbus_rtu.ModbusInvalidResponseError as e:
-            print("%s- Code=ModbusInvalidResponseError" % (e))
+            dataJ['status'] = 'ER'
+            dataJ['status'] = '02'
             #self.master.close()
         except:
+            dataJ['status'] = 'ER'
+            dataJ['status'] = '03'
             print("other")
         return dataJ
             
@@ -71,13 +63,18 @@ class modbuspull():
         try:
             dataJ['data'] = self.master.execute(id, function, begin, output_value = data)
         except modbus_tk.modbus.ModbusError as e:
-            print("%s- Code=%d" % (e, e.get_exception_code()))
+            dataJ['status'] = 'ER'
+            dataJ['status'] = '01'
         except modbus_tk.modbus_rtu.ModbusInvalidResponseError as e:
-            print("%s- Code=ModbusInvalidResponseError" % (e))
+            dataJ['status'] = 'ER'
+            dataJ['status'] = '02'
             #self.master.close()
         except:
+            dataJ['status'] = 'ER'
+            dataJ['status'] = '03'
             print("other")
         return dataJ
+
             
 
 """
