@@ -42,8 +42,10 @@ class WaitChooseItemState(State):
 
     def checkAndChangeState(self,data = [0,0]):
         if (self.status != 0):
+            print("Cho HÀN")
             if self.machine.item.stock < int(self.machine.item.numBuy):
-                pass
+                print("HET HaN")
+           
             elif self.status == 1:
                 self.machine.Que.put("Bạn Sẽ Mua " + \
                                     str(self.machine.item.name) + \
@@ -64,6 +66,7 @@ class WaitChooseItemState(State):
             self.machine.item = self.getItem(id)
             self.machine.item.numBuy = sl
             self.status = 1
+            print("DSD",self.status)
 
     def containsItem(self, wanted):
         ret = False
@@ -72,6 +75,7 @@ class WaitChooseItemState(State):
             if item.id == wanted:
                 ret = True
                 break
+        
         return ret
 
     def checkID(self, wanted):
@@ -81,6 +85,7 @@ class WaitChooseItemState(State):
             if item.id == wanted:
                 ret = True
                 break
+        
         return ret
 
     def getItem(self, wanted):
@@ -391,6 +396,7 @@ class Machine(QObject):
         for i in range(1,self.mysql.totalDevice):
             dataget=self.mysql.getData(str(i))
             self.addItem(Item(i,'caffe sữa'  ,      dataget[4],    8800000000,  "caffeden.ngc" ))
+
         #              name     ,        giá,   số lượng,   file
         """item1 = Item(1,'caffe sữa'  ,      15000,    8800000000,  "caffeden.ngc" )
         item2 = Item(2,'caffe đen'  ,      20000,    1000000000 ,  "caffesua.ngc")
@@ -416,7 +422,7 @@ class Machine(QObject):
 
     def getOrder(self, value,sl):
         self.WaitChooseItemState.haveOrder(value,sl)
-        print("get Order From Ui",flush=True)
+        print("get Order From Ui",value,sl,flush=True)
 
     def getPrice(self,ID):
         for item in self.items:

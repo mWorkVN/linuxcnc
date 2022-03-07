@@ -24,9 +24,9 @@ class MyGUI(QMainWindow):
     
     def __init__(self, machine, main_controller,server):
         super(MyGUI, self).__init__()
-        self.window = QtWidgets.QMainWindow()
-        self.widget=uic.loadUi('vendding.ui', self.window )
-        self.window.show()
+        #self.window = QtWidgets.QMainWindow()
+        self.widget=uic.loadUi('vendding.ui', self )
+        self.show()
         self._machine = machine
         self._main_controller = main_controller
         
@@ -52,12 +52,12 @@ class MyGUI(QMainWindow):
         if int(stat) != 0:
             print("STATE NEW",flush=True)
             self.updateUi()
-            getattr(self, 'window.stackedWidget').setCurrentIndex(int(stat) - 1)
-        self.window.update()
+            getattr(self, 'stackedWidget').setCurrentIndex(int(stat) - 1)
+        self.update()
 
     #@pyqtSlot(str)
     def on_even_loadPAY(self, value):
-        self.window.webView.load(QUrl(value))
+        self.webView.load(QUrl(value))
 
     #@pyqtSlot(str)
     def on_state_robot_error(self, value):
@@ -77,8 +77,8 @@ class MyGUI(QMainWindow):
         goal_dir = os.path.abspath(goal_dir)
         pixmap = QPixmap(goal_dir)
         pixmap = pixmap.scaled(120, 120, Qt.KeepAspectRatio, Qt.FastTransformation)
-        getattr(self.window, 'imageID' +str(id) ).setPixmap(pixmap)
-        getattr(self.window, 'imageID' +str(id)).resize(pixmap.width(), pixmap.height())        
+        getattr(self, 'imageID' +str(id) ).setPixmap(pixmap)
+        getattr(self, 'imageID' +str(id)).resize(pixmap.width(), pixmap.height())        
 
     def initUi(self):
         self.setImage(1)
@@ -88,42 +88,42 @@ class MyGUI(QMainWindow):
 
     def initPrices(self):
         pass
-        #for i in range(1,self._machine.mysql.totalDevice):
-        #    getattr(self.window, 'totalCoinID' + str(i)).setText(str(self.getPrice(i)))
+        for i in range(1,self._machine.mysql.totalDevice):
+            getattr(self, 'totalCoinID' + str(i)).setText(str(self.getPrice(i)))
 
     def updateUi(self):
         
         if self._main_controller.preState == "0":
-            self.window.TotalMoney.setText("0")
-            self.window.nameID.setText("")
-            self.window.slID.setText("0")
-            self.window.moneyGet.setText("0")
+            self.TotalMoney.setText("0")
+            self.nameID.setText("")
+            self.slID.setText("0")
+            self.moneyGet.setText("0")
         elif self._main_controller.preState == "2":
-            self.window.webView.load(QUrl("http://localhost:8081"))
+            self.webView.load(QUrl("http://localhost:8081"))
             money = self._machine.item.numBuy * self._machine.item.price
 
         #x =  {"order":"","sts":"","amount":"","time":""}
         elif self._main_controller.preState == "4": #Success
-            self.window.lbl_orderID.setText(self._machine.vuluePAY["order"])
-            self.window.lbl_orderTime.setText(self._machine.vuluePAY["time"])
-            self.window.lbl_orderGET.setText(self._machine.vuluePAY["amount"])
+            self.lbl_orderID.setText(self._machine.vuluePAY["order"])
+            self.lbl_orderTime.setText(self._machine.vuluePAY["time"])
+            self.lbl_orderGET.setText(self._machine.vuluePAY["amount"])
         elif self._main_controller.preState == "5": #Error
-            self.window.lbl_erID.setText(self._machine.vuluePAY["order"])
-            self.window.lbl_erCode.setText(settings.VNPAY_ERROR_CODE[self._machine.vuluePAY["sts"]])  
+            self.lbl_erID.setText(self._machine.vuluePAY["order"])
+            self.lbl_erCode.setText(settings.VNPAY_ERROR_CODE[self._machine.vuluePAY["sts"]])  
         elif self._main_controller.preState == "6":
-            self.window.webView.history().clear()
+            self.webView.history().clear()
             money = self._machine.item.numBuy * self._machine.item.price
-            self.window.moneyFrefund.setText(str(self._machine.moneyGet))
+            self.moneyFrefund.setText(str(self._machine.moneyGet))
         
     def initEvent(self):
-        self.window.page_buttonGroup.buttonClicked.connect(self.main_tab_changed)
-        self.window.buy_buttonGroup.buttonClicked.connect(self.haveOrder)
-        self.window.btnReturn.clicked.connect(self.returnOrder)
+        self.page_buttonGroup.buttonClicked.connect(self.main_tab_changed)
+        self.buy_buttonGroup.buttonClicked.connect(self.haveOrder)
+        self.btnReturn.clicked.connect(self.returnOrder)
 
     def main_tab_changed(self, btn):
         print("press")
         index = btn.property("index")
-        self.window.main_tab_widget.setCurrentIndex(index)
+        self.main_tab_widget.setCurrentIndex(index)
 
     def naptien_click(self):
         pass
@@ -135,7 +135,7 @@ class MyGUI(QMainWindow):
         return self._machine.getPrice(ID)
 
     def slOrderChange(self):
-        nameStacked = self.window.sender().property('ID')
+        nameStacked = self.sender().property('ID')
         sata = str(self.getPrice(nameStacked))
         position = 1 #int(self.sender().currentIndex())
         total = int(sata)*position
@@ -145,6 +145,7 @@ class MyGUI(QMainWindow):
     def haveOrder(self,btn):
         id = btn.property('ID')
         sl = 1 #int(getattr(self, 'numSlID' +str(id) ).currentIndex())
+
         self._main_controller.setOrder(id,sl)
-        print("have order",flush=True)
+        print("have order",id,sl,flush=True)
 #vend()

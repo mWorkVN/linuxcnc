@@ -36,20 +36,20 @@ class modbuspull():
     def getData(self,id,function,begin,end):
         dataJ = {
             'status':'ok',
-            'data':''
+            'data':0
         }
         try:
             dataJ['data'] = self.master.execute(id, function, begin, end)          
         except modbus_tk.modbus.ModbusError as e:
             dataJ['status'] = 'ER'
-            dataJ['status'] = '01'
+            dataJ['status'] = 1
         except modbus_tk.modbus_rtu.ModbusInvalidResponseError as e:
             dataJ['status'] = 'ER'
-            dataJ['status'] = '02'
+            dataJ['status'] = 2
             #self.master.close()
         except:
             dataJ['status'] = 'ER'
-            dataJ['status'] = '03'
+            dataJ['status'] = 3
             print("other")
         return dataJ
             
@@ -58,20 +58,20 @@ class modbuspull():
     def setData(self,id,function,begin,data):
         dataJ = {
             'status':'ok',
-            'data':''
+            'data':0
         }
         try:
             dataJ['data'] = self.master.execute(id, function, begin, output_value = data)
         except modbus_tk.modbus.ModbusError as e:
             dataJ['status'] = 'ER'
-            dataJ['status'] = '01'
+            dataJ['status'] = 1
         except modbus_tk.modbus_rtu.ModbusInvalidResponseError as e:
             dataJ['status'] = 'ER'
-            dataJ['status'] = '02'
+            dataJ['status'] = 2
             #self.master.close()
         except:
             dataJ['status'] = 'ER'
-            dataJ['status'] = '03'
+            dataJ['status'] = 3
             print("other")
         return dataJ
 

@@ -9,53 +9,94 @@ import posRobot
 import subprocess
 
 
-class stateWait():
-    def __init__(self,robot):
-        self.robot = robot
-        self.state = "wait"
-        self.number = 0
-    def run(self):
+class until():
+    def openGrib(self):
         pass
+    def clsoeGrib(self):
+        pass
+    def checkFinish(self):
+        if (self.exec.robot.checkStatusDoneMDI() != -1):
+            return True
+        return False
+        
 
-class stateRunToBegin():
+class takeGlass():
+    __slots__ = ['robot', 'state', 'number']
     def __init__(self,robot):
-        self.robot = robot
+        self.exec = robot
         self.state = "wait"
         self.number = 0
-    def run(self):
-        pass
-class stateRunToEnd():
-    def __init__(self,robot):
-        self.robot = robot
-        self.state = "wait"
-        self.number = 0
-    def run(self):
-        pass
+    def run(self,data):
+        if (self.number ==0):
+            self.goto(str(pos)) # or self.goto("END_" + pos) 
+            self.number = 1
+        elif (self.number ==1):
+            self.goto("END_" + str(pos)) 
+            self.number = 2
+        elif (self.number == 3):
+            modbusGet = self.robot.valveModbus.getData(1,3,(int(pos)-1)*2 + 1,1)
+            print(modbusGet)
+            if  int(modbusGet['data'][0])!= 1 and int(modbusGet['data'][0])!= 0:
+                self.robot.valveModbus.setData(1,16,(int(pos)-1)*2 ,[0,0])
+                self.number = 4 
+        elif (self.number == 4):
+            self.goto(str(pos))
+            self.number = 5
+        elif (self.number == 5):
+            self.state = "wait"
+            self.number = 0
+            return True  
 
-class stateControlAndWait():
+class takeNguyenLieu():
+    __slots__ = ['robot', 'state', 'number']
     def __init__(self,robot):
-        self.robot = robot
-        self.state = "wait"
+        self.exec = robot
         self.number = 0
-    def run(self):
-        pass
+    def run(self,pos,timewait):
+        pass    
 
-class stateWait():
+class DuaLyThanhPham():
+    __slots__ = ['robot', 'state', 'number']
     def __init__(self,robot):
-        self.robot = robot
-        self.state = "wait"
+        self.exec = robot
         self.number = 0
-    def run(self):
-        pass
+    def run(self,pos,timewait):
+        pass   
 
+
+class takeWait():
+    __slots__ = ['robot', 'state', 'number']
+    def __init__(self,robot):
+        self.exec = robot
+        self.number = 0
+    def run(self,pos,timewait):
+        pass   
+
+class wait():
+    __slots__ = ['robot', 'state', 'number']
+    def __init__(self,robot):
+        self.exec = robot
+        self.number = 0
+    def run(self,pos,timewait):
+        self.robot.state = self.robot.takeGlass
+        return False 
 
 class exec():
+    __slots__ = ['robot', 'state', 'number']
     def __init__(self,robot):
         self.robot = robot
         self.state = "wait"
+        self.takeGlass = takeGlass(self)
+        self.takeNguyenLieu = takeNguyenLieu(self)
+        self.DuaLyThanhPham = DuaLyThanhPham(self)
+        self.takeWait = takeWait(self)
+        self.wait = wait(self)
+        self.stateRunStep = self.wait 
         self.number = 0
         
-    def run(self,pos,timewait):
+    def run(self,pos,timewait,data):
+        #return self.stateRunStep.run(pos,timewait)
+
         if (timewait == "0" or timewait == 0 ):
             return True
         if self.state == "wait":
@@ -69,14 +110,18 @@ class exec():
                 self.goto("END_" + str(pos)) 
                 self.number = 2
             elif (self.number ==2):
-                self.robot.valveModbus.setData(1,6,(pos-1)*2,timewait)
-                if self.robot.valveModbus.getData(1,3,(pos-1)*2 + 1,(pos-1)*2 + 1) != 0:
+                if (int(pos) == 0) or (int(pos) == 15)or (int(pos) == 16):
+                    self.number = 4
+                else:
+                    print("send modbus",(int(pos)-1)*2,timewait)
+                    self.robot.valveModbus.setData(1,6,(int(pos)-1)*2,int(timewait))
                     self.number = 3
             elif (self.number == 3):
-                if  self.robot.valveModbus.getData(1,3,(pos-1)*2 + 1,(pos-1)*2 + 1) != 1:
-                    self.robot.valveModbus.setData(1,6,(pos-1)*2 + 1,[0])
+                modbusGet = self.robot.valveModbus.getData(1,3,(int(pos)-1)*2 + 1,1)
+                print(modbusGet)
+                if  int(modbusGet['data'][0])!= 1 and int(modbusGet['data'][0])!= 0:
+                    self.robot.valveModbus.setData(1,16,(int(pos)-1)*2 ,[0,0])
                     self.number = 4 
-
             elif (self.number == 4):
                 self.goto(str(pos))
                 self.number = 5
@@ -86,11 +131,10 @@ class exec():
                 return True
             self.state = "waitdone"
         elif  self.state == "waitdone":  
-            if (self.number != 3):
+            if (self.number != 3) and (self.number != 4):
                 if (self.robot.checkStatusDoneMDI() != -1):
                     self.state = "move"
             else:
-                time.sleep(float(timewait))
                 self.state = "move"
         return False
 
@@ -138,21 +182,24 @@ class RobotControl(State):
         self.isEMCRun = False
         self.exec = exec(self)
 
+    def initstate(self):
+        self.exec.stateRunStep = self.exec.wait 
+
     def run(self, data):
         stsDone = False
         datareturn = 0
         if self.state == 0 :
-            stsDone = self.exec.run("0","1")  #TAKE
+            stsDone = self.exec.run("0",data[3],data)  #TAKE
         elif self.state < 15 :
-            stsDone = self.exec.run(self.state,data[self.state+4])
+            stsDone = self.exec.run(self.state,data[self.state+4],data)
             
         elif self.state == 15 :
-            stsDone = self.exec.run("15","1") #DUA RA
+            stsDone = self.exec.run("15","1",data) #DUA RA
         elif self.state == 16 :
-            stsDone = self.exec.run("16","1") #HOME
+            stsDone = self.exec.run("16","1",data) #HOME
         if stsDone : self.state = self.state + 1
         #print("CHECK",self.state,stsDone)
-        if self.state == 13:
+        if self.state == 17:
             self.state = 0
             datareturn = 1
         return datareturn

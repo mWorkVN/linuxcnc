@@ -140,7 +140,7 @@ class server(threading.Thread):
         processCommand = ["lsof", "-t", "-i","tcp:8081"]
         processExec = subprocess.Popen(processCommand, stdout = subprocess.PIPE, stderr=subprocess.PIPE)
         processesOut, processesErr = processExec.communicate()
-        print("KssILL ",processesOut)
+        #print("KssILL ",processesOut)
         if (len(processesOut) >2):
             processSplit = processesOut.split()   
             killCommand = ["kill",'-9', processSplit[0]]

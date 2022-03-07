@@ -21,6 +21,7 @@ class MainController(QObject):
     def setOrder(self,id,sl):
         self._machine.myrobot.checkError()
         if self._machine.myrobot.checkEMC() == True:
+            print("have order",id,sl,flush=True)
             self._machine.getOrder(id,sl)
         else:
             self.state_robot_error.emit("ERR")
