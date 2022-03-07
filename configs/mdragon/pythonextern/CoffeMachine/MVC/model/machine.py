@@ -297,7 +297,8 @@ class TakeCoffeeState(State):
             if (self.machine.myrobot.run(self.dataSQL) == 1):
                 self.stateRobot = "finish"
                 self.mprint("Line End") 
-            """if (self.machine.myrobot.checkStatusDoneMDI() != -1):
+            """
+            if (self.machine.myrobot.checkStatusDoneMDI() != -1):
                 if (self.numLine == 0):
                     self.stateRobot = "finish"
                     self.mprint("Line End") 
@@ -312,7 +313,8 @@ class TakeCoffeeState(State):
                              str(self.machine.myrobot.checkStatusDoneMDI()))
             elif (self.numLine == 0):
                     self.stateRobot = "finish"
-                    self.mprint("Line End")"""   
+                    self.mprint("Line End")
+            """   
 
         elif (self.stateRobot == "finish"):
 
@@ -360,8 +362,9 @@ class CheckRefundState(State):
 
 class Machine(QObject):
     even_loadPAY = pyqtSignal(str)
-    def __init__(self,my_logger,queueWEB):
+    def __init__(self,my_logger,queueWEB,valveModbus):
         super().__init__()
+        self.valveModbus = valveModbus
         self.mysql = mysql()
         self.my_logger = my_logger
         self.moneyGet = 0
