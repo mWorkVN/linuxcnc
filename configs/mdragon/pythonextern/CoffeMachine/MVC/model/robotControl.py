@@ -247,7 +247,7 @@ class RobotControl(State):
             s.poll()
 
     def initLinuxcnc(self):
-
+        time.sleep(2)
         self.emcstat.poll()
         
         while self.emcstat.task_state == self.emc.STATE_ESTOP:
@@ -262,7 +262,7 @@ class RobotControl(State):
         
         if self.emcstat.task_state == linuxcnc.STATE_ESTOP_RESET:
             self.emccommand.state(linuxcnc.STATE_ON)
-            time.sleep(1)
+            time.sleep(2)
             print("ESTOP RESET")
         else:
             print("ESTOP RESET ERROR")
@@ -273,8 +273,9 @@ class RobotControl(State):
             print("FAIL TO INITIALIZE THE MACHINE")	
     
     def startLinuxcnc(self, cmd):
+        pass
         #res = subprocess.Popen(cmd.split() ) #, stdout = subprocess.PIPE)
-        if (self.isRUNLCNC == False):
+        """if (self.isRUNLCNC == False):
             cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
             proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT )
             print("end")
@@ -284,7 +285,7 @@ class RobotControl(State):
                 time.sleep(1)
                 if (self.checkProcess("axis") != False) and (self.checkProcess("linuxcnc") != False):
                     print("check")
-                    break
+                    break"""
 
     def getProcesses(self, str):
         processCommand = ["ps", "-A"]
@@ -328,13 +329,16 @@ class RobotControl(State):
     def cleanLinuxcnc(self):
         #displayname = StatusItem.get_ini_data( only_section='DISPLAY', only_name='DISPLAY' )['data']['parameters'][0]['values']['value']
         #p = subprocess.Popen( ['pkill', displayname] , stderr=subprocess.STDOUT )
-        if len(self.checkProcess("axis")) > 0:
+        """if len(self.checkProcess("axis")) > 0:
             for p in self.checkProcess("axis"):
                 self.killProcess(p[1])
             time.sleep(20)
         if len(self.checkProcess("linuxcnc")) > 0:
-            self.isRUNLCNC = True
-            """if len(self.checkProcess("milltask")) > 0:
+            if len(self.checkProcess("linuxcncsvr")) > 0:
+                self.isRUNLCNC = True
+                for p in self.checkProcess("linuxcncsvr"):
+                    self.killProcess(p[1])             
+            if len(self.checkProcess("milltask")) > 0:
                 for p in self.checkProcess("milltask"):
                     self.killProcess(p[1])
             if self.checkIo() != False:
@@ -346,10 +350,8 @@ class RobotControl(State):
 
             if len(self.checkProcess("linuxcnc")) > 0:
                 for p in self.checkProcess("linuxcnc"):
-                    self.killProcess(p[1])
-            if len(self.checkProcess("linuxcncsvr")) > 0:
-                for p in self.checkProcess("linuxcncsvr"):
-                    self.killProcess(p[1])"""                
+                    self.killProcess(p[1])"""
+       
 """
 
 

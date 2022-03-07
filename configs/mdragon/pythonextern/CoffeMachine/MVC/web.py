@@ -15,7 +15,7 @@ from waitress import serve
 import settings
 import variThreading
 import json
-
+import subprocess
 app = Flask(__name__)
 
 @app.route("/")
@@ -137,6 +137,18 @@ class server(threading.Thread):
     global app
     def __init__(self):
         threading.Thread.__init__(self)
+        processCommand = ["lsof", "-t", "-i","tcp:8081"]
+        processExec = subprocess.Popen(processCommand, stdout = subprocess.PIPE, stderr=subprocess.PIPE)
+        processesOut, processesErr = processExec.communicate()
+        print("KssILL ",processesOut)
+        if (len(processesOut) >2):
+            processSplit = processesOut.split()   
+            killCommand = ["kill",'-9', processSplit[0]]
+            #subprocess.communicate()
+            sproc = subprocess.Popen(killCommand)
+            sproc.wait()
+            print("KILL ",processSplit[0])
+
         print("Serveer init")
 
     def run(self):
