@@ -275,7 +275,7 @@ class RobotControl(State):
     def startLinuxcnc(self, cmd):
         pass
         #res = subprocess.Popen(cmd.split() ) #, stdout = subprocess.PIPE)
-        """if (self.isRUNLCNC == False):
+        if (self.isRUNLCNC == False):
             cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
             proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT )
             print("end")
@@ -285,7 +285,7 @@ class RobotControl(State):
                 time.sleep(1)
                 if (self.checkProcess("axis") != False) and (self.checkProcess("linuxcnc") != False):
                     print("check")
-                    break"""
+                    break
 
     def getProcesses(self, str):
         processCommand = ["ps", "-A"]
@@ -325,8 +325,25 @@ class RobotControl(State):
         #displayname = StatusItem.get_ini_data( only_section='DISPLAY', only_name='DISPLAY' )['data']['parameters'][0]['values']['value']
         p = subprocess.Popen( ['pkill', displayname] , stderr=subprocess.STDOUT )
 
+    # Check presence of LinuxCNC.
+    # Returns normally, if LinuxCNC is detected.
+    # Raises LinuxCNC_NotRunning, if LinuxCNC is not detected.
+    def linuxCNCRun(self):
+        # Check whether LinuxCNC is running.
+        for lockname in ("/tmp/linuxcnc.lock", "/tmp/emc.lock"):
+            if fileExists(lockname):
+                return True
+        if not opt_watchdog:
+            # The check is disabled. Return success.
+            return True
+        return False
+        #printError("LinuxCNC doesn't seem to be running. "\"(Use '--watchdog off' to disable this check.)")
+        #raise "LINUXCNC NOT RUN"
+
 
     def cleanLinuxcnc(self):
+        if self.linuxCNCRun():
+            self.isRUNLCNC = True
         #displayname = StatusItem.get_ini_data( only_section='DISPLAY', only_name='DISPLAY' )['data']['parameters'][0]['values']['value']
         #p = subprocess.Popen( ['pkill', displayname] , stderr=subprocess.STDOUT )
         """if len(self.checkProcess("axis")) > 0:
