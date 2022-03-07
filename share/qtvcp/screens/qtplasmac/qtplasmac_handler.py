@@ -1,4 +1,4 @@
-VERSION = '1.221.165'
+VERSION = '1.222.168'
 
 '''
 qtplasmac_handler.py
@@ -35,6 +35,7 @@ import math
 import glob
 import linuxcnc
 import hal, hal_glib
+from OpenGL.GL import glTranslatef
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -44,23 +45,25 @@ from qtvcp import logger
 from qtvcp.core import Status, Action, Info, Tool
 from qtvcp.lib.gcodes import GCodes
 from qtvcp.lib.keybindings import Keylookup
-from qtvcp.widgets.file_manager import FileManager as FILE_MAN
-from qtvcp.widgets.gcode_editor import GcodeEditor as EDITOR
-from qtvcp.widgets.mdi_history import MDIHistory as MDI_HISTORY
-from qtvcp.widgets.mdi_line import MDILine as MDI_LINE
-from qtvcp.widgets.status_label import StatusLabel as STATLABEL
-from qtvcp.widgets.stylesheeteditor import  StyleSheetEditor as SSE
-from qtvcp.widgets.camview_widget import CamView as CAM
-from qtvcp.widgets.simple_widgets import DoubleScale as DOUBLESCALE
-from qtvcp.widgets.origin_offsetview import OriginOffsetView as OFFSETVIEW
-from qtvcp.widgets.origin_offsetview import MyTableModel as OFFSET_TABLE
-from qtvcp.lib.aux_program_loader import Aux_program_loader
 from qtvcp.lib.qtplasmac import tooltips as TOOLTIPS
 from qtvcp.lib.qtplasmac import set_offsets as OFFSETS
 from qtvcp.lib.qtplasmac import run_from_line as RFL
 from qtvcp.lib.qtplasmac import updater as UPDATER
-from OpenGL.GL import glTranslatef
+from qtvcp.widgets.camview_widget import CamView as CAM
+from qtvcp.widgets.file_manager import FileManager as FILE_MAN
+from qtvcp.widgets.gcode_editor import GcodeEditor as EDITOR
+from qtvcp.widgets.mdi_history import MDIHistory as MDI_HISTORY
+from qtvcp.widgets.mdi_line import MDILine as MDI_LINE
+from qtvcp.widgets.origin_offsetview import OriginOffsetView as OFFSETVIEW
+from qtvcp.widgets.origin_offsetview import MyTableModel as OFFSET_TABLE
+from qtvcp.widgets.screen_options import ScreenOptions as OPTIONS
+from qtvcp.widgets.simple_widgets import DoubleScale as DOUBLESCALE
+from qtvcp.widgets.status_label import StatusLabel as STATLABEL
+from qtvcp.widgets.stylesheeteditor import  StyleSheetEditor as SSE
+from qtvcp.lib.aux_program_loader import Aux_program_loader
+from qtvcp.lib.notify import Notify
 from rs274.glcanon import GlCanonDraw
+from qt5_graphics import Lcnc_3dGraphics as DRO
 
 LOG = logger.getLogger(__name__)
 KEYBIND = Keylookup()
@@ -68,6 +71,7 @@ STATUS = Status()
 INFO = Info()
 ACTION = Action()
 TOOL = Tool()
+NOTICE = Notify()
 AUX_PRGM = Aux_program_loader()
 INIPATH = os.environ.get('INI_FILE_NAME', '/dev/null')
 
@@ -247,7 +251,6 @@ class HandlerClass:
         self.preRflFile = ''
         self.preClearFile = ''
         self.rflActive = False
-        self.jogInhibit = ''
         self.ccButton, self.otButton, self.ptButton, self.tpButton = '', '', '', ''
         self.ctButton, self.scButton, self.frButton, self.mcButton = '', '', '', ''
         self.ovButton, self.llButton, self.tlButton = '', '', ''
@@ -342,16 +345,10 @@ class HandlerClass:
         STATUS.connect('interp-waiting', self.interp_waiting)
         STATUS.connect('interp-run', self.interp_running)
         STATUS.connect('jograte-changed', self.jog_rate_changed)
-        STATUS.connect('current_feed_rate', lambda w, v: self.feed_rate_changed(v))
         STATUS.connect('graphics-gcode-properties', lambda w, d:self.update_gcode_properties(d))
         STATUS.connect('system_notify_button_pressed', self.system_notify_button_pressed)
         STATUS.connect('tool-in-spindle-changed', self.tool_changed)
         STATUS.connect('periodic', lambda w: self.update_periodic())
-        self.overlayPreview.setText(self.get_overlay_text(False))
-        self.overlayConv.setText(self.get_overlay_text(True))
-        if not self.w.chk_overlay.isChecked():
-            self.overlayPreview.hide()
-            self.overlayConv.hide()
         self.w.setWindowTitle('{} - QtPlasmaC v{}, powered by QtVCP on LinuxCNC v{}'.format(self.machineName, VERSION, linuxcnc.version.split(':')[0]))
         self.startupTimer = QTimer()
         self.startupTimer.timeout.connect(self.startup_timeout)
@@ -392,6 +389,8 @@ class HandlerClass:
         self.gcode_editor_patch()
         self.camview_patch()
         self.offset_table_patch()
+        self.qt5_graphics_patch()
+        self.screen_options_patch()
 
 # patched gcode editor functions
     def gcode_editor_patch(self):
@@ -441,8 +440,6 @@ class HandlerClass:
             self.view_t_pressed()
         self.w.gcode_editor.editMode()
         self.vkb_hide()
-        if self.w.chk_overlay.isChecked():
-            self.overlayPreview.show()
         ACTION.SET_MANUAL_MODE()
 
     # we don't use lexer colors
@@ -525,6 +522,72 @@ class HandlerClass:
         else:
             return Qt.ItemIsEditable | Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
+# patched qt5_graphics functions
+    def qt5_graphics_patch(self):
+        self.old_joint_dro_format_OFF = DRO.joint_dro_format_OFF
+        DRO.joint_dro_format_OFF = self.new_joint_dro_format_OFF
+        self.old_dro_format = DRO.dro_format
+        DRO.dro_format = self.new_dro_format
+
+    # not used, placeholder for future change in qt5_graphics.py
+    def new_joint_dro_format_OFF(self,s,spd,num_of_joints,limit, homed):
+        return limit, homed, self.get_overlay_text(True), ['']
+
+    # replace dro with current material
+    def new_dro_format(self,s,spd,dtg,limit,homed,positions,axisdtg,g5x_offset,g92_offset,tlo_offset):
+        return limit, homed, self.get_overlay_text(True), ['']
+
+# patched screen options functions
+    def screen_options_patch(self):
+        self.old_process_error = OPTIONS.process_error
+        OPTIONS.process_error = self.new_process_error
+
+    # we want custom notifications for jog errors
+    def new_process_error(self, w, kind, text):
+        O = self.w.screen_options
+        if O.desktop_notify:
+            if 'on limit switch error' in text:
+                NOTICE.update(O.notify_hard_limits, title='Machine Error:', message=text, msgs=O.notify_max_msgs)
+            elif 'jog-inhibit' in text:
+                if self.w.led_float_switch.hal_pin.get():
+                    trigger = _translate('HandlerClass', 'Float Switch')
+                elif self.w.led_ohmic_probe.hal_pin.get():
+                    trigger = _translate('HandlerClass', 'Ohmic Probe')
+                elif self.w.led_breakaway_switch.hal_pin.get():
+                    trigger = _translate('HandlerClass', 'Breakaway Switch')
+                msg0 = _translate('HandlerClass', 'has disabled jogging')
+                text = '{} {}\n'.format(trigger, msg0)
+                NOTICE.update(O.notify_critical, title='Operator Error:', message=text, msgs=O.notify_max_msgs)
+            elif kind == linuxcnc.OPERATOR_ERROR:
+                NOTICE.update(O.notify_critical, title='Operator Error:', message=text, msgs=O.notify_max_msgs)
+            elif kind == linuxcnc.OPERATOR_TEXT:
+                NOTICE.update(O.notify_critical, title='Operator Text:', message=text, msgs=O.notify_max_msgs)
+            elif kind == linuxcnc.OPERATOR_DISPLAY:
+                NOTICE.update(O.notify_critical, title='Operator Display:', message=text, msgs=O.notify_max_msgs)
+            elif kind == linuxcnc.NML_ERROR:
+                NOTICE.update(O.notify_critical, title='Internal NML Error:', message=text, msgs=O.notify_max_msgs)
+            elif kind == linuxcnc.NML_TEXT:
+                NOTICE.update(O.notify_critical, title='Internal NML Text:', message=text, msgs=O.notify_max_msgs)
+            elif kind == linuxcnc.NML_DISPLAY:
+                NOTICE.update(O.notify_critical, title='Internal NML Display:', message=text, msgs=O.notify_max_msgs)
+            elif kind == STATUS.TEMPARARY_MESSAGE:
+                NOTICE.update(O.notify_normal,
+                              title='Operator Info:',
+                              message=text,
+                              status_timeout=0,
+                              timeout=2,
+                              msgs=O.notify_max_msgs)
+        if O.play_sounds and O.mchnMsg_play_sound:
+            STATUS.emit('play-sound', '%s' % O.mchnMsg_sound_type)
+            if O.mchnMsg_speak_errors:
+                if kind in (linuxcnc.OPERATOR_ERROR, linuxcnc.NML_ERROR):
+                    STATUS.emit('play-sound', 'SPEAK %s ' % text)
+            if O.mchnMsg_speak_text:
+                if kind in (linuxcnc.OPERATOR_TEXT, linuxcnc.NML_TEXT,
+                            linuxcnc.OPERATOR_DISPLAY, STATUS.TEMPARARY_MESSAGE):
+                    STATUS.emit('play-sound', 'SPEAK %s ' % text)
+        STATUS.emit('update-machine-log', text, 'TIME')
+
 
 #########################################################################################################################
 # SPECIAL FUNCTIONS SECTION #
@@ -556,7 +619,6 @@ class HandlerClass:
         self.offsetsActivePin = self.h.newpin('offsets_active', hal.HAL_BIT, hal.HAL_IN)
         self.zHeightPin = self.h.newpin('z_height', hal.HAL_FLOAT, hal.HAL_IN)
         self.plasmacStatePin = self.h.newpin('plasmac_state', hal.HAL_S32, hal.HAL_IN)
-        self.jogInhibitPin = self.h.newpin('jog_inhibit', hal.HAL_BIT, hal.HAL_OUT)
         self.paramTabDisable = self.h.newpin('param_disable', hal.HAL_BIT, hal.HAL_IN)
         self.convTabDisable = self.h.newpin('conv_disable', hal.HAL_BIT, hal.HAL_IN)
         self.consChangePin = self.h.newpin('consumable_changing', hal.HAL_BIT, hal.HAL_IN)
@@ -605,6 +667,8 @@ class HandlerClass:
         self.gcodeScalePin = self.h.newpin('gcode_scale', hal.HAL_FLOAT, hal.HAL_OUT)
         self.developmentPin = self.h.newpin('development', hal.HAL_BIT, hal.HAL_IN)
         self.tabsAlwaysEnabled = self.h.newpin('tabs_always_enabled', hal.HAL_BIT, hal.HAL_IN)
+        self.jogInhibited = self.h.newpin('jog_inhibited', hal.HAL_BIT, hal.HAL_IN)
+        self.sensorActive = self.h.newpin('sensor_active', hal.HAL_BIT, hal.HAL_IN)
 
     def link_hal_pins(self):
         #arc parameters
@@ -699,6 +763,8 @@ class HandlerClass:
         CALL(['halcmd', 'net', 'plasmac:consumable-changing', 'plasmac.consumable-changing', 'qtplasmac.consumable_changing'])
         CALL(['halcmd', 'net', 'plasmac:laser-on', 'qtplasmac.laser_on'])
         CALL(['halcmd', 'net', 'plasmac:gcode-scale', 'plasmac.gcode-scale', 'qtplasmac.gcode_scale'])
+        CALL(['halcmd', 'net', 'plasmac:jog-inhibit', 'qtplasmac.jog_inhibited'])
+        CALL(['halcmd', 'net', 'plasmac:sensor_active', 'plasmac.sensor-active', 'qtplasmac.sensor_active'])
 
 # *** add system hal pin changes here that may affect existing configs ***
         if not hal.pin_has_writer('plasmac.feed-upm'): # if feed-upm is not yet connected in hal
@@ -758,6 +824,8 @@ class HandlerClass:
         self.w.jog_stack.setCurrentIndex(0)
         self.w.chk_override_limits.setChecked(False)
         self.w.chk_override_limits.setEnabled(False)
+        self.w.chk_override_jog.setChecked(False)
+        self.w.chk_override_jog.setEnabled(False)
         self.w.thc_enable.setChecked(self.w.PREFS_.getpref('THC enable', True, bool, 'ENABLE_OPTIONS'))
         self.w.cornerlock_enable.setChecked(self.w.PREFS_.getpref('Corner lock enable', True, bool, 'ENABLE_OPTIONS'))
         self.w.kerfcross_enable.setChecked(self.w.PREFS_.getpref('Kerf cross enable', True, bool, 'ENABLE_OPTIONS'))
@@ -811,12 +879,13 @@ class HandlerClass:
         self.w.gcode_editor.gCodeLexerAction.setVisible(False)
         self.w.gcode_editor.label.setText('')
         self.w.gcodegraphics.set_alpha_mode(True)
-        self.w.gcodegraphics.setdro(False)
+        self.w.gcodegraphics.setShowOffsets(False)
+        self.w.gcodegraphics._font = 'monospace 11'
         self.w.conv_preview.set_cone_basesize(0.1)
         self.w.conv_preview.set_view('Z')
         self.w.conv_preview.set_alpha_mode(True)
         self.w.conv_preview.setShowOffsets(False)
-        self.w.conv_preview.setdro(False)
+        self.w.conv_preview._font = 'monospace 11'
         self.w.conv_preview.inhibit_selection = True
         self.w.conv_preview.updateGL()
         self.w.conv_preview.setInhibitControls(True)
@@ -842,12 +911,6 @@ class HandlerClass:
         self.error_present = False
         self.laserButtonState = 'laser'
         self.camButtonState = 'markedge'
-        self.overlayPreview = QLabel(self.w.gcodegraphics)
-        self.overlayPreview.setStyleSheet('font: 12pt "Courier"; color: #cccccc; background: rgba(1,0,0,255)')
-        self.overlayPreview.setAlignment(Qt.AlignTop|Qt.AlignLeft)
-        self.overlayConv = QLabel(self.w.conv_preview)
-        self.overlayConv.setStyleSheet('font: 12pt "Courier"; color: #cccccc; background: rgba(1,0,0,255)')
-        self.overlayConv.setAlignment(Qt.AlignTop|Qt.AlignLeft)
         self.overlayProgress = QProgressBar(self.w.gcode_display)
         self.overlayProgress.setOrientation(Qt.Vertical)
         self.overlayProgress.setInvertedAppearance(True)
@@ -855,17 +918,20 @@ class HandlerClass:
         self.overlayProgress.hide()
 
     def get_overlay_text(self, kerf):
+        text = ['']
+        if not self.w.chk_overlay.isChecked():
+            return text
         if '.' in self.w.cut_feed_rate.text() and len(self.w.cut_feed_rate.text().split('.')[0]) > 3:
-            text  = ('FR: {}\n'.format(self.w.cut_feed_rate.text().split('.')[0]))
+            text.append('FR: {}\n'.format(self.w.cut_feed_rate.text().split('.')[0]))
         else:
-            text  = ('FR: {}\n'.format(self.w.cut_feed_rate.text()))
-        text += ('PH: {}\n'.format(self.w.pierce_height.text()))
-        text += ('PD: {}\n'.format(self.w.pierce_delay.text()))
-        text += ('CH: {}'.format(self.w.cut_height.text()))
+            text.append('FR: {}\n'.format(self.w.cut_feed_rate.text()))
+        text.append('PH: {}\n'.format(self.w.pierce_height.text()))
+        text.append('PD: {}\n'.format(self.w.pierce_delay.text()))
+        text.append('CH: {}'.format(self.w.cut_height.text()))
         if kerf == True:
-            text += ('\nKW: {}'.format(self.w.kerf_width.text()))
+            text.append('\nKW: {}'.format(self.w.kerf_width.text()))
         if self.pmx485Exists:
-            text += ('\nCA: {}'.format(self.w.cut_amps.text()))
+            text.append('\nCA: {}'.format(self.w.cut_amps.text()))
         return text
 
     def offset_peripherals(self):
@@ -1137,6 +1203,7 @@ class HandlerClass:
             else:
                 self.set_buttons_state([self.idleHomedList], False)
         else:
+            self.w.power.setChecked(False)
             self.set_buttons_state([self.idleOnList, self.idleHomedList], False)
             if self.ptButton and hal.get_value('plasmac.probe-test'):
                 self.probe_test(False)
@@ -1270,12 +1337,6 @@ class HandlerClass:
             if STATUS.is_auto_running():
                 self.set_tab_jog_states(False)
 
-    def feed_rate_changed(self, rate):
-        if not rate:
-            for joint in range(len(self.coordinates)):
-                if self.isJogging[joint]:
-                    self.isJogging[joint] = False
-
     def jog_rate_changed(self, object, value):
         msg0 = _translate('HandlerClass', 'JOG')
         self.w.jogs_label.setText('{}\n{:.0f}'.format(msg0, STATUS.get_jograte()))
@@ -1310,8 +1371,6 @@ class HandlerClass:
             if not self.cameraOn and self.w.preview_stack.currentIndex() != 4:
                 self.w.preview_stack.setCurrentIndex(0)
                 self.vkb_hide()
-                if self.w.chk_overlay.isChecked():
-                    self.overlayPreview.show()
             self.w.file_open.setText(os.path.basename(filename))
             if not self.single_cut_request:
                 self.fileOpened = True
@@ -1385,8 +1444,8 @@ class HandlerClass:
             self.firstHoming = True
         if not self.fileOpened:
             self.set_blank_gcodeprops()
-        self.w.gcodegraphics.setdro(False)
-        self.w.conv_preview.setdro(False)
+        self.w.gcodegraphics.updateGL()
+        self.w.conv_preview.updateGL()
 
     def joint_homed(self, obj, joint):
         dro = self.coordinates[int(joint)]
@@ -1411,11 +1470,35 @@ class HandlerClass:
         STATUS.emit('dro-reference-change-request', 1)
         hal.set_p('plasmac.homed', '0')
         self.interp_idle(None)
+        self.w.gcodegraphics.updateGL()
+        self.w.conv_preview.updateGL()
 
     def hard_limit_tripped(self, obj, tripped, list_of_tripped):
         self.w.chk_override_limits.setEnabled(tripped)
         if not tripped:
             self.w.chk_override_limits.setChecked(False)
+
+    def jog_inhibited_changed(self, state):
+        if state:
+            self.w.chk_override_jog.setEnabled(state)
+        else:
+           if not self.w.led_float_switch.hal_pin.get() and not self.w.led_ohmic_probe.hal_pin.get() and \
+                                                            not self.w.led_breakaway_switch.hal_pin.get():
+                self.w.chk_override_jog.setChecked(False)
+                hal.set_p('plasmac.override-jog', '0')
+
+    def sensor_active_changed(self, state):
+        if not state:
+            self.w.chk_override_jog.setEnabled(False)
+            self.w.chk_override_jog.setChecked(False)
+            hal.set_p('plasmac.override-jog', str(state))
+
+    def override_jog_changed(self, state):
+        if state:
+            hal.set_p('plasmac.override-jog', '1')
+        else:
+            hal.set_p('plasmac.override-jog', '0')
+
 
     def tool_changed(self, obj, tool):
         if tool == 0:
@@ -1746,13 +1829,11 @@ class HandlerClass:
     def file_open_clicked(self):
         self.w.preview_stack.setCurrentIndex(1)
         self.vkb_hide()
-        self.overlayPreview.hide()
         self.w.filemanager.table.setFocus()
 
     def file_edit_clicked(self):
         if STATUS.stat.interp_state == linuxcnc.INTERP_IDLE and self.w.preview_stack.currentIndex() != 2:
             self.w.preview_stack.setCurrentIndex(2)
-            self.overlayPreview.hide()
             self.w.run.setEnabled(False)
             self.w.gcode_editor.editor.setFocus()
             if self.fileOpened:
@@ -1784,8 +1865,6 @@ class HandlerClass:
     def file_cancel_clicked(self):
         self.w.preview_stack.setCurrentIndex(0)
         self.vkb_hide()
-        if self.w.chk_overlay.isChecked():
-            self.overlayPreview.show()
         ACTION.SET_MANUAL_MODE()
 
     def cone_size_changed(self, data):
@@ -1894,32 +1973,6 @@ class HandlerClass:
                 head = _translate('HandlerClass', 'FILE ERROR')
                 msg0 = _translate('HandlerClass', 'does not exist')
                 STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{} {}\n'.format(head, file, msg0))
-
-    def jog_inhibit_changed(self, state, switch):
-        if state and not self.jogInhibit:
-            for axis in [0,1,2,3]:
-                if self.isJogging[axis]:
-                    ACTION.JOG(axis, 0, 0, 0)
-                    head = _translate('HandlerClass', 'JOG ERROR')
-                    msg0 = _translate('HandlerClass', 'Jogging stopped')
-                    msg1 = _translate('HandlerClass', 'tripped')
-                    STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{} {}\n'.format(head, msg0, switch, msg1))
-                    self.isJogging[axis] = False
-            self.jogInhibit = switch
-            self.jogInhibitPin.set(True)
-        else:
-            if self.w.led_float_switch.hal_pin.get():
-                self.jogInhibit = 'float switch'
-                self.jogInhibitPin.set(True)
-            elif self.w.led_ohmic_probe.hal_pin.get():
-                self.jogInhibit = 'ohmic probe'
-                self.jogInhibitPin.set(True)
-            elif self.w.led_breakaway_switch.hal_pin.get():
-                self.jogInhibit = 'breakaway switch'
-                self.jogInhibitPin.set(True)
-            else:
-                self.jogInhibit = ''
-                self.jogInhibitPin.set(False)
 
     def jog_slow_pressed(self, external=False):
         if self.w.jog_slow.isChecked():
@@ -2171,7 +2224,7 @@ class HandlerClass:
         self.w.jog_slow.pressed.connect(self.jog_slow_pressed)
         self.w.chk_soft_keyboard.stateChanged.connect(self.soft_keyboard)
         self.w.chk_override_limits.stateChanged.connect(self.chk_override_limits_changed)
-        self.w.chk_overlay.stateChanged.connect(self.overlay_changed)
+        self.w.chk_overlay.stateChanged.connect(self.overlay_update)
         self.w.chk_tool_tips.stateChanged.connect(lambda:TOOLTIPS.tool_tips_changed(self.w))
         self.w.torch_enable.stateChanged.connect(lambda w:self.torch_enable_changed(w))
         self.w.ohmic_probe_enable.stateChanged.connect(lambda w:self.ohmic_probe_enable_changed(w))
@@ -2318,9 +2371,6 @@ class HandlerClass:
         self.w.feed_label.pressed.connect(self.feed_label_pressed)
         self.w.rapid_label.pressed.connect(self.rapid_label_pressed)
         self.w.jogs_label.pressed.connect(self.jogs_label_pressed)
-        self.w.led_float_switch.hal_pin.value_changed.connect(lambda v:self.jog_inhibit_changed(v, 'float switch'))
-        self.w.led_ohmic_probe.hal_pin.value_changed.connect(lambda v:self.jog_inhibit_changed(v, 'ohmic probe'))
-        self.w.led_breakaway_switch.hal_pin.value_changed.connect(lambda v:self.jog_inhibit_changed(v, 'breakaway switch'))
         self.paramTabDisable.value_changed.connect(lambda v:self.param_tab_changed(v))
         self.convTabDisable.value_changed.connect(lambda v:self.conv_tab_changed(v))
         self.pierceCountPin.value_changed.connect(self.pierce_count_changed)
@@ -2389,6 +2439,9 @@ class HandlerClass:
         self.w.conv_save.pressed.connect(lambda:self.conv_call('save'))
         self.w.conv_settings.pressed.connect(lambda:self.conv_call('settings'))
         self.w.conv_send.pressed.connect(lambda:self.conv_call('send'))
+        self.w.chk_override_jog.stateChanged.connect(self.override_jog_changed)
+        self.jogInhibited.value_changed.connect(lambda v:self.jog_inhibited_changed(v))
+        self.sensorActive.value_changed.connect(lambda v:self.sensor_active_changed(v))
 
     def conv_call(self, operation):
         if self.developmentPin:
@@ -2434,7 +2487,6 @@ class HandlerClass:
         for axis in self.axisList:
             self.w['home_{}'.format(axis)].set_joint(self.coordinates.index(axis))
             self.w['home_{}'.format(axis)].set_joint_number(self.coordinates.index(axis))
-        self.isJogging = {}
         for joint in range(len(self.coordinates)):
             # check if home all button required
             if not self.iniFile.find('JOINT_{}'.format(joint), 'HOME_SEQUENCE'):
@@ -2446,8 +2498,6 @@ class HandlerClass:
                     self.jogSyncList.append('jog_{}_minus'.format(self.coordinates[joint]))
                     self.jogButtonList.remove('jog_{}_plus'.format(self.coordinates[joint]))
                     self.jogButtonList.remove('jog_{}_minus'.format(self.coordinates[joint]))
-            # set jogging status
-            self.isJogging[joint] = False
 
     def set_mode(self):
         block1 = ['arc_ok_high', 'arc_ok_high_lbl', 'arc_ok_low', 'arc_ok_low_lbl' ]
@@ -2518,12 +2568,6 @@ class HandlerClass:
         hal.set_p('plasmac.offset-probe-delay', '{}'.format(self.probeDelay))
 
     def kb_jog(self, state, joint, direction, shift = False, linear = True):
-        if self.jogInhibit and state and (joint != 2 or direction != 1):
-            head = _translate('HandlerClass', 'JOG ERROR')
-            msg0 = _translate('HandlerClass', 'Cannot jog')
-            msg1 = _translate('HandlerClass', 'tripped')
-            STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{} {}\n'.format(head, msg0, self.jogInhibit, msg1))
-            return
         if linear:
             distance = STATUS.get_jog_increment()
             rate = STATUS.get_jograte()/60
@@ -2539,13 +2583,11 @@ class HandlerClass:
             elif self.jogSlow and not self.w.jog_slow.isChecked():
                 rate = STATUS.get_jograte()/60/self.slowJogFactor
             ACTION.JOG(joint, direction, rate, distance)
-            self.isJogging[joint] = True
             self.w.grabKeyboard()
         else:
             self.w.releaseKeyboard()
             if not STATUS.get_jog_increment():
                 ACTION.JOG(joint, 0, 0, 0)
-                self.isJogging[joint] = False
 
     def keyboard_shortcuts(self):
         if self.w.chk_keyboard_shortcuts.isChecked():
@@ -2581,13 +2623,9 @@ class HandlerClass:
             button = 'touch_{}'.format(axis)
             self.w[button].dialog_code = inputType
 
-    def overlay_changed(self, state):
-        if self.w.chk_overlay.isChecked():
-            self.overlayPreview.show()
-            self.overlayConv.show()
-        else:
-            self.overlayPreview.hide()
-            self.overlayConv.hide()
+    def overlay_update(self, state):
+        self.w.gcodegraphics.updateGL()
+        self.w.conv_preview.updateGL()
 
     def dialog_show_ok(self, icon, title, error, bText=_translate('HandlerClass', 'OK')):
         msg = QMessageBox(self.w)
@@ -4000,8 +4038,7 @@ class HandlerClass:
             self.w.material_selector.setCurrentIndex(self.w.materials_box.currentIndex())
             self.w.conv_material.setCurrentIndex(self.w.materials_box.currentIndex())
         self.autoChange = False
-        self.overlayPreview.setText(self.get_overlay_text(False))
-        self.overlayConv.setText(self.get_overlay_text(True))
+        self.overlay_update(None)
 
     def material_change_pin_changed(self, halpin):
         if halpin == 0:
@@ -4399,13 +4436,10 @@ class HandlerClass:
         self.w.camview.rotation = STATUS.stat.rotation_xy
         if self.w.preview_stack.currentIndex() != 3:
             self.w.preview_stack.setCurrentIndex(3)
-            self.overlayPreview.hide()
             self.button_active('camera')
             self.cameraOn = True
         else:
             self.w.preview_stack.setCurrentIndex(0)
-            if self.w.chk_overlay.isChecked():
-                self.overlayPreview.show()
             self.button_normal('camera')
             self.cameraOn = False
             ACTION.SET_MANUAL_MODE()
