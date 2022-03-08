@@ -37,7 +37,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_5">
        <widget class="QWidget" name="horizontalLayoutWidget">
@@ -984,7 +984,7 @@
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-439</y>
+           <y>0</y>
            <width>935</width>
            <height>1018</height>
           </rect>
@@ -2801,7 +2801,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>945</width>
+           <width>505</width>
            <height>1218</height>
           </rect>
          </property>

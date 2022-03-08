@@ -437,6 +437,8 @@ class RobotControl(State):
         #res = subprocess.Popen(cmd.split() ) #, stdout = subprocess.PIPE)
         if (self.isRUNLCNC == False):
             cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
+
+            cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/noGui.ini"]
             proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT )
             print("end")
 

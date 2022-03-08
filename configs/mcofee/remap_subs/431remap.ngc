@@ -1,8 +1,0 @@
-;M430 by remap: select userk kins
-o<431remap>sub
-  #<SWITCHKINS_PIN> = 3  ; set N as required: motion.analog-out-0N
-  #<kinstype> = 2        ; this routine selects 2:userk
-
-   (debug,M30: V5420: #5420)
-   (debug,joint.0.motor-pos-fb:#<_hal[joint.0.free-pos-cmd]>)
-o<431remap>endsub

@@ -1,4 +1,0 @@
-#!/bin/bash
-# wait for P seconds
-sleep $1
-exit 0
