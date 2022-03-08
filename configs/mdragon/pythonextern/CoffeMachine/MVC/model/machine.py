@@ -296,7 +296,7 @@ class TakeCoffeeState(State):
             f.close()
             self.gcode.reverse()"""
             self.stateRobot = "Control"
-            self.machine.myrobot.init()
+            self.machine.myrobot.initstate()
 
         elif (self.stateRobot == "Control"):
             if (self.machine.myrobot.run(self.dataSQL) == 1):

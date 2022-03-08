@@ -9,95 +9,203 @@ import posRobot
 import subprocess
 
 
-class until():
+class until:
+    def increseStep(self):
+        self.number += 1
+        
     def openGrib(self):
+        self.number += 1
         pass
-    def clsoeGrib(self):
+    def closeGrib(self):
+        self.number += 1
         pass
     def checkFinish(self):
         if (self.exec.robot.checkStatusDoneMDI() != -1):
-            return True
+            self.number += 1 
         return False
-        
 
-class takeGlass():
-    __slots__ = ['robot', 'state', 'number']
+    def moveJoinToPos(self,pos):
+        if (self.exec.robot.checkStatusDoneMDI() != -1):
+            pos = getattr(posRobot,str(pos))
+            print("RUN",pos)
+            self.exec.robot.sendMDI("G0.1 "+ pos)
+            time.sleep(0.05)    
+            self.number += 1   
+
+    def moveWToPos(self,pos):
+        if (self.exec.robot.checkStatusDoneMDI() != -1):
+            pos = getattr(posRobot,str(pos))
+            print("RUN",pos)
+            self.exec.robot.sendMDI("G0 "+ pos)
+            time.sleep(0.05)    
+            self.number += 1 
+
+class takeGlassState(until):
+    #__slots__ = ['robot', 'state', 'number']
     def __init__(self,robot):
         self.exec = robot
         self.state = "wait"
+        self.number = 0
+
+    def run(self,data):
+        if (self.number ==0):
+            self.openGrib()
+        elif (self.number ==1): #move to Glass 1
+            self.moveJoinToPos("TAKE_GLASS_" + str(data[3])) 
+        elif (self.number == 2): #wait done
+            self.checkFinish()
+        elif (self.number == 3): #move to Glass 2
+            self.moveJoinToPos("TAKE_GLASS_END_" + str(data[3])) 
+        elif (self.number == 4): #Close Glass
+            self.checkFinish()
+        elif (self.number == 5): #move to Glass 1
+            self.closeGrib() 
+        elif (self.number == 6): #move to Glass 1
+            self.moveJoinToPos("TAKE_GLASS_" + str(data[3])) 
+        elif (self.number == 7): #move to Glass 1
+            self.checkFinish()
+        elif (self.number == 8): #move to Glass 1
+            self.number = 0
+            self.exec.stateRunStep = self.exec.takeNguyenLieu
+        return 0
+
+class takeNguyenLieu(until):
+    #__slots__ = ['robot', 'runAt', 'number']
+    def __init__(self,robot):
+        self.exec = robot
+        self.number = 0
+        self.runAt = 0
+    def run(self,data):
+        if (data[self.runAt+5] == 0):
+            self.runAt += 1
+        elif self.runAt < 14 :
+            self.checkrun(data)
+        elif self.runAt == 14 :
+            self.runAt = 0
+            self.exec.stateRunStep = self.exec.DuaLyThanhPham
+        return 0
+ #nect state
+
+    def checkrun(self,data):
+        if (self.number ==0):
+            self.increseStep()
+        elif (self.number ==1): #move to Glass 1
+            self.moveJoinToPos("TAKE_NL_" + str(self.runAt + 1)) 
+        elif (self.number == 2): #wait done
+            self.checkFinish()
+        elif (self.number == 3): #move to Glass 2
+            self.moveJoinToPos("TAKE_NL_END_" + str(self.runAt + 1)) 
+        elif (self.number == 4): #Close Glass
+            self.checkFinish()
+        elif (self.number == 5): #move to Glass 1
+            #print("send modbus",(int(self.runAt )*2)+5,timewait)
+            self.exec.robot.valveModbus.setData(1,6,int(self.runAt)*2,int( data[(int(self.runAt ))+5]))
+            self.increseStep()
+        elif (self.number == 6):
+            modbusGet = self.exec.robot.valveModbus.getData(1,3,(self.runAt *2) +1,1)
+            print(modbusGet)
+            if  int(modbusGet['data'][0])!= 1 and int(modbusGet['data'][0])!= 0:
+                self.exec.robot.valveModbus.setData(1,16,self.runAt *2 ,[0,0])
+                self.increseStep()
+        elif (self.number == 7): #move to Glass 1
+            self.moveJoinToPos("TAKE_NL_" + str(self.runAt + 1)) 
+        elif (self.number == 8): #wait done
+            self.checkFinish()
+        elif (self.number == 9): #move to Glass 1
+            self.number = 0
+            self.runAt += 1
+        
+
+class DuaLyThanhPham(until):
+    #__slots__ = ['robot', 'state', 'number']
+    def __init__(self,robot):
+        self.exec = robot
         self.number = 0
     def run(self,data):
         if (self.number ==0):
-            self.goto(str(pos)) # or self.goto("END_" + pos) 
-            self.number = 1
-        elif (self.number ==1):
-            self.goto("END_" + str(pos)) 
-            self.number = 2
-        elif (self.number == 3):
-            modbusGet = self.robot.valveModbus.getData(1,3,(int(pos)-1)*2 + 1,1)
-            print(modbusGet)
-            if  int(modbusGet['data'][0])!= 1 and int(modbusGet['data'][0])!= 0:
-                self.robot.valveModbus.setData(1,16,(int(pos)-1)*2 ,[0,0])
-                self.number = 4 
-        elif (self.number == 4):
-            self.goto(str(pos))
-            self.number = 5
-        elif (self.number == 5):
-            self.state = "wait"
+            self.increseStep()
+        elif (self.number ==1): #move to Glass 1
+            self.moveJoinToPos("MOVE_END_FIRST") 
+        elif (self.number == 2): #wait done
+            self.checkFinish()
+        elif (self.number == 3): #move to Glass 2
+            self.moveJoinToPos("MOVE_END_END") 
+        elif (self.number == 4): #Close Glass
+            self.checkFinish()
+        elif (self.number == 5): #move to Glass 1
+            self.openGrib() 
+        elif (self.number == 6): #move to Glass 1
+            self.moveJoinToPos("MOVE_END_FIRST") 
+        elif (self.number == 7): #move to Glass 1
+            self.checkFinish()
+        elif (self.number == 8): #move to Glass 1
             self.number = 0
-            return True  
+            self.exec.stateRunStep = self.exec.goHomeState 
+        return 0
 
-class takeNguyenLieu():
+class goHomeState(until):
     __slots__ = ['robot', 'state', 'number']
     def __init__(self,robot):
         self.exec = robot
         self.number = 0
-    def run(self,pos,timewait):
-        pass    
-
-class DuaLyThanhPham():
-    __slots__ = ['robot', 'state', 'number']
+    def run(self,data):
+        if (self.number ==0):
+            self.increseStep()
+        elif (self.number ==1): #move to Glass 1
+            self.moveJoinToPos("MOVE_HOME") 
+        elif (self.number == 2): #wait done
+            self.checkFinish()
+        elif (self.number == 3): #move to Glass 1
+            self.number = 0
+            self.exec.stateRunStep = self.exec.finishState 
+        return 0
+class finishState(until):
+    #__slots__ = ['robot', 'state', 'number']
     def __init__(self,robot):
         self.exec = robot
         self.number = 0
-    def run(self,pos,timewait):
-        pass   
+    def run(self,data):
+        self.exec.stateRunStep = self.exec.waitState 
+        return 1 
 
-
-class takeWait():
-    __slots__ = ['robot', 'state', 'number']
+class waitState(until):
+    #__slots__ = ['robot', 'state', 'number']
     def __init__(self,robot):
         self.exec = robot
         self.number = 0
-    def run(self,pos,timewait):
-        pass   
+    def run(self,data):
+        return 0 
 
-class wait():
-    __slots__ = ['robot', 'state', 'number']
+class InitStats(until):
+    #__slots__ = ['robot', 'number']
     def __init__(self,robot):
         self.exec = robot
         self.number = 0
-    def run(self,pos,timewait):
-        self.robot.state = self.robot.takeGlass
-        return False 
+
+    def run(self,data):
+        self.exec.stateRunStep = self.exec.takeGlassState 
+        return 0    
 
 class exec():
-    __slots__ = ['robot', 'state', 'number']
+    #__slots__ = ['robot', 'state', 'number']
     def __init__(self,robot):
+        super().__init__()
         self.robot = robot
-        self.state = "wait"
-        self.takeGlass = takeGlass(self)
+        #self.state = "wait"
+        self.initStats = InitStats(self)
+        self.takeGlassState = takeGlassState(self)
         self.takeNguyenLieu = takeNguyenLieu(self)
         self.DuaLyThanhPham = DuaLyThanhPham(self)
-        self.takeWait = takeWait(self)
-        self.wait = wait(self)
-        self.stateRunStep = self.wait 
+        self.goHomeState = goHomeState(self)
+        self.finishState = finishState(self)
+        self.waitState = waitState(self)
+        self.stateRunStep = self.waitState 
         self.number = 0
         
     def run(self,pos,timewait,data):
-        #return self.stateRunStep.run(pos,timewait)
+        return self.stateRunStep.run(data)
 
-        if (timewait == "0" or timewait == 0 ):
+        """if (timewait == "0" or timewait == 0 ):
             return True
         if self.state == "wait":
             self.state = "move"
@@ -136,9 +244,9 @@ class exec():
                     self.state = "move"
             else:
                 self.state = "move"
-        return False
+        return False"""
 
-    def move(self,statep,pos):
+    """def move(self,statep,pos):
         self.goto(str(pos)) # or self.goto("END_" + pos) 
         statep =  statep +1
         self.state = "waitdone"
@@ -156,7 +264,7 @@ class exec():
         #    pass
         
     def wait(self):
-        pass
+        pass"""
         
 
 class RobotControl(State):
@@ -183,10 +291,11 @@ class RobotControl(State):
         self.exec = exec(self)
 
     def initstate(self):
-        self.exec.stateRunStep = self.exec.wait 
+        self.exec.stateRunStep = self.exec.initStats 
 
     def run(self, data):
-        stsDone = False
+        return self.exec.run("0",data[3],data)
+        """stsDone = False
         datareturn = 0
         if self.state == 0 :
             stsDone = self.exec.run("0",data[3],data)  #TAKE
@@ -202,7 +311,7 @@ class RobotControl(State):
         if self.state == 17:
             self.state = 0
             datareturn = 1
-        return datareturn
+        return datareturn"""
 
 
     def moveToPos(self):
