@@ -18,7 +18,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSlot,  QObject ,pyqtSlot,QUrl,Qt, QTimer
 from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator
-from modbus import modbuspull
+from modbus import ModbusPull
 
 LOG_FILENAME = 'mylog.log'
 my_logger = logging.getLogger('MyLogger')
@@ -33,12 +33,23 @@ class App(QApplication):
     def __init__(self, sys_argv,server):
         super(App, self).__init__(sys_argv)
         queueWEB = variThreading.init()
-        valveModbus = modbuspull()
+        valveModbus = ModbusPull()
         self.Machine = Machine(my_logger,variThreading.queueVNPAY,valveModbus)
         self.main_controller = MainController(self.Machine)
         self.main_view = MyGUI(self.Machine, self.main_controller,server)
+        #self.main_controller.loop()
         #self.main_view.show()
- 
+
+class App1(QApplication):
+    def __init__(self, sys_argv,server):
+        super(App, self).__init__(sys_argv)
+        queueWEB = variThreading.init()
+        valveModbus = modbuspull()
+        self.Machine = Machine(my_logger,variThreading.queueVNPAY,valveModbus)
+        
+        self.main_view = MyGUI(self.Machine,server)
+        self.main_controller = MainController(self.Machine,self.main_view )
+        #self.main_view.show() 
  
 if __name__ == '__main__':
     app = App(sys.argv,server)

@@ -4,6 +4,7 @@ import linuxcnc
 from vnpay import vnpay
 from model.state import State
 from model.robotControl import RobotControl
+from model.controlVal import ControlVal
 try: 
     import queue
 except ImportError: #py2
@@ -42,11 +43,10 @@ class WaitChooseItemState(State):
 
     def checkAndChangeState(self,data = [0,0]):
         if (self.status != 0):
-            print("Cho HÀN")
+            """print("Cho HÀN")
             if self.machine.item.stock < int(self.machine.item.numBuy):
-                print("HET HaN")
-           
-            elif self.status == 1:
+                print("HET HaN")"""
+            if self.status == 1:
                 self.machine.Que.put("Bạn Sẽ Mua " + \
                                     str(self.machine.item.name) + \
                                     " số lượng " + str(self.machine.item.numBuy))
@@ -104,8 +104,8 @@ class ShowItemsState(State):
     def checkAndChangeState(self,data = [0,0]):
         self.mprint("Switching to showItemsState")
         self.mprint('\nitems available \n***************')
-        for item in self.machine.items:
-            pass
+        #for item in self.machine.items:
+        #    pass
             #self.mprint(item.name + " Price: "+ str(item.price) + "(VND) Stock :" + str(item.stock)) # otherwise self.mprint this item and show its price
         self.mprint('***************\n')
         self.machine.state = self.machine.WaitChooseItemState
@@ -118,8 +118,8 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
         self.machine = machine
         self.moneypre = 0
         self.state= 0
-        self.idCheck = 0
-        self.dateCheck = 0
+        #self.idCheck = 0
+        #self.dateCheck = 0
         self.timeLoop = 0
 
     def checkAndChangeState(self,data = [0,0]):
@@ -134,8 +134,8 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
             self.timeLoop = time.time()
             
         elif (self.state == 1):
-            if (self.machine.queueWeb.empty() == False):
-                self.machine.vuluePAY = self.machine.queueWeb.get()
+            if (self.machine.queueWebIN.empty() == False):
+                self.machine.vuluePAY = self.machine.queueWebIN.get()
                 print (self.machine.vuluePAY)
                 self.timeLoop = time.time()
                 self.state = 2
@@ -186,15 +186,17 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
         time_change = datetime.timedelta(minutes=1)
         timeend = timebegin + time_change
         order_id = orderID
-        self.idCheck = order_id
-        self.dateCheck=timebegin.strftime('%Y%m%d%H%M%S')
+        self.machine.inforpayment['id'] = order_id
+        self.machine.inforpayment['day'] = timebegin.strftime('%Y%m%d%H%M%S')
+        #self.idCheck = order_id
+        #self.dateCheck=timebegin.strftime('%Y%m%d%H%M%S')
         vnp = vnpay()
         vnp.requestData['vnp_Version'] = '2.1.0'
         vnp.requestData['vnp_Command'] = 'pay'
         vnp.requestData['vnp_TmnCode'] = 'AGM2PN7X'
         vnp.requestData['vnp_Amount'] = amount * 100
         vnp.requestData['vnp_CurrCode'] = 'VND'
-        vnp.requestData['vnp_TxnRef'] = self.idCheck
+        vnp.requestData['vnp_TxnRef'] = self.machine.inforpayment['id']
         vnp.requestData['vnp_OrderInfo'] = order_desc
         vnp.requestData['vnp_OrderType'] = order_type
         # Check language, default: vn
@@ -206,7 +208,7 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
         if bank_code and bank_code != "":
             vnp.requestData['vnp_BankCode'] = bank_code
         
-        vnp.requestData['vnp_CreateDate'] = self.dateCheck   # 20150410063022
+        vnp.requestData['vnp_CreateDate'] = self.machine.inforpayment['day']  # 20150410063022
         vnp.requestData['vnp_ExpireDate'] = timeend.strftime('%Y%m%d%H%M%S')
         vnp.requestData['vnp_IpAddr'] = ipaddr
         vnp.requestData['vnp_ReturnUrl'] = settings.VNPAY_RETURN_URL
@@ -264,7 +266,7 @@ class BuyItemState(State):
             self.mprint('You can\'t buy this item. Insert more coins.') # then obvs you cant buy this item
             self.machine.state = self.machine.WaitChooseItemState
         else:
-            self.machine.moneyGet -= (self.machine.item.price * self.machine.item.numBuy) # subtract item price from available cash
+            # subtract item price from available cash
             self.machine.item.buyFromStock() # call this function to decrease the item inventory by 1
             #self.mprint('You got ' +self.machine.item.name)
             self.mprint('Cash remaining: ' + str(self.machine.moneyGet))
@@ -286,15 +288,8 @@ class TakeCoffeeState(State):
             self.dataSQL=self.machine.mysql.getData(str(self.machine.item.id))
             if self.dataSQL[19] != "END":
                 print("Sai Data")
+                self.machine.state = self.machine.CheckRefundState
             self.numLine = 0
-            """self.mprint('Control Robot to '+str(self.machine.item.controlfile))
-            f = open("./gcode/" + self.machine.item.controlfile, "r")
-            
-            for line in f.readlines():
-                self.gcode.append(line)
-                self.numLine += 1
-            f.close()
-            self.gcode.reverse()"""
             self.stateRobot = "Control"
             self.machine.myrobot.initstate()
 
@@ -322,9 +317,9 @@ class TakeCoffeeState(State):
             """   
 
         elif (self.stateRobot == "finish"):
-
             self.stateRobot = "init"
             self.logdata("info",'Robot take')
+            self.machine.moneyGet -= (self.machine.item.price * self.machine.item.numBuy)
             self.machine.state = self.machine.CheckRefundState
 
 class textToSpeed(State):
@@ -353,22 +348,27 @@ class CheckRefundState(State):
                 self.machine.Que.put("Quý khách lần này đẹp trai nên thối hẳn \
                                     cho 10000")
             self.machine.Que.put("Chúc quý khách ngon miệng")
+            
         elif self.machine.Que.empty():
             self.state = 0
             self.logdata("info",'Refunded oder: ' + str(self.machine.orderNum)  + 'Refund:' + str(self.machine.moneyGet) + " Success")
             if self.machine.moneyGet > 0:
                 self.mprint(str(self.machine.moneyGet) + " refunded.")
                 self.machine.moneyGet = 0
+                time.sleep(2)
             self.machine.item.numBuy = 0
             self.logdata("info",'CheckRefundState OK ' )
             self.mprint('Thank you, have a nice day!\n')
             time.sleep(2)
+            self.machine.inforpayment['id'] = ''
+            self.machine.inforpayment['day'] = ''
             self.machine.state = self.machine.ShowItemsState
 
 class Machine(QObject):
     even_loadPAY = pyqtSignal(str)
     def __init__(self,my_logger,queueWEB,valveModbus):
         super().__init__()
+        self.inforpayment ={'id':'','day':''}
         self.valveModbus = valveModbus
         self.mysql = mysql()
         self.my_logger = my_logger
@@ -379,7 +379,7 @@ class Machine(QObject):
         self.timeout = 10 
         self.orderNum = 0
         self.Que = queue.Queue(5)
-        self.queueWeb = queueWEB
+        self.queueWebIN = queueWEB
         self.ShowItemsState = ShowItemsState(self,"0")
         self.WaitChooseItemState = WaitChooseItemState(self,"1")
         self.WaitMoneyToBuyState = WaitMoneyToBuyState(self,"2")
@@ -387,25 +387,17 @@ class Machine(QObject):
         self.TakeCoffeeState = TakeCoffeeState(self,"4")
         self.ErrorState = ErrorState(self,"5")
         self.CheckRefundState = CheckRefundState(self,"6")
-        #self.
         self.state = self.ShowItemsState
         self.state.speak("S")
-
-        self.myrobot=RobotControl(valveModbus)
+        self.plcVal = ControlVal(valveModbus)
+        self.myrobot=RobotControl(self.plcVal)
+        self.statusMachine = 0 # =1 error Robot, 3error PLC
         self.totalItems = 2
         for i in range(1,self.mysql.totalDevice):
             dataget=self.mysql.getData(str(i))
             self.addItem(Item(i,'caffe sữa'  ,      dataget[4],    8800000000,  "caffeden.ngc" ))
 
-        #              name     ,        giá,   số lượng,   file
-        """item1 = Item(1,'caffe sữa'  ,      15000,    8800000000,  "caffeden.ngc" )
-        item2 = Item(2,'caffe đen'  ,      20000,    1000000000 ,  "caffesua.ngc")
-        item3 = Item(3,'caffe Kem'  ,      25000,    8800000000,  "caffeden.ngc" )
-        item4 = Item(4,'Nước Suối'  ,      10000,    1000000000 ,  "caffesua.ngc")
-        self.addItem(item1)
-        self.addItem(item2)
-        self.addItem(item3)
-        self.addItem(item4)"""
+        self.timeLoopGetPLC = 0
 
     def returnOrder(self):
         self.state = self.ShowItemsState
@@ -413,6 +405,12 @@ class Machine(QObject):
 
     def run(self,data = [0,0]):
         self.state.checkAndChangeState(data)
+        if (time.time() - self.timeLoopGetPLC > 60):
+            self.timeLoopGetPLC = time.time()
+            mucNuoc = self.plcVal.getData(1,3,28,14)
+            print("mucNuoc",mucNuoc)
+        if self.plcVal.stateModbus == 'er' or self.myrobot.statusRobot == 'er':
+            print("error")
 
     def scan(self):
         return self.state.scan()

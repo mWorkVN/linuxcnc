@@ -6,7 +6,7 @@ from modbus_tk import modbus_rtu
 import serial.tools.list_ports as prtlst
 
 
-class modbuspull():
+class ModbusPull():
     def __init__(self):    
         
         self.initCom()
@@ -41,15 +41,15 @@ class modbuspull():
         try:
             dataJ['data'] = self.master.execute(id, function, begin, end)          
         except modbus_tk.modbus.ModbusError as e:
-            dataJ['status'] = 'ER'
-            dataJ['status'] = 1
+            dataJ['status'] = 'er'
+            dataJ['data'] = 1
         except modbus_tk.modbus_rtu.ModbusInvalidResponseError as e:
-            dataJ['status'] = 'ER'
-            dataJ['status'] = 2
+            dataJ['status'] = 'er'
+            dataJ['data'] = 2
             #self.master.close()
         except:
-            dataJ['status'] = 'ER'
-            dataJ['status'] = 3
+            dataJ['status'] = 'er'
+            dataJ['data'] = 3
             print("other")
         return dataJ
             
@@ -63,15 +63,15 @@ class modbuspull():
         try:
             dataJ['data'] = self.master.execute(id, function, begin, output_value = data)
         except modbus_tk.modbus.ModbusError as e:
-            dataJ['status'] = 'ER'
-            dataJ['status'] = 1
+            dataJ['status'] = 'er'
+            dataJ['data'] = 1
         except modbus_tk.modbus_rtu.ModbusInvalidResponseError as e:
-            dataJ['status'] = 'ER'
-            dataJ['status'] = 2
+            dataJ['status'] = 'er'
+            dataJ['data'] = 2
             #self.master.close()
         except:
-            dataJ['status'] = 'ER'
-            dataJ['status'] = 3
+            dataJ['status'] = 'er'
+            dataJ['data'] = 3
             print("other")
         return dataJ
 

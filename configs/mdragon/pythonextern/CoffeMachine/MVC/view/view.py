@@ -36,6 +36,11 @@ class MyGUI(QMainWindow):
         self._machine.even_loadPAY.connect(self.on_even_loadPAY)
         self._main_controller.state_robot_error.connect(self.on_state_robot_error)
 
+        self.timer = QTimer(self)
+        self.timer.setSingleShot(False)
+        self.timer.setInterval(5) # in milliseconds, so 5000 = 5 seconds
+        self.timer.timeout.connect(self.loopGui)
+        self.timer.start()
         continueToBuy = True
         self.initEvent()
         self.initUi()
@@ -43,8 +48,8 @@ class MyGUI(QMainWindow):
         self.numberGui = "0"
         self.test = 0
         #self.showFullScreen()
-        
-    def paintEvent(self, event):
+
+    def loopGui(self):
         timebegin = time.time()
         #print("update",self.test)
         self._main_controller.run()
@@ -53,7 +58,18 @@ class MyGUI(QMainWindow):
             print("STATE NEW",flush=True)
             self.updateUi()
             getattr(self, 'stackedWidget').setCurrentIndex(int(stat) - 1)
-        self.update()
+
+    def paintEvent(self, event):
+        pass
+        """timebegin = time.time()
+        #print("update",self.test)
+        self._main_controller.run()
+        stat = self._main_controller.checkChangeState()
+        if int(stat) != 0:
+            print("STATE NEW",flush=True)
+            self.updateUi()
+            getattr(self, 'stackedWidget').setCurrentIndex(int(stat) - 1)
+        self.update()"""
 
     #@pyqtSlot(str)
     def on_even_loadPAY(self, value):
@@ -113,7 +129,9 @@ class MyGUI(QMainWindow):
         elif self._main_controller.preState == "6":
             self.webView.history().clear()
             money = self._machine.item.numBuy * self._machine.item.price
-            self.moneyFrefund.setText(str(self._machine.moneyGet))
+            self.moneyRefund.setText(str(self._machine.moneyGet))
+            self.idRefund.setText(str(self._machine.inforpayment['id']))
+            self.dayRefund.setText(str(self._machine.inforpayment['day']))
         
     def initEvent(self):
         self.page_buttonGroup.buttonClicked.connect(self.main_tab_changed)
@@ -145,7 +163,6 @@ class MyGUI(QMainWindow):
     def haveOrder(self,btn):
         id = btn.property('ID')
         sl = 1 #int(getattr(self, 'numSlID' +str(id) ).currentIndex())
-
         self._main_controller.setOrder(id,sl)
         print("have order",id,sl,flush=True)
 #vend()

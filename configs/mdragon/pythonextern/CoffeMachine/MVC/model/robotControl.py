@@ -40,11 +40,10 @@ class until:
             time.sleep(0.05)    
             self.number += 1 
 
-class takeGlassState(until):
-    #__slots__ = ['robot', 'state', 'number']
+class TakeGlassState(until):
+    __slots__ = ['robot', 'number']
     def __init__(self,robot):
         self.exec = robot
-        self.state = "wait"
         self.number = 0
 
     def run(self,data):
@@ -66,11 +65,11 @@ class takeGlassState(until):
             self.checkFinish()
         elif (self.number == 8): #move to Glass 1
             self.number = 0
-            self.exec.stateRunStep = self.exec.takeNguyenLieu
+            self.exec.stateRunStep = self.exec.takeNguyenLieuState
         return 0
 
-class takeNguyenLieu(until):
-    #__slots__ = ['robot', 'runAt', 'number']
+class TakeNguyenLieuState(until):
+    __slots__ = ['robot', 'runAt', 'number']
     def __init__(self,robot):
         self.exec = robot
         self.number = 0
@@ -79,33 +78,35 @@ class takeNguyenLieu(until):
         if (data[self.runAt+5] == 0):
             self.runAt += 1
         elif self.runAt < 14 :
-            self.checkrun(data)
+            self.__checkrun(data)
         elif self.runAt == 14 :
             self.runAt = 0
-            self.exec.stateRunStep = self.exec.DuaLyThanhPham
+            self.exec.stateRunStep = self.exec.duaLyThanhPhamState
         return 0
  #nect state
 
-    def checkrun(self,data):
+    def __checkrun(self,data):
         if (self.number ==0):
             self.increseStep()
-        elif (self.number ==1): #move to Glass 1
+        elif (self.number ==1): 
             self.moveJoinToPos("TAKE_NL_" + str(self.runAt + 1)) 
         elif (self.number == 2): #wait done
             self.checkFinish()
-        elif (self.number == 3): #move to Glass 2
+        elif (self.number == 3): 
             self.moveJoinToPos("TAKE_NL_END_" + str(self.runAt + 1)) 
-        elif (self.number == 4): #Close Glass
+        elif (self.number == 4): 
             self.checkFinish()
-        elif (self.number == 5): #move to Glass 1
-            #print("send modbus",(int(self.runAt )*2)+5,timewait)
-            self.exec.robot.valveModbus.setData(1,6,int(self.runAt)*2,int( data[(int(self.runAt ))+5]))
-            self.increseStep()
+        elif (self.number == 5): 
+            modbusReturn = self.exec.robot.PLCModbus.setData(1,6,int(self.runAt)*2,int( data[(int(self.runAt ))+5]))
+            if (modbusReturn == True):
+                self.increseStep()
         elif (self.number == 6):
-            modbusGet = self.exec.robot.valveModbus.getData(1,3,(self.runAt *2) +1,1)
+            modbusGet = self.exec.robot.PLCModbus.getData(1,3,(self.runAt *2) +1,1)
             print(modbusGet)
-            if  int(modbusGet['data'][0])!= 1 and int(modbusGet['data'][0])!= 0:
-                self.exec.robot.valveModbus.setData(1,16,self.runAt *2 ,[0,0])
+            if (modbusGet['status'] == 'er'):
+                self.increseStep()
+            elif  int(modbusGet['data'][0])!= 1 and int(modbusGet['data'][0])!= 0:
+                self.exec.robot.PLCModbus.setData(1,16,self.runAt *2 ,[0,0])
                 self.increseStep()
         elif (self.number == 7): #move to Glass 1
             self.moveJoinToPos("TAKE_NL_" + str(self.runAt + 1)) 
@@ -116,8 +117,8 @@ class takeNguyenLieu(until):
             self.runAt += 1
         
 
-class DuaLyThanhPham(until):
-    #__slots__ = ['robot', 'state', 'number']
+class DuaLyThanhPhamState(until):
+    __slots__ = ['robot', 'number']
     def __init__(self,robot):
         self.exec = robot
         self.number = 0
@@ -143,8 +144,8 @@ class DuaLyThanhPham(until):
             self.exec.stateRunStep = self.exec.goHomeState 
         return 0
 
-class goHomeState(until):
-    __slots__ = ['robot', 'state', 'number']
+class GoHomeState(until):
+    __slots__ = ['robot', 'number']
     def __init__(self,robot):
         self.exec = robot
         self.number = 0
@@ -159,117 +160,56 @@ class goHomeState(until):
             self.number = 0
             self.exec.stateRunStep = self.exec.finishState 
         return 0
-class finishState(until):
-    #__slots__ = ['robot', 'state', 'number']
+
+class FinishState(until):
+    __slots__ = ['exec']
     def __init__(self,robot):
         self.exec = robot
-        self.number = 0
     def run(self,data):
         self.exec.stateRunStep = self.exec.waitState 
         return 1 
 
-class waitState(until):
-    #__slots__ = ['robot', 'state', 'number']
+class WaitState(until):
+    __slots__ = ['exec']
     def __init__(self,robot):
         self.exec = robot
-        self.number = 0
     def run(self,data):
         return 0 
 
 class InitStats(until):
-    #__slots__ = ['robot', 'number']
+    __slots__ = ['exec']
     def __init__(self,robot):
         self.exec = robot
-        self.number = 0
 
     def run(self,data):
         self.exec.stateRunStep = self.exec.takeGlassState 
         return 0    
 
 class exec():
-    #__slots__ = ['robot', 'state', 'number']
+    __slots__ = ['robot', 'initStats', 'takeGlassState', 'takeNguyenLieuState',\
+                   'duaLyThanhPhamState',  'goHomeState','finishState','waitState','stateRunStep']
     def __init__(self,robot):
         super().__init__()
         self.robot = robot
-        #self.state = "wait"
         self.initStats = InitStats(self)
-        self.takeGlassState = takeGlassState(self)
-        self.takeNguyenLieu = takeNguyenLieu(self)
-        self.DuaLyThanhPham = DuaLyThanhPham(self)
-        self.goHomeState = goHomeState(self)
-        self.finishState = finishState(self)
-        self.waitState = waitState(self)
+        self.takeGlassState = TakeGlassState(self)
+        self.takeNguyenLieuState = TakeNguyenLieuState(self)
+        self.duaLyThanhPhamState = DuaLyThanhPhamState(self)
+        self.goHomeState = GoHomeState(self)
+        self.finishState = FinishState(self)
+        self.waitState = WaitState(self)
         self.stateRunStep = self.waitState 
-        self.number = 0
+        #self.number = 0
         
-    def run(self,pos,timewait,data):
+    def run(self,data):
         return self.stateRunStep.run(data)
-
-        """if (timewait == "0" or timewait == 0 ):
-            return True
-        if self.state == "wait":
-            self.state = "move"
-        elif self.state == "move":
-            #move to pos
-            if (self.number ==0):
-                self.goto(str(pos)) # or self.goto("END_" + pos) 
-                self.number = 1
-            elif (self.number ==1):
-                self.goto("END_" + str(pos)) 
-                self.number = 2
-            elif (self.number ==2):
-                if (int(pos) == 0) or (int(pos) == 15)or (int(pos) == 16):
-                    self.number = 4
-                else:
-                    print("send modbus",(int(pos)-1)*2,timewait)
-                    self.robot.valveModbus.setData(1,6,(int(pos)-1)*2,int(timewait))
-                    self.number = 3
-            elif (self.number == 3):
-                modbusGet = self.robot.valveModbus.getData(1,3,(int(pos)-1)*2 + 1,1)
-                print(modbusGet)
-                if  int(modbusGet['data'][0])!= 1 and int(modbusGet['data'][0])!= 0:
-                    self.robot.valveModbus.setData(1,16,(int(pos)-1)*2 ,[0,0])
-                    self.number = 4 
-            elif (self.number == 4):
-                self.goto(str(pos))
-                self.number = 5
-            elif (self.number == 5):
-                self.state = "wait"
-                self.number = 0
-                return True
-            self.state = "waitdone"
-        elif  self.state == "waitdone":  
-            if (self.number != 3) and (self.number != 4):
-                if (self.robot.checkStatusDoneMDI() != -1):
-                    self.state = "move"
-            else:
-                self.state = "move"
-        return False"""
-
-    """def move(self,statep,pos):
-        self.goto(str(pos)) # or self.goto("END_" + pos) 
-        statep =  statep +1
-        self.state = "waitdone"
-        if statep == 5:
-            self.state = "wait"
-            statep = 0
-        elif statep == 3:statep = 4
-
-    def goto(self,pos):
-        pos = getattr(posRobot,'TAKE_' +str(pos))
-        print("RUN",pos)
-        self.robot.sendMDI("G0.1 "+ pos)
-        time.sleep(0.05)
-        #while (self.robot.checkStatusDoneMDI() == -1):
-        #    pass
-        
-    def wait(self):
-        pass"""
         
 
 class RobotControl(State):
-    def __init__(self,valveModbus):
-        self.valveModbus=valveModbus
+    __slots__ = ['PLCModbus','exec','emc','emccommand','emcstat']
+    def __init__(self,PLCModbus):
+        self.PLCModbus=PLCModbus
+        self.statusRobot = 'ok'
         self.isRUNLCNC = False
         startCmd = "/home/mwork/mworkcnc/scripts/linuxcnc /home/mwork/mworkcnc/configs/mdragon/scara.ini"
         self.cleanLinuxcnc()
@@ -283,10 +223,6 @@ class RobotControl(State):
         for i in range(4):
             self.axis_home(i, self.emccommand, self.emcstat)
         self.set_mdi_mode()
-        time.sleep(1)
-        #self.myRobot=None 
-        print("Init STATE")   
-        self.state = 0
         self.isEMCRun = False
         self.exec = exec(self)
 
@@ -294,37 +230,7 @@ class RobotControl(State):
         self.exec.stateRunStep = self.exec.initStats 
 
     def run(self, data):
-        return self.exec.run("0",data[3],data)
-        """stsDone = False
-        datareturn = 0
-        if self.state == 0 :
-            stsDone = self.exec.run("0",data[3],data)  #TAKE
-        elif self.state < 15 :
-            stsDone = self.exec.run(self.state,data[self.state+4],data)
-            
-        elif self.state == 15 :
-            stsDone = self.exec.run("15","1",data) #DUA RA
-        elif self.state == 16 :
-            stsDone = self.exec.run("16","1",data) #HOME
-        if stsDone : self.state = self.state + 1
-        #print("CHECK",self.state,stsDone)
-        if self.state == 17:
-            self.state = 0
-            datareturn = 1
-        return datareturn"""
-
-
-    def moveToPos(self):
-        pass
-        
-    def controlPin(self):
-        pass
-
-    def waitTime(self):
-        pass
-
-    def goHome(self):
-        pass
+        return self.exec.run(data)
 
     def delInit(self):
         return
@@ -333,21 +239,21 @@ class RobotControl(State):
         del self.emccommand 
 
     def checkEMC(self):
-        try:
-            #self.emcstat = self.emc.stat()
+        self.checkReady()
+        try:  
             self.emcstat.poll()
             self.isEMCRun = True
+            self.statusRobot = 'ok'
         except linuxcnc.error as e:
-            print('Unable to poll linuxcnc, is it running?')
-            #self.error('Error message: {}'.format(e))
+            self.statusRobot = 'er'
             self.isEMCRun = False
         return self.isEMCRun 
 
     def reload(self):
-        imp.reload(linuxcnc) 
-
-        self.emc = linuxcnc
-        self.emccommand = self.emc.command()
+        pass
+        #imp.reload(linuxcnc) 
+        #self.emc = linuxcnc
+        #self.emccommand = self.emc.command()
         
 
     def init(self):
@@ -356,8 +262,8 @@ class RobotControl(State):
         #self.reload()
         self.checkEMC()
 
-    def checkError(self):
-        self.checkEMC()
+    """def checkError(self):
+        self.checkEMC()"""
 
     def set_mdi_mode(self):
         if self.isEMCRun ==False:
@@ -376,7 +282,7 @@ class RobotControl(State):
             self.emccommand.wait_complete()
 
     def checkStatusDoneMDI(self):
-        if self.isEMCRun ==False:
+        if self.isEMCRun == False:
             return 1      
         return self.emccommand.wait_complete(0.001)
 
@@ -385,18 +291,7 @@ class RobotControl(State):
             return
         self.set_mdi_mode() 
         data  = self.emccommand.mdi(msg)
-        #print("MDI returnb",time.time(),data)
-        #self.state = 1
 
-    def running(self, do_poll=True):
-        '''
-        check wether interpreter is running.
-        If so, cant switch to MDI mode.
-        '''
-        if do_poll:
-            self.emcstat.poll()
-        return (self.emcstat.task_mode == linuxcnc.MODE_AUTO and
-                self.emcstat.interp_state != linuxcnc.INTERP_IDLE)
 
     def axis_home(self, i, c, s):
         c.home(i)
@@ -405,6 +300,17 @@ class RobotControl(State):
             print("wait H")
             time.sleep(0.1)
             s.poll()
+
+    def checkReady(self):
+        self.emcstat.poll()
+        if self.emcstat.task_state == self.emc.STATE_ESTOP:
+            print("ESP ON")
+        if self.emcstat.task_state != linuxcnc.STATE_ON:
+            print("NOT ON MACHINE")
+        for i in range(0,4):
+            if self.emcstat.homed[i] != 1:
+                print("Axis ", i , "not Home")
+
 
     def initLinuxcnc(self):
         time.sleep(2)
@@ -433,16 +339,12 @@ class RobotControl(State):
             print("FAIL TO INITIALIZE THE MACHINE")	
     
     def startLinuxcnc(self, cmd):
-        pass
         #res = subprocess.Popen(cmd.split() ) #, stdout = subprocess.PIPE)
         if (self.isRUNLCNC == False):
             cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
 
             cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/noGui.ini"]
             proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT )
-            print("end")
-
-            #Wait 30s at maximum
             for i in range(30):
                 time.sleep(1)
                 if (self.checkProcess("axis") != False) and (self.checkProcess("linuxcnc") != False):
@@ -456,7 +358,6 @@ class RobotControl(State):
         checkExec = subprocess.Popen(checkProcess, stdin = processExec.stdout, stdout = subprocess.PIPE, stderr=subprocess.PIPE)
         processesOut, processesErr = checkExec.communicate()
         processSplit = processesOut.split()
-    
         return processSplit
     
     def checkIo(self):
@@ -469,7 +370,6 @@ class RobotControl(State):
 
     def checkProcess(self, str):
         retVal = []
-    
         strGrep = self.getProcesses(str)
         for i in range(len(strGrep) // 4):
             retVal.append([strGrep[4*i + 3], strGrep[4*i]])
@@ -478,29 +378,16 @@ class RobotControl(State):
 
     def killProcess(self, processId):
         killCommand = ["kill", processId]
-        #subprocess.communicate()
         sproc = subprocess.Popen(killCommand)
         sproc.wait()
-        #subprocess.Popen(killCommand, stderr=subprocess.STDOUT )
-    def shutdown(self):
-        displayname = ""
-        #displayname = StatusItem.get_ini_data( only_section='DISPLAY', only_name='DISPLAY' )['data']['parameters'][0]['values']['value']
-        p = subprocess.Popen( ['pkill', displayname] , stderr=subprocess.STDOUT )
 
-    # Check presence of LinuxCNC.
-    # Returns normally, if LinuxCNC is detected.
-    # Raises LinuxCNC_NotRunning, if LinuxCNC is not detected.
+        
+
     def linuxCNCRun(self):
-        # Check whether LinuxCNC is running.
         for lockname in ("/tmp/linuxcnc.lock", "/tmp/emc.lock"):
             if os.path.exists(lockname):
                 return True
-        #if not opt_watchdog:
-            # The check is disabled. Return success.
-        #    return True
         return False
-        #printError("LinuxCNC doesn't seem to be running. "\"(Use '--watchdog off' to disable this check.)")
-        #raise "LINUXCNC NOT RUN"
 
 
     def cleanLinuxcnc(self):

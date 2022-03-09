@@ -67,20 +67,15 @@ def convertJoinMode(self):
         else:
             SWITCHKINS_PIN = 3
             kinstype = 1  
-            print("!")
             CoordinateNumber = self.params[5220]
-            print("1")
             self.execute("M129")  
-            print("2")
             self.execute("M68 E%d Q%d"%(SWITCHKINS_PIN,kinstype))
-            print("!")
             self.execute("M66 E0 L0")
         return True
     except Exception as e:
         return False   
 
 def m439remap(self, **words): #convert to joint mode
-    print("M439")
     if convertJoinMode(self):return INTERP_OK
     return INTERP_ERROR
 
@@ -115,7 +110,6 @@ def convertWorldMode(self):
         return False
 
 def m438remap(self, **words): # convert to world mode
-    print("M438")
     if convertWorldMode(self):return INTERP_OK
     return INTERP_ERROR
 
@@ -140,7 +134,6 @@ def g01testskins(self, **words):
             else: 
                 pos[name]  = float(hal.get_value("axis."+name+".pos-cmd")) 
         gcodecmd="G53 %s X%.4fY%.4fZ%.4f C %.4f %s "%(typeGcode, pos['x'] ,pos['y'] ,pos['z'] ,pos['c'], cmd["f"])
-        print("M438 test ", gcodecmd , "in ",time.time())
         self.execute(gcodecmd )
         yield INTERP_EXECUTE_FINISH
     except Exception as e:
@@ -171,9 +164,6 @@ def g01remapskins(self, **words):
         value = hal.get_value("motion.switchkins-type")
         if (value == 0):
             convertJoinMode(self)
-            #m439remap(self)
-            #self.execute("M439",lineno())
-        print("G01 ",  "value begin",value)
         self.execute("M66 E0 L0")
         yield INTERP_EXECUTE_FINISH
         xposvalue = 0
@@ -192,7 +182,6 @@ def g01remapskins(self, **words):
                 statusKin = 1
             else: 
                 pos[name]  = float(hal.get_value("axis."+name+".pos-cmd")) 
-        #if (value==1):
         anglepos = scarakinematicInver(pos)
         xcmd = ""
         if (xold != anglepos[0]) or (yold != anglepos[1]):
@@ -205,10 +194,8 @@ def g01remapskins(self, **words):
         self.execute(gcodecmd )
         #yield INTERP_EXECUTE_FINISH
         check_coords(self, 'z', anglepos[2])
-        #print("G01 ",  "value ",value)
         if (value==0):
             convertWorldMode(self)
-            #m438remap(self)
         self.execute("M66 E0 L0")
         yield INTERP_EXECUTE_FINISH
     except Exception as e:
@@ -240,7 +227,6 @@ def g11remapskins(self, **words):
             anglepos = scarakinematicInver(pos)
             gcodecmd="G53 G01 X%.4f Y%.4f Z%.4f C%.4f %s"%(anglepos[0] ,anglepos[1] ,anglepos[2] ,anglepos[3], cmd["f"])
             self.execute(gcodecmd)
-            print("M439" , gcodecmd)
         elif (value==0): 
             print("REMAP - G1.1 {} {} {} {} {}".format(cmd["x"],cmd["y"],cmd["z"],cmd["c"],cmd["f"])) 
     except Exception as e:
