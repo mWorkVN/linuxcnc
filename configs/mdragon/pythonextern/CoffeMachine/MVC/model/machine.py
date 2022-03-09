@@ -16,6 +16,7 @@ import settings
 from PyQt5.QtCore import QObject, pyqtSignal
 from sql import mysql
 import subprocess
+from memory_profiler import profile
 
 class Item:
     def __init__(self,id, name, price, stock ,controlfile):
@@ -118,8 +119,6 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
         self.machine = machine
         self.moneypre = 0
         self.state= 0
-        #self.idCheck = 0
-        #self.dateCheck = 0
         self.timeLoop = 0
 
     def checkAndChangeState(self,data = [0,0]):
@@ -127,9 +126,7 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
         if (self.state == 0):
             self.state = 1
             timebegin = datetime.datetime.now()
-            #self.machine.orderNum = str(int(round(datetime.datetime.timestamp(timebegin))))
             self.machine.orderNum = str(int(round(timebegin.timestamp())))
-            #self.machine.orderNum = "123"
             self.payment(price,self.machine.orderNum)
             self.timeLoop = time.time()
             
@@ -142,7 +139,6 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
 
         elif (self.state == 2):
             if self.machine.vuluePAY["order"] == self.machine.orderNum :
-                print("DUNG ORDER")
                 if self.machine.vuluePAY["sts"] == "00":
                     self.machine.moneyGet = price
                     self.machine.state = self.machine.BuyItemState
@@ -172,7 +168,7 @@ class WaitMoneyToBuyState(State,vnpay,QObject):
             self.machine.Que.put("END")
             #self.speak(" ")
 
-
+    @profile
     def payment(self,price,orderID):
         order_type ='1'
         amount = price
@@ -366,6 +362,7 @@ class CheckRefundState(State):
 
 class Machine(QObject):
     even_loadPAY = pyqtSignal(str)
+    @profile
     def __init__(self,my_logger,queueWEB,valveModbus):
         super().__init__()
         self.inforpayment ={'id':'','day':''}
@@ -402,7 +399,7 @@ class Machine(QObject):
     def returnOrder(self):
         self.state = self.ShowItemsState
         self.WaitMoneyToBuyState.state = 0
-
+    
     def run(self,data = [0,0]):
         self.state.checkAndChangeState(data)
         if (time.time() - self.timeLoopGetPLC > 60):

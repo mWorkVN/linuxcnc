@@ -192,7 +192,16 @@
                      <number>2</number>
                     </property>
                     <property name="text">
-                     <string>Chon</string>
+                     <string/>
+                    </property>
+                    <property name="textFormat">
+                     <enum>Qt::PlainText</enum>
+                    </property>
+                    <property name="pixmap">
+                     <pixmap resource="view/res/coofee.qrc">:/FOOD/Food/1.jpg</pixmap>
+                    </property>
+                    <property name="scaledContents">
+                     <bool>true</bool>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>
@@ -404,7 +413,13 @@
                      <number>2</number>
                     </property>
                     <property name="text">
-                     <string>Chon</string>
+                     <string/>
+                    </property>
+                    <property name="pixmap">
+                     <pixmap resource="view/res/coofee.qrc">:/FOOD/Food/4.jpg</pixmap>
+                    </property>
+                    <property name="scaledContents">
+                     <bool>true</bool>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>
@@ -637,7 +652,13 @@
                      <number>2</number>
                     </property>
                     <property name="text">
-                     <string>Chon</string>
+                     <string/>
+                    </property>
+                    <property name="pixmap">
+                     <pixmap resource="view/res/coofee.qrc">:/FOOD/Food/2.jpg</pixmap>
+                    </property>
+                    <property name="scaledContents">
+                     <bool>true</bool>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>
@@ -849,7 +870,13 @@
                      <number>2</number>
                     </property>
                     <property name="text">
-                     <string>Chon</string>
+                     <string/>
+                    </property>
+                    <property name="pixmap">
+                     <pixmap resource="view/res/coofee.qrc">:/FOOD/Food/3.jpg</pixmap>
+                    </property>
+                    <property name="scaledContents">
+                     <bool>true</bool>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>
@@ -5073,7 +5100,7 @@
           </size>
          </property>
          <property name="text">
-          <string>CAFFE</string>
+          <string>CÀ PHÊ</string>
          </property>
          <property name="index" stdset="0">
           <number>0</number>
@@ -6201,7 +6228,9 @@
    <header>QtWebKitWidgets/QWebView</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="view/res/coofee.qrc"/>
+ </resources>
  <connections/>
  <buttongroups>
   <buttongroup name="page_buttonGroup"/>

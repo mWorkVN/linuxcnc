@@ -102,7 +102,7 @@ class TakeNguyenLieuState(until):
                 self.increseStep()
         elif (self.number == 6):
             modbusGet = self.exec.robot.PLCModbus.getData(1,3,(self.runAt *2) +1,1)
-            print(modbusGet)
+            #print(modbusGet)
             if (modbusGet['status'] == 'er'):
                 self.increseStep()
             elif  int(modbusGet['data'][0])!= 1 and int(modbusGet['data'][0])!= 0:
