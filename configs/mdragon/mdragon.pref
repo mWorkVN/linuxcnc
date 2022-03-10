@@ -56,7 +56,7 @@ desktop_notify = False
 notify_max_msgs = 1
 shutdown_check = True
 sound_player_on = False
-mainwindow_geometry = 3 29 802 626
+mainwindow_geometry = 296 116 802 626
 overlay_play_sound = False
 overlay_sound_type = RING
 
