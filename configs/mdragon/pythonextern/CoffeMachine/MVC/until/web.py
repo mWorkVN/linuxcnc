@@ -20,7 +20,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    return "<p>Vui Longf Cho Khoi Tao Giao Dich</p>"
+    return "<p>Vui Lòng Chờ Khởi Tạo Giao Dịch</p>"
 
 @app.route('/pay',methods=["GET"])
 def log_in():
