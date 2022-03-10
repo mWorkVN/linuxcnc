@@ -1,3 +1,4 @@
+#!/usr/bin/ python3
 # coding: utf8
 import  time ,os,sys
 import PyQt5
@@ -9,7 +10,7 @@ from memory_profiler import profile
 import subprocess
 class MyGUI(QtWidgets.QMainWindow):
 
-    def __init__(self, machine, main_controller,server):
+    def __init__(self, machine, main_controller):
         super(MyGUI, self).__init__()
         #self.window = QtWidgets.QMainWindow()
         self.load_resources()
@@ -23,42 +24,37 @@ class MyGUI(QtWidgets.QMainWindow):
 
         self._machine = machine
         self._main_controller = main_controller
-        
-        self.FlaskWeb = server()
-        self.FlaskWeb.setDaemon(True)
-        self.FlaskWeb.start()
-
-
+    
         self.timer = QTimer(self)
         self.timer.setSingleShot(False)
         self.timer.setInterval(10) # in milliseconds, so 5000 = 5 seconds
         self.timer.timeout.connect(self.loopGui)
         self.timer.start()
-
-        continueToBuy = True
-        self.initEvent()
+        
         self.initUi()
         self.initPrices()
-        #self.numberGui = "0"
-        #self.test = 0
-
+        self.initEvent()
             
         self._machine.even_loadPAY.connect(self.on_even_loadPAY)
         self._main_controller.state_robot_error.connect(self.on_state_robot_error)
         self._main_controller.even_changePage.connect(self.on_even_changePage)
+
+        self.main_tab_widget.setCurrentIndex(2)
+        self.main_tab_widget.setCurrentIndex(1)
+        self.main_tab_widget.setCurrentIndex(0)
+
+
+        from view.nuocChaiList import ListNuocChai
+        self.CHOOSEACTUATOR = ListNuocChai()
+        self.CHOOSEACTUATOR.setObjectName('CHOOSEACTUATOR')
+        self.actuator.addWidget(self.CHOOSEACTUATOR)
+
         #self.show()
         #self.showFullScreen()
 
     def loopGui(self):
-        timebegin = time.time()
-        #print("update",self.test)
         self._main_controller.run()
-        """stat = self._main_controller.checkChangeState()
-        if int(stat) != 0:
-            #print("STATE NEW",flush=True)
-            self.updateUi()
-            getattr(self, 'stackedWidget').setCurrentIndex(int(stat) - 1)
-        """
+
     def paintEvent(self, event):
         pass
 
@@ -66,7 +62,9 @@ class MyGUI(QtWidgets.QMainWindow):
     @pyqtSlot(str)
     def on_even_changePage(self, value):
         self.updateUi()
-        getattr(self, 'stackedWidget').setCurrentIndex(int(value) - 1)
+        numpage = int(value) - 1
+        if numpage<0: return
+        self.stackedWidget.setCurrentIndex(numpage)
 
     @pyqtSlot(str)
     def on_even_loadPAY(self, value):
@@ -104,7 +102,8 @@ class MyGUI(QtWidgets.QMainWindow):
         #self.setImage(4)
     
     def initPrices(self):
-        for i in range(1,self._machine.mysql.totalDevice + 1):
+        #for i in range(1,self._machine.mysql.totalDevice + 1):
+        for i in range(1,12):
             getattr(self, 'totalCoinID' + str(i)).setText(str(self.getPrice(i)))
 
     
@@ -112,10 +111,6 @@ class MyGUI(QtWidgets.QMainWindow):
         
         if self._main_controller.preState == "0":
             pass
-            #self.TotalMoney.setText("0")
-            #self.nameID.setText("")
-            #self.slID.setText("0")
-            #self.moneyGet.setText("0")
         elif self._main_controller.preState == "2":
             self.webView.load(QUrl("http://localhost:8081"))
             money = self._machine.item.numBuy * self._machine.item.price
@@ -136,7 +131,11 @@ class MyGUI(QtWidgets.QMainWindow):
             self.moneyRefund.setText(str(self._machine.moneyGet))
             self.idRefund.setText(str(self._machine.inforpayment['id']))
             self.dayRefund.setText(str(self._machine.inforpayment['day']))
-        
+
+    def initialized__(self):        
+
+        print("sssssssssssssssssss")
+
     def initEvent(self):
         self.page_buttonGroup.buttonClicked.connect(self.main_tab_changed)
         self.buy_buttonGroup.buttonClicked.connect(self.haveOrder)
@@ -147,6 +146,13 @@ class MyGUI(QtWidgets.QMainWindow):
         if index is None: return
         self.main_tab_widget.setCurrentIndex(int(index))
         self.update()
+
+    def haveOrder(self,btn):
+        id = btn.property('ID')
+        if id is None: return
+        sl = 1 #int(getattr(self, 'numSlID' +str(id) ).currentIndex())
+        self._main_controller.setOrder(id,sl)
+        print("have order",id,sl,flush=True)
 
     def naptien_click(self):
         pass
@@ -166,11 +172,7 @@ class MyGUI(QtWidgets.QMainWindow):
         #getattr(self, 'totalCoinID' + str(nameStacked)).setText(str(total))
         #print("have slOrderChange",flush=True)
 
-    def haveOrder(self,btn):
-        id = btn.property('ID')
-        sl = 1 #int(getattr(self, 'numSlID' +str(id) ).currentIndex())
-        self._main_controller.setOrder(id,sl)
-        print("have order",id,sl,flush=True)
+
 
     def load_resources(self):
         def qrccompile(qrcname, qrcpy):
@@ -226,4 +228,12 @@ class MyGUI(QtWidgets.QMainWindow):
                 print('could not load {} resource file: {}'.format(qrcpy, e))
         else:
             print('No resource file to load: {}'.format(qrcpy))
+    ##############################
+    # required class boiler code #
+    ##############################
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+    def __setitem__(self, item, value):
+        return setattr(self, item, value)
 #vend()

@@ -15,14 +15,17 @@ class MainController(QObject):
         self._machine.run()
         self.checkChangeState()
         self._manageSysTem.run()
-        if (time.time()- self.timeLOOPCheckSYS > 10):
-            self.timeLOOPCheckSYS = time.time()
-            print("CPU,MEM ",self._manageSysTem.run())
+        self.checkMemory()
 
     def checkChangeState(self):
         if (self.preState != self._machine.scan()):
             self.preState = self._machine.scan()
             self.even_changePage.emit(self.preState)
+            
+    def checkMemory(self):
+        if (time.time()- self.timeLOOPCheckSYS > 10):
+            self.timeLOOPCheckSYS = time.time()
+            print("CPU,MEM ",self._manageSysTem.run())
 
     def setOrder(self,id,sl):
         #self._machine.myrobot.checkError()

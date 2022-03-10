@@ -23,18 +23,24 @@ my_logger.addHandler(handler)
 
 
 class App(QApplication):
+
+    __slots__ = ['FlaskWeb', 'Machine', 'main_controller', 'main_view']
     @profile
-    def __init__(self, sys_argv,server):
+    def __init__(self, sys_argv):
         super(App, self).__init__(sys_argv)
         queueWEB = variThreading.init()
+        self.FlaskWeb = server()
+        self.FlaskWeb.setDaemon(True)
+        self.FlaskWeb.start()
         valveModbus = ModbusPull()
         self.Machine = Machine(my_logger,variThreading.queueVNPAY,valveModbus)
         self.main_controller = MainController(self.Machine)
-        self.main_view = MyGUI(self.Machine, self.main_controller,server)
+        self.main_view = MyGUI(self.Machine, self.main_controller)
         #self.main_controller.loop()
         self.main_view.show()
-
+        self.main_view.initialized__()
+        #self.main_view.showFullScreen()
  
 if __name__ == '__main__':
-    app = App(sys.argv,server)
+    app = App(sys.argv)
     sys.exit(app.exec_())
