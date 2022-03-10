@@ -1,17 +1,15 @@
 # coding: utf8
-import sys, time ,os
+import sys
 from model.machine import Machine
 from controller.control import MainController
 from view.view import MyGUI
 import logging
 import logging.handlers
-from web import server    
-import variThreading
-
+from until.web import server    
+import until.variThreading as variThreading
+from until.modbus import ModbusPull
 from PyQt5.QtWidgets import QApplication
-#from PyQt5.QtCore import pyqtSlot,  QObject ,pyqtSlot,QUrl,Qt, QTimer
-#from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator
-from modbus import ModbusPull
+from memory_profiler import profile
 
 
 LOG_FILENAME = 'mylog.log'
@@ -21,7 +19,8 @@ handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=5*1024*102
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 my_logger.addHandler(handler)
-from memory_profiler import profile
+
+
 
 class App(QApplication):
     @profile
@@ -33,7 +32,7 @@ class App(QApplication):
         self.main_controller = MainController(self.Machine)
         self.main_view = MyGUI(self.Machine, self.main_controller,server)
         #self.main_controller.loop()
-        #self.main_view.show()
+        self.main_view.show()
 
  
 if __name__ == '__main__':

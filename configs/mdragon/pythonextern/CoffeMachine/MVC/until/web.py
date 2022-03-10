@@ -3,7 +3,7 @@
 import sys, time ,os
 import threading
 
-from vnpay import vnpay
+from until.vnpay import vnpay
 try: 
     import queue
 except ImportError: #py2
@@ -12,8 +12,8 @@ except ImportError: #py2
 from flask import Flask, render_template
 from flask import request
 from waitress import serve
-import settings
-import variThreading
+import setting.settings as settings
+import until.variThreading as variThreading
 import json
 import subprocess
 app = Flask(__name__)

@@ -1,5 +1,4 @@
 import sqlite3, pandas as pd
-#if we have an excel file
 from memory_profiler import profile
 
 class mysql():

@@ -29,11 +29,11 @@
       <x>0</x>
       <y>10</y>
       <width>971</width>
-      <height>691</height>
+      <height>771</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>6</number>
     </property>
     <widget class="QWidget" name="stackedWidgetPage1">
      <widget class="QStackedWidget" name="main_tab_widget">
@@ -45,10 +45,13 @@
         <height>641</height>
        </rect>
       </property>
-      <property name="currentIndex">
-       <number>0</number>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
       </property>
-      <widget class="QWidget" name="page_5">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="caaaaaaa">
        <widget class="QWidget" name="horizontalLayoutWidget">
         <property name="geometry">
          <rect>
@@ -198,7 +201,7 @@
                      <enum>Qt::PlainText</enum>
                     </property>
                     <property name="pixmap">
-                     <pixmap resource="view/res/coofee.qrc">:/FOOD/Food/1.jpg</pixmap>
+                     <pixmap>:/FOOD/Food/1.jpg</pixmap>
                     </property>
                     <property name="scaledContents">
                      <bool>true</bool>
@@ -416,7 +419,7 @@
                      <string/>
                     </property>
                     <property name="pixmap">
-                     <pixmap resource="view/res/coofee.qrc">:/FOOD/Food/4.jpg</pixmap>
+                     <pixmap>:/FOOD/Food/4.jpg</pixmap>
                     </property>
                     <property name="scaledContents">
                      <bool>true</bool>
@@ -655,7 +658,7 @@
                      <string/>
                     </property>
                     <property name="pixmap">
-                     <pixmap resource="view/res/coofee.qrc">:/FOOD/Food/2.jpg</pixmap>
+                     <pixmap>:/FOOD/Food/2.jpg</pixmap>
                     </property>
                     <property name="scaledContents">
                      <bool>true</bool>
@@ -873,7 +876,7 @@
                      <string/>
                     </property>
                     <property name="pixmap">
-                     <pixmap resource="view/res/coofee.qrc">:/FOOD/Food/3.jpg</pixmap>
+                     <pixmap>:/FOOD/Food/3.jpg</pixmap>
                     </property>
                     <property name="scaledContents">
                      <bool>true</bool>
@@ -991,7 +994,7 @@
         </layout>
        </widget>
       </widget>
-      <widget class="QWidget" name="page_6">
+      <widget class="QWidget" name="bbbbbbbb">
        <widget class="QScrollArea" name="scrollArea">
         <property name="geometry">
          <rect>
@@ -2807,7 +2810,7 @@
         </widget>
        </widget>
       </widget>
-      <widget class="QWidget" name="page_7">
+      <widget class="QWidget" name="sssssss">
        <widget class="QScrollArea" name="scrollArea_2">
         <property name="enabled">
          <bool>true</bool>
@@ -5080,6 +5083,28 @@
         </widget>
        </widget>
       </widget>
+      <widget class="QWidget" name="page_5">
+       <widget class="QTableView" name="tableView">
+        <property name="geometry">
+         <rect>
+          <x>400</x>
+          <y>40</y>
+          <width>256</width>
+          <height>192</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QColumnView" name="columnView">
+        <property name="geometry">
+         <rect>
+          <x>380</x>
+          <y>270</y>
+          <width>256</width>
+          <height>192</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
      </widget>
      <widget class="QWidget" name="horizontalLayoutWidget_2">
       <property name="geometry">
@@ -6205,6 +6230,55 @@
         </layout>
        </item>
       </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="page_6">
+     <widget class="QLabel" name="imageAc_16">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>120</y>
+        <width>481</width>
+        <height>60</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>666</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>20</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="lineWidth">
+       <number>0</number>
+      </property>
+      <property name="text">
+       <string>MAY LOI</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
      </widget>
     </widget>
    </widget>

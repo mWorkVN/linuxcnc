@@ -1,87 +1,78 @@
 # coding: utf8
 import  time ,os,sys
-#import logging
-#import logging.handlers
 import PyQt5
-from PyQt5 import QtGui, QtCore, QtWidgets, uic
+from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import  QObject ,pyqtSlot,QUrl,Qt, QTimer
 from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator
-#import linuxcnc
-from gtts import gTTS
-from playsound import playsound
-import pyttsx3
-#from threading import Thread
-try: 
-    import queue
-except ImportError: #py2
-    import Queue as queue
-import variThreading
-import settings
+import setting.settings as settings
 from memory_profiler import profile
 import subprocess
 class MyGUI(QtWidgets.QMainWindow):
+
     def __init__(self, machine, main_controller,server):
         super(MyGUI, self).__init__()
-
         #self.window = QtWidgets.QMainWindow()
         self.load_resources()
-        self.widget=uic.loadUi('vendding.ui', self )
-        self.show()
+        uic.loadUi('ui/vendding.ui', self )
+        
         mainpath = os.path.dirname(os.path.abspath(__file__))
         goal_dir = os.path.join(mainpath, 'res','coofee.qss')
         goal_dir = os.path.abspath(goal_dir)
         qss_file = open(goal_dir).read()
         self.setStyleSheet(qss_file)
+
         self._machine = machine
         self._main_controller = main_controller
         
         self.FlaskWeb = server()
-        self.FlaskWeb.setDaemon(True); 
+        self.FlaskWeb.setDaemon(True)
         self.FlaskWeb.start()
-        self._machine.even_loadPAY.connect(self.on_even_loadPAY)
-        self._main_controller.state_robot_error.connect(self.on_state_robot_error)
+
 
         self.timer = QTimer(self)
         self.timer.setSingleShot(False)
-        self.timer.setInterval(5) # in milliseconds, so 5000 = 5 seconds
+        self.timer.setInterval(10) # in milliseconds, so 5000 = 5 seconds
         self.timer.timeout.connect(self.loopGui)
         self.timer.start()
+
         continueToBuy = True
         self.initEvent()
         self.initUi()
         self.initPrices()
-        self.numberGui = "0"
-        self.test = 0
+        #self.numberGui = "0"
+        #self.test = 0
+
+            
+        self._machine.even_loadPAY.connect(self.on_even_loadPAY)
+        self._main_controller.state_robot_error.connect(self.on_state_robot_error)
+        self._main_controller.even_changePage.connect(self.on_even_changePage)
+        #self.show()
         #self.showFullScreen()
 
     def loopGui(self):
         timebegin = time.time()
         #print("update",self.test)
         self._main_controller.run()
-        stat = self._main_controller.checkChangeState()
+        """stat = self._main_controller.checkChangeState()
         if int(stat) != 0:
-            print("STATE NEW",flush=True)
+            #print("STATE NEW",flush=True)
             self.updateUi()
             getattr(self, 'stackedWidget').setCurrentIndex(int(stat) - 1)
-
+        """
     def paintEvent(self, event):
         pass
-        """timebegin = time.time()
-        #print("update",self.test)
-        self._main_controller.run()
-        stat = self._main_controller.checkChangeState()
-        if int(stat) != 0:
-            print("STATE NEW",flush=True)
-            self.updateUi()
-            getattr(self, 'stackedWidget').setCurrentIndex(int(stat) - 1)
-        self.update()"""
 
-    #@pyqtSlot(str)
-    @profile
+
+    @pyqtSlot(str)
+    def on_even_changePage(self, value):
+        self.updateUi()
+        getattr(self, 'stackedWidget').setCurrentIndex(int(value) - 1)
+
+    @pyqtSlot(str)
     def on_even_loadPAY(self, value):
         self.webView.load(QUrl(value))
 
-    #@pyqtSlot(str)
+    @pyqtSlot(str)
     def on_state_robot_error(self, value):
         print("ERR")
         """msg = QMessageBox()
@@ -113,18 +104,18 @@ class MyGUI(QtWidgets.QMainWindow):
         #self.setImage(4)
     
     def initPrices(self):
-        pass
-        for i in range(1,self._machine.mysql.totalDevice):
+        for i in range(1,self._machine.mysql.totalDevice + 1):
             getattr(self, 'totalCoinID' + str(i)).setText(str(self.getPrice(i)))
 
     
     def updateUi(self):
         
         if self._main_controller.preState == "0":
-            self.TotalMoney.setText("0")
-            self.nameID.setText("")
-            self.slID.setText("0")
-            self.moneyGet.setText("0")
+            pass
+            #self.TotalMoney.setText("0")
+            #self.nameID.setText("")
+            #self.slID.setText("0")
+            #self.moneyGet.setText("0")
         elif self._main_controller.preState == "2":
             self.webView.load(QUrl("http://localhost:8081"))
             money = self._machine.item.numBuy * self._machine.item.price
@@ -134,9 +125,11 @@ class MyGUI(QtWidgets.QMainWindow):
             self.lbl_orderID.setText(self._machine.vuluePAY["order"])
             self.lbl_orderTime.setText(self._machine.vuluePAY["time"])
             self.lbl_orderGET.setText(self._machine.vuluePAY["amount"])
+
         elif self._main_controller.preState == "5": #Error
             self.lbl_erID.setText(self._machine.vuluePAY["order"])
             self.lbl_erCode.setText(settings.VNPAY_ERROR_CODE[self._machine.vuluePAY["sts"]])  
+
         elif self._main_controller.preState == "6":
             self.webView.history().clear()
             money = self._machine.item.numBuy * self._machine.item.price
@@ -150,14 +143,14 @@ class MyGUI(QtWidgets.QMainWindow):
         self.btnReturn.clicked.connect(self.returnOrder)
 
     def main_tab_changed(self, btn):
-        print("press")
         index = btn.property("index")
-        self.main_tab_widget.setCurrentIndex(index)
+        if index is None: return
+        self.main_tab_widget.setCurrentIndex(int(index))
+        self.update()
 
     def naptien_click(self):
         pass
 
-    @profile
     def returnOrder(self,value):
         self.webView.history().clear()
         self._machine.returnOrder()
@@ -166,12 +159,12 @@ class MyGUI(QtWidgets.QMainWindow):
         return self._machine.getPrice(ID)
 
     def slOrderChange(self):
-        nameStacked = self.sender().property('ID')
-        sata = str(self.getPrice(nameStacked))
-        position = 1 #int(self.sender().currentIndex())
-        total = int(sata)*position
+        idDevide = self.sender().property('ID')
+        price = str(self.getPrice(idDevide))
+        sl = 1 #int(self.sender().currentIndex())
+        total = int(price)*sl
         #getattr(self, 'totalCoinID' + str(nameStacked)).setText(str(total))
-        print("have slOrderChange",flush=True)
+        #print("have slOrderChange",flush=True)
 
     def haveOrder(self,btn):
         id = btn.property('ID')
@@ -179,17 +172,11 @@ class MyGUI(QtWidgets.QMainWindow):
         self._main_controller.setOrder(id,sl)
         print("have order",id,sl,flush=True)
 
-
-
     def load_resources(self):
         def qrccompile(qrcname, qrcpy):
-            print('Compiling qrc: {} to \n {}'.format(qrcname, qrcpy))
             try:
                 subprocess.call(["pyrcc5", "-o", "{}".format(qrcpy), "{}".format(qrcname)])
             except OSError as e:
-                print(
-                    '{}, pyrcc5 error. try in terminal: sudo apt install pyqt5-dev-tools to install dev tools'.format(
-                        e))
                 msg = QtWidgets.QMessageBox()
                 msg.setIcon(QtWidgets.QMessageBox.Critical)
                 msg.setText("QTvcp qrc compiling ERROR! ")
@@ -201,7 +188,6 @@ class MyGUI(QtWidgets.QMainWindow):
                 msg.show()
                 retval = msg.exec_()
                 if retval == QtWidgets.QMessageBox.Abort:  # cancel button
-                    print("Canceled from qrc compiling Error Dialog\n")
                     raise SystemError('pyrcc5 compiling error: try: "sudo apt install pyqt5-dev-tools"')
         mainpath = os.path.dirname(os.path.abspath(__file__))
         goal_dir = os.path.join(mainpath, 'res','coofee.qrc')

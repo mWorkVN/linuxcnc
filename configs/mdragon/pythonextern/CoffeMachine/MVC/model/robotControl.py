@@ -5,9 +5,9 @@ import sys, time ,os
 import linuxcnc
 from model.state import State
 import imp
-import posRobot
+import setting.posRobot as posRobot
 import subprocess
-
+from memory_profiler import profile
 
 class until:
     def increseStep(self):
@@ -27,7 +27,6 @@ class until:
     def moveJoinToPos(self,pos):
         if (self.exec.robot.checkStatusDoneMDI() != -1):
             pos = getattr(posRobot,str(pos))
-            print("RUN",pos)
             self.exec.robot.sendMDI("G0.1 "+ pos)
             time.sleep(0.05)    
             self.number += 1   
@@ -35,7 +34,6 @@ class until:
     def moveWToPos(self,pos):
         if (self.exec.robot.checkStatusDoneMDI() != -1):
             pos = getattr(posRobot,str(pos))
-            print("RUN",pos)
             self.exec.robot.sendMDI("G0 "+ pos)
             time.sleep(0.05)    
             self.number += 1 
@@ -228,6 +226,7 @@ class RobotControl(State):
 
     def initstate(self):
         self.exec.stateRunStep = self.exec.initStats 
+
 
     def run(self, data):
         return self.exec.run(data)

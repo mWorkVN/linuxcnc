@@ -91,7 +91,7 @@ def convertWorldMode(self):
         if (value == 0):
             self.execute("M66 E0 L0")
         elif (float(angleY)>= 0):
-            info= "Error SwitchKins M439 3001 - YJoint >= 0 degree " + str(angleY)
+            info= "Error SwitchKins M439 3001 - YJoint >= 0 degree {}".format(str(angleY))
             self.set_errormsg(info)
         else:
             numberCoor = int(CoordinateNumber-1)
@@ -132,7 +132,7 @@ def g01testskins(self, **words):
                 cmd[name] = "{}{} ".format(name,words[name])
                 statusKin = 1
             else: 
-                pos[name]  = float(hal.get_value("axis."+name+".pos-cmd")) 
+                pos[name]  = float(hal.get_value('axis.{}.pos-commanded'.format(name)))   
         gcodecmd="G53 %s X%.4fY%.4fZ%.4f C %.4f %s "%(typeGcode, pos['x'] ,pos['y'] ,pos['z'] ,pos['c'], cmd["f"])
         self.execute(gcodecmd )
         yield INTERP_EXECUTE_FINISH
@@ -181,7 +181,8 @@ def g01remapskins(self, **words):
                 cmd[name] = "{}{} ".format(name,words[name])
                 statusKin = 1
             else: 
-                pos[name]  = float(hal.get_value("axis."+name+".pos-cmd")) 
+                #pos[name]  = float(hal.get_value("axis."+name+".pos-cmd")) 
+                pos[name]  = float(hal.get_value('axis.{}.pos-commanded'.format(name)))   
         anglepos = scarakinematicInver(pos)
         xcmd = ""
         if (xold != anglepos[0]) or (yold != anglepos[1]):
@@ -190,7 +191,7 @@ def g01remapskins(self, **words):
             yold= anglepos[1]
         gcodecmd="G53 %s X%f Y%f Z %f C %f %s "%(typeGcode, anglepos[0] ,anglepos[1] ,anglepos[2] ,anglepos[3], cmd["f"])
         #gcodecmd="G53 %s %s z%.2f C%.4f %s "%(typeGcode, xcmd ,anglepos[2] ,anglepos[3], cmd["f"])
-        print("G01 ", gcodecmd , "in ",time.time())
+        #print("G01 ", gcodecmd , "in ",time.time())
         self.execute(gcodecmd )
         #yield INTERP_EXECUTE_FINISH
         check_coords(self, 'z', anglepos[2])
@@ -221,7 +222,7 @@ def g11remapskins(self, **words):
                 cmd[name] = "{}{} ".format(name,words[name])
                 statusKin = 1
             else: 
-                pos[name]  = float(hal.get_value("axis."+name+".pos-commanded"))        
+                pos[name]  = float(hal.get_value('axis.{}.pos-commanded'.format(name)))     
         cmdgcode = ""
         if (value==1):
             anglepos = scarakinematicInver(pos)

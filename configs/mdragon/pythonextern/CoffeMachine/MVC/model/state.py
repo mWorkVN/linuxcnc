@@ -1,24 +1,15 @@
 # coding: utf8
-import sys, time ,os
-#import logging
-#import logging.handlers
+import os,time
 from gtts import gTTS
 from playsound import playsound
 import pyttsx3
 from threading import Thread
 
-"""try: 
-    import queue
-except ImportError: #py2
-    import Queue as queue
-import imp
-"""
+
 class State:
 
     def scan(self):
-        #self.mprint("Current Name State  " + self.name)
         return self.name
-        pass
 
     def mprint(self,msg):
         if (os.name == 'nt'): print(msg,flush=True) # win
@@ -31,7 +22,7 @@ class State:
     def speak1(self,msg):
         while(1):
             if (self.machine.Que.empty() == False):
-                filename = "talk"+str(int(time.time()))+".mp3"
+                filename = "talk{}.mp3".format(str(int(time.time())))
                 msg = self.machine.Que.get() 
                 if (msg == "END"):continue
                 print("Play ",str(filename),flush=True)

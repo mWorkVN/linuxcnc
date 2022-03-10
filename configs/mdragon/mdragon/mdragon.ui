@@ -2021,7 +2021,7 @@ LINE</string>
                     <enum>QFrame::Raised</enum>
                    </property>
                    <property name="currentIndex">
-                    <number>6</number>
+                    <number>7</number>
                    </property>
                    <widget class="QWidget" name="main_tab_widgetPage1">
                     <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -11611,7 +11611,7 @@ PLATE</string>
             <number>2</number>
            </property>
            <property name="text">
-            <string>03:58:27 PM</string>
+            <string>04:12:23 PM</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -12562,10 +12562,10 @@ PLATE</string>
   <slot>btn_view_machine_clicked()</slot>
  </slots>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
-  <buttongroup name="page_buttonGroup"/>
   <buttongroup name="mpage_buttonGroup"/>
-  <buttongroup name="mode_buttonGroup"/>
+  <buttongroup name="page_buttonGroup"/>
   <buttongroup name="swkins_buttonGroup"/>
+  <buttongroup name="mode_buttonGroup"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
