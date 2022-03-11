@@ -1,4 +1,4 @@
-
+TIME_CHECK_NGUYENLIEU = 3
 
 VNPAY_RETURN_URL = 'http://localhost:8081/pay'  # get from config
 VNPAY_PAYMENT_URL = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'  # get from config

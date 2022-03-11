@@ -1,3 +1,6 @@
+QMainWindow {
+    background: url(:/images/images/brushed_metal.png);
+}
 
 
 QPushButton,

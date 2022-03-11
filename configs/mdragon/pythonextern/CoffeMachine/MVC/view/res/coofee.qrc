@@ -9,4 +9,7 @@
     <file>Food/7.jpg</file>
     <file>Food/8.jpg</file>
   </qresource>
+  <qresource prefix="images">
+    <file>images/brushed_metal.png</file>
+  </qresource>
 </RCC>

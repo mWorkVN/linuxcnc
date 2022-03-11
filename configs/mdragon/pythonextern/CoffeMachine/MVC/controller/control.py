@@ -29,7 +29,6 @@ class MainController(QObject):
             print("CPU,MEM ",self._manageSysTem.run())
 
     def setOrder(self,id,sl):
-        #self._machine.myrobot.checkError()
         self.timeBeginOrder = 0
         if self._machine.myrobot.checkEMC() == True:
             print("have order",id,sl,flush=True)
@@ -44,7 +43,7 @@ class MainController(QObject):
         return self.preState
 
     def checkTimeOutDisplay(self):
-        if self.timeBeginOrder ==0: return
+        if self.timeBeginOrder == 0: return
         elif time.time() -self.timeBeginOrder >30:
             self.timeBeginOrder =0
             self._machine.state = self._machine.ShowItemsState

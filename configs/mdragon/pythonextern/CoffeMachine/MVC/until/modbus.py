@@ -16,7 +16,7 @@ class ModbusPull():
         PORT = self.getCOMs()
         print(PORT)
         self.master = modbus_rtu.RtuMaster(
-            serial.Serial(port=PORT, baudrate=9600, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+            serial.Serial(port=PORT, baudrate=19200, bytesize=8, parity='N', stopbits=1, xonxoff=0)
         )
         #self.settings(1.0)
 
@@ -35,21 +35,21 @@ class ModbusPull():
 
     def getData(self,id,function,begin,end):
         dataJ = {
-            'status':'ok',
-            'data':0
+            's':'ok',
+            'd':0
         }
         try:
-            dataJ['data'] = self.master.execute(id, function, begin, end)          
+            dataJ['d'] = self.master.execute(id, function, begin, end)          
         except modbus_tk.modbus.ModbusError as e:
-            dataJ['status'] = 'er'
-            dataJ['data'] = 1
+            dataJ['s'] = 'er'
+            dataJ['d'] = 1
         except modbus_tk.modbus_rtu.ModbusInvalidResponseError as e:
-            dataJ['status'] = 'er'
-            dataJ['data'] = 2
+            dataJ['s'] = 'er'
+            dataJ['d'] = 2
             #self.master.close()
         except:
-            dataJ['status'] = 'er'
-            dataJ['data'] = 3
+            dataJ['s'] = 'er'
+            dataJ['d'] = 3
             print("other")
         return dataJ
             
@@ -57,21 +57,21 @@ class ModbusPull():
 
     def setData(self,id,function,begin,data):
         dataJ = {
-            'status':'ok',
-            'data':0
+            's':'ok',
+            'd':0
         }
         try:
-            dataJ['data'] = self.master.execute(id, function, begin, output_value = data)
+            dataJ['d'] = self.master.execute(id, function, begin, output_value = data)
         except modbus_tk.modbus.ModbusError as e:
-            dataJ['status'] = 'er'
-            dataJ['data'] = 1
+            dataJ['s'] = 'er'
+            dataJ['d'] = 1
         except modbus_tk.modbus_rtu.ModbusInvalidResponseError as e:
-            dataJ['status'] = 'er'
-            dataJ['data'] = 2
+            dataJ['s'] = 'er'
+            dataJ['d'] = 2
             #self.master.close()
         except:
-            dataJ['status'] = 'er'
-            dataJ['data'] = 3
+            dataJ['s'] = 'er'
+            dataJ['d'] = 3
             print("other")
         return dataJ
 

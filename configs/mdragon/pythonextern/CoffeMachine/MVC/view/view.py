@@ -3,11 +3,12 @@
 import  time ,os,sys
 import PyQt5
 from PyQt5 import QtWidgets, uic,QtCore
-from PyQt5.QtCore import  QObject ,pyqtSlot,QUrl,Qt, QTimer
-from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator
+from PyQt5.QtCore import  QObject ,pyqtSlot,QUrl,Qt, QTimer ,QRect
+from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator , QTransform , QPainter
 import setting.settings as settings
 from memory_profiler import profile
 import subprocess
+
 class MyGUI(QtWidgets.QMainWindow):
 
     def __init__(self, machine, main_controller):
@@ -39,21 +40,21 @@ class MyGUI(QtWidgets.QMainWindow):
         self._main_controller.state_robot_error.connect(self.on_state_robot_error)
         self._main_controller.even_changePage.connect(self.on_even_changePage)
 
-        self.main_tab_widget.setCurrentIndex(2)
-        self.main_tab_widget.setCurrentIndex(1)
         self.main_tab_widget.setCurrentIndex(0)
         self.stackedWidget.setCurrentIndex(0)
+
         self.videoslider.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
 
-        from view.nuocChaiList import ListNuocChai
+        """from view.nuocChaiList import ListNuocChai
         self.CHOOSEACTUATOR = ListNuocChai()
         self.CHOOSEACTUATOR.setObjectName('CHOOSEACTUATOR')
-        self.actuator.addWidget(self.CHOOSEACTUATOR)
+        self.actuator.addWidget(self.CHOOSEACTUATOR)"""
 
         self.sttImage = 1
         self.timeDisplaySlider = 0
         #self.show()
         #self.showFullScreen()
+
     def mouseReleaseEvent(self, e):
         if self.stackedWidget.currentIndex() == 0 :
             self._main_controller.beginOrder()
@@ -64,16 +65,25 @@ class MyGUI(QtWidgets.QMainWindow):
         self._main_controller.run()
 
     def paintEvent(self, event):
-        if (time.time() - self.timeDisplaySlider > 3): 
+        if (time.time() - self.timeDisplaySlider > 2): 
             self.timeDisplaySlider = time.time()
             if self.stackedWidget.currentIndex() == 0 :
                 mainpath = os.path.dirname(os.path.abspath(__file__))
-                goal_dir = os.path.join(mainpath, 'res/Food',str(self.sttImage) + '.jpg')
+                goal_dir = os.path.join(mainpath, 'pic',str(self.sttImage) + '.jpg')
                 goal_dir = os.path.abspath(goal_dir)
                 pixmap = QPixmap(goal_dir)
                 self.videoslider.setPixmap(pixmap)
                 self.sttImage += 1
+                xform = QTransform()
+                xform.rotate(12)
+                xformed_pixmap = pixmap.transformed(xform, Qt.SmoothTransformation)
+                self.videoslider.setPixmap(xformed_pixmap)
+                painter = QPainter(self)
+                rect = QRect(10, 60, 8888, 8888)
+                painter.drawPixmap(rect, pixmap)
                 if (self.sttImage == 18):self.sttImage = 1
+                del pixmap,goal_dir,mainpath
+                
         self.update()
 
 
@@ -137,13 +147,13 @@ class MyGUI(QtWidgets.QMainWindow):
 
         #x =  {"order":"","sts":"","amount":"","time":""}
         elif self._main_controller.preState == "4": #Success
-            self.lbl_orderID.setText(self._machine.vuluePAY["order"])
-            self.lbl_orderTime.setText(self._machine.vuluePAY["time"])
-            self.lbl_orderGET.setText(self._machine.vuluePAY["amount"])
+            self.lbl_orderID.setText(self._machine.msgFromVNPAY["order"])
+            self.lbl_orderTime.setText(self._machine.msgFromVNPAY["time"])
+            self.lbl_orderGET.setText(self._machine.msgFromVNPAY["amount"])
 
         elif self._main_controller.preState == "5": #Error
-            self.lbl_erID.setText(self._machine.vuluePAY["order"])
-            self.lbl_erCode.setText(settings.VNPAY_ERROR_CODE[self._machine.vuluePAY["sts"]])  
+            self.lbl_erID.setText(self._machine.msgFromVNPAY["order"])
+            self.lbl_erCode.setText(settings.VNPAY_ERROR_CODE[self._machine.msgFromVNPAY["sts"]])  
 
         elif self._main_controller.preState == "6":
             self.webView.history().clear()
@@ -151,6 +161,10 @@ class MyGUI(QtWidgets.QMainWindow):
             self.moneyRefund.setText(str(self._machine.moneyGet))
             self.idRefund.setText(str(self._machine.inforpayment['id']))
             self.dayRefund.setText(str(self._machine.inforpayment['day']))
+
+        elif self._main_controller.preState == "7":
+            self.msgError.setText(str(self._machine.msgError))
+            
 
     def initialized__(self):        
 

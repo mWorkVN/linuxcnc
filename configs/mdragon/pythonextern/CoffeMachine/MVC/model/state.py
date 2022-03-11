@@ -1,7 +1,7 @@
 # coding: utf8
 import os,time
 from gtts import gTTS
-from playsound import playsound
+#from playsound import playsound
 from threading import Thread
 
 
@@ -20,9 +20,9 @@ class State:
 
     def speak1(self,msg):
         while(1):
-            if (self.machine.Que.empty() == False):
+            if (self.machine.queSpeaker.empty() == False):
                 filename = "talk{}.mp3".format(str(int(time.time())))
-                msg = self.machine.Que.get() 
+                msg = self.machine.queSpeaker.get() 
                 if (msg == "END"):continue
                 print("Play ",str(filename),flush=True)
                 #tts = gTTS(text=msg, lang='vi')

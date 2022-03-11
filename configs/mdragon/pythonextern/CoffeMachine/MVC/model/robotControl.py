@@ -70,6 +70,7 @@ class TakeNguyenLieuState(until):
         self.stateRobot = robot
         self.number = 0
         self.runAt = 0
+        self.tryModbus = 0
     def run(self,data):
         if (data[self.runAt+5] == 0):
             self.runAt += 1
@@ -95,13 +96,16 @@ class TakeNguyenLieuState(until):
         elif (self.number == 5): 
             modbusReturn = self.stateRobot.robot.PLCModbus.setData(1,6,int(self.runAt)*2,int( data[(int(self.runAt ))+5]))
             if (modbusReturn == True):
+                self.tryModbus =0
                 self.increseStep()
+            else:self.checkTrySendModbus()
         elif (self.number == 6):
             modbusGet = self.stateRobot.robot.PLCModbus.getData(1,3,(self.runAt *2) +1,1)
             #print(modbusGet)
-            if (modbusGet['status'] == 'er'):
-                self.increseStep()
-            elif  int(modbusGet['data'][0])!= 1 and int(modbusGet['data'][0])!= 0:
+            if (modbusGet['s'] == 'er'):
+                self.checkTrySendModbus()
+            elif  int(modbusGet['d'][0])!= 1 and int(modbusGet['d'][0])!= 0:
+                self.tryModbus =0
                 self.stateRobot.robot.PLCModbus.setData(1,16,self.runAt *2 ,[0,0])
                 self.increseStep()
         elif (self.number == 7): #move to Glass 1
@@ -112,6 +116,11 @@ class TakeNguyenLieuState(until):
             self.number = 0
             self.runAt += 1
         
+    def checkTrySendModbus(self):
+        self.tryModbus += 1
+        if self.tryModbus >5:
+            self.tryModbus = 0
+            self.increseStep()
 
 class DuaLyThanhPhamState(until):
     __slots__ = ['robot', 'number','stateRobot']
@@ -186,7 +195,9 @@ class StateRobot():
                    'duaLyThanhPhamState',  'goHomeState','finishState','waitState','stateRunStep']
     def __init__(self,robot):
         super().__init__()
+
         self.robot = robot
+
         self.initStats = InitStats(self)
         self.takeGlassState = TakeGlassState(self)
         self.takeNguyenLieuState = TakeNguyenLieuState(self)
@@ -203,6 +214,7 @@ class StateRobot():
 
 class RobotControl(State):
     __slots__ = ['PLCModbus','stateRobot','emc','emccommand','emcstat']
+    proc = None
     def __init__(self,PLCModbus):
         self.PLCModbus=PLCModbus
         self.statusRobot = 'ok'
@@ -214,17 +226,34 @@ class RobotControl(State):
         self.emc = linuxcnc
         self.emcstat = self.emc.stat() # create a connection to the status channel
         self.emccommand = self.emc.command()
+        self.emcError = self.emc.error_channel()
         self.initLinuxcnc()
         self.set_manual_mode()
-        for i in range(4):
-            self.axis_home(i, self.emccommand, self.emcstat)
+        self.homeAll()
         self.set_mdi_mode()
         self.isEMCRun = False
         self.stateRobot = StateRobot(self)
+        self.emccommand.maxvel(10.0)
 
     def initstate(self):
         self.stateRobot.stateRunStep = self.stateRobot.initStats 
 
+    def getER(self):
+        error = self.emcError.poll()
+        #print("SSSSSS",error)
+        if error:
+            kind, text = error
+            if kind in (linuxcnc.NML_ERROR, linuxcnc.OPERATOR_ERROR):
+                typus = "error"
+            else:
+                typus = "info"
+            print(typus, text)
+            if "error finishing read! iter=" in text:
+                print(typus, text)
+                return 'reboot'
+        return 'ok'
+    def closeL(self):
+        self.proc.terminate()
 
     def run(self, data):
         return self.stateRobot.run(data)
@@ -236,15 +265,17 @@ class RobotControl(State):
         del self.emccommand 
 
     def checkEMC(self):
-        self.checkReady()
         try:  
             self.emcstat.poll()
             self.isEMCRun = True
             self.statusRobot = 'ok'
         except linuxcnc.error as e:
-            self.statusRobot = 'er'
+            self.statusRobot = 'er_connect'
             self.isEMCRun = False
-        
+        if self.statusRobot != 'er_connect':
+            if self.checkReady() == False :self.statusRobot = 'ok'
+            if (self.statusRobot == 'e_NotHome'): self.homeAll()
+            if (self.statusRobot == 'e_ON'): self.emccommand.state(linuxcnc.STATE_ON)
         return self.isEMCRun 
 
     def reload(self):
@@ -253,6 +284,9 @@ class RobotControl(State):
         #self.emc = linuxcnc
         #self.emccommand = self.emc.command()
         
+    def homeAll(self):
+        for i in range(4):
+            self.axis_home(i, self.emccommand, self.emcstat)
 
     def init(self):
         pass
@@ -302,12 +336,28 @@ class RobotControl(State):
     def checkReady(self):
         self.emcstat.poll()
         if self.emcstat.task_state == self.emc.STATE_ESTOP:
-            print("ESP ON")
-        if self.emcstat.task_state != linuxcnc.STATE_ON:
-            print("NOT ON MACHINE")
-        for i in range(0,4):
-            if self.emcstat.homed[i] != 1:
-                print("Axis ", i , "not Home")
+            self.statusRobot = 'e_EMG'
+            return True
+        elif self.emcstat.task_state != linuxcnc.STATE_ON:
+            self.statusRobot = 'e_ON'
+            return True
+        #print("HOME ",self.emcstat.homed[0],self.emcstat.homed[1],self.emcstat.homed[2],self.emcstat.homed[3],self.emcstat.homed[4])
+        elif self.emcstat.homed[0] != 1:
+            self.statusRobot = 'e_NotHome 1'
+            return True
+        elif self.emcstat.homed[1] != 1:
+            self.statusRobot = 'e_NotHome 2'
+            return True
+        elif self.emcstat.homed[2] != 1:
+            self.statusRobot = 'e_NotHome 3'
+            return True
+        elif self.emcstat.homed[3] != 1:
+            self.statusRobot = 'e_NotHome 4' 
+            return True
+        """elif self.emcstat.homed[4] != 1:
+            self.statusRobot = 'e_NotHome 5'
+            return True"""
+        return False
 
 
     def initLinuxcnc(self):
@@ -338,16 +388,16 @@ class RobotControl(State):
     
     def startLinuxcnc(self, cmd):
         #res = subprocess.Popen(cmd.split() ) #, stdout = subprocess.PIPE)
-        if (self.isRUNLCNC == False):
-            cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
+        #if (self.isRUNLCNC == False):
+        cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
 
-            cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/noGui.ini"]
-            proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT )
-            for i in range(30):
-                time.sleep(1)
-                if (self.checkProcess("axis") != False) and (self.checkProcess("linuxcnc") != False):
-                    print("check")
-                    break
+        cmd = ["/home/mwork/mworkcnc/scripts/linuxcncm","/home/mwork/mworkcnc/configs/mdragon/noGui.ini"]
+        self.proc = subprocess.Popen(cmd) #, stderr=subprocess.STDOUT 
+        for i in range(30):
+            time.sleep(1)
+            if (self.checkProcess("axis") != False) and (self.checkProcess("linuxcnc") != False):
+                print("check")
+                break
 
     def getProcesses(self, str):
         processCommand = ["ps", "-A"]
@@ -390,7 +440,7 @@ class RobotControl(State):
 
     def cleanLinuxcnc(self):
         if self.linuxCNCRun():
-            self.isRUNLCNC = True
+            self.isRUNLCNC = False
        
 """
 
