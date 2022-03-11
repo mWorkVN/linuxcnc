@@ -195,7 +195,7 @@ Pnp_SpeedZD = 0
 Pnp_InputBad = 0
 
 [CHOOSE_ACTUATOR]
-Nhan Test = 61
+Nhan Test = 66
 Type Actuator = 0
 scum_close_ex2_type = 0
 scum_open_ex2_type = 0
