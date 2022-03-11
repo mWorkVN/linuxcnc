@@ -294,7 +294,7 @@ class CheckRefundState(State):
 
 class Machine(QObject):
     even_loadPAY = pyqtSignal(str)
-    
+    even_loads = pyqtSignal(str)
     @profile
     def __init__(self,my_logger,queueWEB,valveModbus, RunVNPAY):
         super().__init__()
@@ -327,6 +327,7 @@ class Machine(QObject):
         self.state.speak("S")
         self.plcVal = ControlVal(valveModbus)
         self.myrobot=RobotControl(self.plcVal)
+        self.myrobot.initRobot()
         #self.statusMachine = 0 # =1 error Robot, 3error PLC
         self.totalItems = 2
         for i in range(1,self.mysql.totalDevice):
@@ -346,9 +347,7 @@ class Machine(QObject):
 
     def run(self,data = [0,0]):
         timeNow = time.time()
-        if self.myrobot.getER() == 'reboot':
-            print("LOI ROBOT CAN REBOOT")
-            self.myrobot.closeL()
+        self.checkRebootRobot()
         self.state.checkAndChangeState(data)
         if (timeNow - self.timeLoopGetPLC > settings.TIME_CHECK_NGUYENLIEU):
             self.timeLoopGetPLC = timeNow
@@ -357,6 +356,17 @@ class Machine(QObject):
             if mucNuoc['s'] == 'ok': self.mucNguyenLieu = mucNuoc['d']
             #self.plcVal.checkError(1) # READ COIN 
         self.timecheckLOOP = timeNow
+
+    def checkRebootRobot(self):
+        if self.myrobot.getER() == 'reboot': # linuxcnc mat nguon, can reboot lai
+            self.even_loads.emit("c")
+
+    def rebootRobot(self):
+        del self.myrobot
+        self.myrobot=RobotControl(self.plcVal)
+
+    def initRobot(self):
+        self.myrobot.initRobot()
 
 
     def checkError(self):

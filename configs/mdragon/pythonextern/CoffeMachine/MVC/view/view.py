@@ -13,10 +13,11 @@ class MyGUI(QtWidgets.QMainWindow):
 
     def __init__(self, machine, main_controller):
         super(MyGUI, self).__init__()
+        
         #self.window = QtWidgets.QMainWindow()
         self.load_resources()
         uic.loadUi('ui/vendding.ui', self )
-        
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         mainpath = os.path.dirname(os.path.abspath(__file__))
         goal_dir = os.path.join(mainpath, 'res','coofee.qss')
         goal_dir = os.path.abspath(goal_dir)
@@ -35,7 +36,7 @@ class MyGUI(QtWidgets.QMainWindow):
         self.initUi()
         self.initPrices()
         self.initEvent()
-            
+        self._machine.even_loads.connect(self.on_even_rebootrobot)      
         self._machine.even_loadPAY.connect(self.on_even_loadPAY)
         self._main_controller.state_robot_error.connect(self.on_state_robot_error)
         self._main_controller.even_changePage.connect(self.on_even_changePage)
@@ -52,14 +53,24 @@ class MyGUI(QtWidgets.QMainWindow):
 
         self.sttImage = 1
         self.timeDisplaySlider = 0
-        #self.show()
-        #self.showFullScreen()
+        self.showfull()
 
     def mouseReleaseEvent(self, e):
         if self.stackedWidget.currentIndex() == 0 :
             self._main_controller.beginOrder()
             print("MOUSE")
 
+    def showfull(self):
+        self.show()
+        #self.showFullScreen()
+
+    def on_even_rebootrobot(self):
+        self.stackedWidget.setCurrentIndex(8)
+        self.update()
+        self._machine.rebootRobot()
+        self.showfull()
+        self._machine.initRobot()
+        self.stackedWidget.setCurrentIndex(0)
 
     def loopGui(self):
         self._main_controller.run()

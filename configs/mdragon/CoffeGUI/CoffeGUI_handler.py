@@ -49,6 +49,8 @@ class HandlerClass:
     def __init__(self, halcomp,widgets,paths):
         self.hal = halcomp
         self.w = widgets
+        print("SSSSSSSSSSSSSSSSSs")
+        self.w.hide()
         self.PATHS = paths
         self._last_count = 0
         self.init_pins()

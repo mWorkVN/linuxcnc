@@ -37,7 +37,7 @@ class App(QApplication):
         self.Machine = Machine(my_logger,variThreading.queueVNPAY,self.valveModbus,self.RunVNPAY)
         self.main_controller = MainController(self.Machine)
         self.main_view = MyGUI(self.Machine, self.main_controller)
-        self.main_view.show()
+        #self.main_view.show()
         self.main_view.initialized__()
         #self.main_view.showFullScreen()
  

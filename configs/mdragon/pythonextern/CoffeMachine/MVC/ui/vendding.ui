@@ -39,7 +39,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>8</number>
     </property>
     <widget class="QWidget" name="page_7">
      <widget class="QLabel" name="videoslider">
@@ -4123,9 +4123,9 @@
      <widget class="QLabel" name="imageAc_22">
       <property name="geometry">
        <rect>
-        <x>250</x>
-        <y>80</y>
-        <width>481</width>
+        <x>130</x>
+        <y>100</y>
+        <width>651</width>
         <height>60</height>
        </rect>
       </property>
@@ -4161,7 +4161,7 @@
        <number>0</number>
       </property>
       <property name="text">
-       <string>HET NGUYEN LIEU</string>
+       <string>VUI LONG CHO KHOI DONG LAI ROBOT</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -4194,7 +4194,7 @@
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buy_buttonGroup"/>
   <buttongroup name="page_buttonGroup"/>
+  <buttongroup name="buy_buttonGroup"/>
  </buttongroups>
 </ui>

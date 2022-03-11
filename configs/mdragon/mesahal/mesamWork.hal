@@ -152,7 +152,7 @@ net J3vel => ddt.7.in
 net J3acc <= ddt.7.out
 
 # estop loopback
-#net estop-loop iocontrol.0.user-enable-out iocontrol.0.emc-enable-in
+net estop-loop iocontrol.0.user-enable-out iocontrol.0.emc-enable-in
 
 # create signals for tool loading loopback
 net tool-prep-loop iocontrol.0.tool-prepare iocontrol.0.tool-prepared

@@ -214,7 +214,6 @@ class StateRobot():
 
 class RobotControl(State):
     __slots__ = ['PLCModbus','stateRobot','emc','emccommand','emcstat']
-    proc = None
     def __init__(self,PLCModbus):
         self.PLCModbus=PLCModbus
         self.statusRobot = 'ok'
@@ -222,6 +221,8 @@ class RobotControl(State):
         startCmd = "/home/mwork/mworkcnc/scripts/linuxcnc /home/mwork/mworkcnc/configs/mdragon/scara.ini"
         self.cleanLinuxcnc()
         self.startLinuxcnc(startCmd)
+
+    def initRobot(self):
         self.isEMCRun = True
         self.emc = linuxcnc
         self.emcstat = self.emc.stat() # create a connection to the status channel
@@ -240,7 +241,6 @@ class RobotControl(State):
 
     def getER(self):
         error = self.emcError.poll()
-        #print("SSSSSS",error)
         if error:
             kind, text = error
             if kind in (linuxcnc.NML_ERROR, linuxcnc.OPERATOR_ERROR):
@@ -252,8 +252,9 @@ class RobotControl(State):
                 print(typus, text)
                 return 'reboot'
         return 'ok'
-    def closeL(self):
-        self.proc.terminate()
+
+
+
 
     def run(self, data):
         return self.stateRobot.run(data)
@@ -387,12 +388,12 @@ class RobotControl(State):
             print("FAIL TO INITIALIZE THE MACHINE")	
     
     def startLinuxcnc(self, cmd):
-        #res = subprocess.Popen(cmd.split() ) #, stdout = subprocess.PIPE)
-        #if (self.isRUNLCNC == False):
         cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
-
-        cmd = ["/home/mwork/mworkcnc/scripts/linuxcncm","/home/mwork/mworkcnc/configs/mdragon/noGui.ini"]
-        self.proc = subprocess.Popen(cmd) #, stderr=subprocess.STDOUT 
+        cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/noGui.ini"]
+        self.linuxCNCRun()
+        proc = subprocess.Popen(cmd) #, stderr=subprocess.STDOUT 
+        if (self.isRUNLCNC == True):
+            time.sleep(20)
         for i in range(30):
             time.sleep(1)
             if (self.checkProcess("axis") != False) and (self.checkProcess("linuxcnc") != False):
@@ -440,7 +441,7 @@ class RobotControl(State):
 
     def cleanLinuxcnc(self):
         if self.linuxCNCRun():
-            self.isRUNLCNC = False
+            self.isRUNLCNC = True
        
 """
 
