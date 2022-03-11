@@ -741,7 +741,7 @@ if [ -f $LOCKFILE ]; then
     y|Y|yes)
       echo Cleaning up old LinuxCNC...
       Cleanup other
-      sleep 5
+      sleep 8
     ;;
     *)
       echo Not starting new LinuxCNC

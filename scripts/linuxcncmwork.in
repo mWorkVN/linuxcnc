@@ -729,23 +729,18 @@ LOCKFILE=/tmp/linuxcnc.lock
 if [ -f $LOCKFILE ]; then
   if tty -s; then
     input=y
-    #echo -n "LinuxCNC is still running.  Restart it? [Y/n] "
-    #read input; [ -z $input ] && input=y
   elif [ -z "$DISPLAY" ]; then
     echo "No display, no tty, trying to clean up other instance automatically"
     input=y
   else
-    input=$(@WISH@ <<EOF
-wm wi .
-puts [tk_messageBox -title LinuxCNC -message "LinuxCNC is still running.  Restart it?" -type yesno]
-exit
-EOF
-)
+    input=y
+
   fi
   case $input in
     y|Y|yes)
       echo Cleaning up old LinuxCNC...
       Cleanup other
+      sleep 8
     ;;
     *)
       echo Not starting new LinuxCNC
