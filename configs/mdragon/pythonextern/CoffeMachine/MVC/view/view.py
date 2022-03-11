@@ -2,7 +2,7 @@
 # coding: utf8
 import  time ,os,sys
 import PyQt5
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets, uic,QtCore
 from PyQt5.QtCore import  QObject ,pyqtSlot,QUrl,Qt, QTimer
 from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator
 import setting.settings as settings
@@ -27,7 +27,7 @@ class MyGUI(QtWidgets.QMainWindow):
     
         self.timer = QTimer(self)
         self.timer.setSingleShot(False)
-        self.timer.setInterval(10) # in milliseconds, so 5000 = 5 seconds
+        self.timer.setInterval(1) # in milliseconds, so 5000 = 5 seconds
         self.timer.timeout.connect(self.loopGui)
         self.timer.start()
         
@@ -42,33 +42,53 @@ class MyGUI(QtWidgets.QMainWindow):
         self.main_tab_widget.setCurrentIndex(2)
         self.main_tab_widget.setCurrentIndex(1)
         self.main_tab_widget.setCurrentIndex(0)
-
+        self.stackedWidget.setCurrentIndex(0)
+        self.videoslider.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
 
         from view.nuocChaiList import ListNuocChai
         self.CHOOSEACTUATOR = ListNuocChai()
         self.CHOOSEACTUATOR.setObjectName('CHOOSEACTUATOR')
         self.actuator.addWidget(self.CHOOSEACTUATOR)
 
+        self.sttImage = 1
+        self.timeDisplaySlider = 0
         #self.show()
         #self.showFullScreen()
+    def mouseReleaseEvent(self, e):
+        if self.stackedWidget.currentIndex() == 0 :
+            self._main_controller.beginOrder()
+            print("MOUSE")
+
 
     def loopGui(self):
         self._main_controller.run()
 
     def paintEvent(self, event):
-        pass
+        if (time.time() - self.timeDisplaySlider > 3): 
+            self.timeDisplaySlider = time.time()
+            if self.stackedWidget.currentIndex() == 0 :
+                mainpath = os.path.dirname(os.path.abspath(__file__))
+                goal_dir = os.path.join(mainpath, 'res/Food',str(self.sttImage) + '.jpg')
+                goal_dir = os.path.abspath(goal_dir)
+                pixmap = QPixmap(goal_dir)
+                self.videoslider.setPixmap(pixmap)
+                self.sttImage += 1
+                if (self.sttImage == 18):self.sttImage = 1
+        self.update()
 
 
     @pyqtSlot(str)
     def on_even_changePage(self, value):
         self.updateUi()
-        numpage = int(value) - 1
+        numpage = int(value) 
         if numpage<0: return
         self.stackedWidget.setCurrentIndex(numpage)
 
     @pyqtSlot(str)
     def on_even_loadPAY(self, value):
+        print("begin load",time.time())
         self.webView.load(QUrl(value))
+        print("end load",time.time())
 
     @pyqtSlot(str)
     def on_state_robot_error(self, value):
@@ -152,13 +172,14 @@ class MyGUI(QtWidgets.QMainWindow):
         if id is None: return
         sl = 1 #int(getattr(self, 'numSlID' +str(id) ).currentIndex())
         self._main_controller.setOrder(id,sl)
-        print("have order",id,sl,flush=True)
+        print("have order",id,sl)
 
     def naptien_click(self):
         pass
 
     def returnOrder(self,value):
         self.webView.history().clear()
+        self.webView.load(QUrl("http://localhost:8081"))
         self._machine.returnOrder()
 
     def getPrice(self,ID):
@@ -169,10 +190,6 @@ class MyGUI(QtWidgets.QMainWindow):
         price = str(self.getPrice(idDevide))
         sl = 1 #int(self.sender().currentIndex())
         total = int(price)*sl
-        #getattr(self, 'totalCoinID' + str(nameStacked)).setText(str(total))
-        #print("have slOrderChange",flush=True)
-
-
 
     def load_resources(self):
         def qrccompile(qrcname, qrcpy):

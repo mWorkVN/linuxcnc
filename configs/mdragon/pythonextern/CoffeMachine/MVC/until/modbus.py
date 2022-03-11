@@ -22,7 +22,7 @@ class ModbusPull():
 
     def settings(self,set_timeout):
         self.master.set_timeout(set_timeout)
-        self.master.set_verbose(True)
+        #self.master.set_verbose(True)
 
     def getCOMs(self):
         COMs=[]

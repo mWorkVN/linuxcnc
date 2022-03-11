@@ -2,7 +2,7 @@
 import sys, time ,os
 import linuxcnc
 from PyQt5.QtCore import QObject, pyqtSignal
-from until.vnpay import vnpay
+#from until.vnpay import vnpay
 from model.state import State
 from model.robotControl import RobotControl
 from model.controlVal import ControlVal
@@ -45,9 +45,6 @@ class WaitChooseItemState(State):
 
     def checkAndChangeState(self,data = [0,0]):
         if (self.status != 0):
-            """print("Cho HÀN")
-            if self.machine.item.stock < int(self.machine.item.numBuy):
-                print("HET HaN")"""
             if self.status == 1:
                 self.machine.Que.put("Bạn Sẽ Mua {} số lượng {}".format(self.machine.item.name,self.machine.item.numBuy))
                 self.machine.Que.put("Tổng Tiền Cần thanh toán là {}".format(self.machine.item.price * self.machine.item.numBuy))
@@ -102,16 +99,17 @@ class ShowItemsState(State):
         self.machine = machine
 
     def checkAndChangeState(self,data = [0,0]):
-        self.mprint("Switching to showItemsState")
-        self.mprint('\nitems available \n***************')
+        pass
+        #self.mprint("Switching to showItemsState")
+        #self.mprint('\nitems available \n***************')
         #for item in self.machine.items:
         #    pass
             #self.mprint(item.name + " Price: "+ str(item.price) + "(VND) Stock :" + str(item.stock)) # otherwise self.mprint this item and show its price
-        self.mprint('***************\n')
-        self.machine.state = self.machine.WaitChooseItemState
+        #self.mprint('***************\n')
+        #self.machine.state = self.machine.WaitChooseItemState
 
 
-class WaitMoneyToBuyState(State,vnpay):
+class WaitMoneyToBuyState(State):
     @profile
     def __init__(self, machine,namestate):
         self.name = namestate     
@@ -122,21 +120,26 @@ class WaitMoneyToBuyState(State,vnpay):
 
     def checkAndChangeState(self,data = [0,0]):
         price = self.machine.item.price * self.machine.item.numBuy
-        if (self.state == 0):
-            self.state = 1
+        if (self.state == 0): # NEED CHECK ROBOT AND VALVE STATE, IF it don't have err then change state
+            if self.machine.checkError()['sts'] == True :
+                self.machine.state = self.machine.ErrorMachineState
+            else :self.state = 1
+        if (self.state == 1):
+            self.state = 2
             timebegin = datetime.datetime.now()
             self.machine.orderNum = str(int(round(timebegin.timestamp())))
-            self.payment(price,self.machine.orderNum)
+            #self.payment(price,self.machine.orderNum)
+            self.createPayment(price,self.machine.orderNum)
             self.timeLoop = time.time()
             
-        elif (self.state == 1):
+        elif (self.state == 2):
             if (self.machine.queueWebIN.empty() == False):
                 self.machine.vuluePAY = self.machine.queueWebIN.get()
                 print (self.machine.vuluePAY)
                 self.timeLoop = time.time()
-                self.state = 2
+                self.state = 3
 
-        elif (self.state == 2):
+        elif (self.state == 3):
             if self.machine.vuluePAY["order"] == self.machine.orderNum :
                 if self.machine.vuluePAY["sts"] == "00":
                     self.machine.moneyGet = price
@@ -166,83 +169,20 @@ class WaitMoneyToBuyState(State,vnpay):
             #self.machine.Que.put("B?n V?a N?p" + str(moneyGet) + " T?ng Ti?n là" + str(self.machine.moneyGet))
             #self.machine.Que.put("END")
             #self.speak(" ")
-
-    def payment(self,price,orderID):
-        order_type ='1'
-        amount = price
-        order_desc = 'Testr'
-        bank_code = ''
-        language = 'vn'
-        ipaddr = '127.0.0.1'
-        # Build URL Payment
-        
+    def createPayment(self,price,orderID):
         timebegin = datetime.datetime.now()
-        time_change = datetime.timedelta(minutes=1)
-        timeend = timebegin + time_change
-        order_id = orderID
-        self.machine.inforpayment['id'] = order_id
-        self.machine.inforpayment['day'] = timebegin.strftime('%Y%m%d%H%M%S')
-        #self.idCheck = order_id
-        #self.dateCheck=timebegin.strftime('%Y%m%d%H%M%S')
-        vnp = vnpay()
-        vnp.requestData['vnp_Version'] = '2.1.0'
-        vnp.requestData['vnp_Command'] = 'pay'
-        vnp.requestData['vnp_TmnCode'] = 'AGM2PN7X'
-        vnp.requestData['vnp_Amount'] = amount * 100
-        vnp.requestData['vnp_CurrCode'] = 'VND'
-        vnp.requestData['vnp_TxnRef'] = self.machine.inforpayment['id']
-        vnp.requestData['vnp_OrderInfo'] = order_desc
-        vnp.requestData['vnp_OrderType'] = order_type
-        # Check language, default: vn
-        if language and language != '':
-            vnp.requestData['vnp_Locale'] = language
-        else:
-            vnp.requestData['vnp_Locale'] = 'vn'
-            # Check bank_code, if bank_code is empty, customer will be selected bank on VNPAY
-        if bank_code and bank_code != "":
-            vnp.requestData['vnp_BankCode'] = bank_code
-        
-        vnp.requestData['vnp_CreateDate'] = self.machine.inforpayment['day']  # 20150410063022
-        vnp.requestData['vnp_ExpireDate'] = timeend.strftime('%Y%m%d%H%M%S')
-        vnp.requestData['vnp_IpAddr'] = ipaddr
-        vnp.requestData['vnp_ReturnUrl'] = settings.VNPAY_RETURN_URL
-        vnpay_payment_url = vnp.get_payment_url(settings.VNPAY_PAYMENT_URL, settings.VNPAY_HASH_SECRET_KEY)
-        #pzrint(vnpay_payment_url)
-        del vnp
-        self.machine.even_loadPAY.emit(vnpay_payment_url)
-        
-    def query(self):
-        vnp = vnpay()
-        vnp.requestData = {}
-        vnp.requestData['vnp_Command'] = 'querydr'
-        vnp.requestData['vnp_Version'] = '2.1.0'
-        vnp.requestData['vnp_TmnCode'] = settings.VNPAY_TMN_CODE
-        vnp.requestData['vnp_TxnRef'] = self.idCheck
-        vnp.requestData['vnp_OrderInfo'] = 'Kiem tra ket qua GD OrderId:{}'.format(self.idCheck)
-        vnp.requestData['vnp_TransDate'] = self.dateCheck  # 20150410063022
-        vnp.requestData['vnp_CreateDate'] = datetime.datetime.now().strftime('%Y%m%d%H%M%S')  # 20150410063022
-        vnp.requestData['vnp_IpAddr'] = '127.0.0.1'
-        requestUrl = vnp.get_payment_url(settings.VNPAY_API_URL, settings.VNPAY_HASH_SECRET_KEY)
-        responseData = urllib.request.urlopen(requestUrl).read().decode()
-        #print('RequestURL:' + requestUrl)
-        #print('VNPAY Response:' + responseData)
-        if 'Request_is_duplicate' in responseData:
-            del vnp
-            return
-        data = responseData.split('&')
-        for x in data:
-            tmp = x.split('=')
-            if len(tmp) == 2:
-                vnp.responseData[tmp[0]] = urllib.parse.unquote(tmp[1]).replace('+', ' ')
-        del vnp
-        #print('Validate data from VNPAY:' + str(vnp.validate_response(settings.VNPAY_HASH_SECRET_KEY))  )
-
+        self.machine.inforpayment['id'] = orderID
+        self.machine.inforpayment['day'] = timebegin.strftime('%Y%m%d%H%M%S')  
+        url = self.machine.RunVNPAY.payment(price,orderID,self.machine.inforpayment['day'])  
+        self.machine.even_loadPAY.emit(url)
+    
 class ErrorState(State):
     @profile
     def __init__(self, machine,namestate):
         self.name = namestate      
         self.machine = machine
         self.timeout = 0
+        
     def checkAndChangeState(self,data = [0,0]):
         if self.timeout == 0:
             self.timeout = time.time()
@@ -305,8 +245,15 @@ class ErrorMachineState(State):
     def __init__(self, machine,namestate):
         self.name = namestate     
         self.machine = machine
+        self.timeout = 0
     def checkAndChangeState(self,data = [0,0]):
-        pass
+        #DISPLAY ERROR STATE IN 5 seconds
+        if self.timeout == 0:
+            self.timeout = time.time()
+        elif (time.time()- self.timeout ) >3:
+            self.timeout = 0
+            self.machine.state = self.machine.ShowItemsState
+
 
 class CheckRefundState(State):
     @profile
@@ -350,8 +297,9 @@ class Machine(QObject):
     even_loadPAY = pyqtSignal(str)
     
     @profile
-    def __init__(self,my_logger,queueWEB,valveModbus):
+    def __init__(self,my_logger,queueWEB,valveModbus, RunVNPAY):
         super().__init__()
+        self.RunVNPAY = RunVNPAY
         self.inforpayment ={'id':'','day':''}
         self.valveModbus = valveModbus
         self.mysql = mysql()
@@ -384,22 +332,33 @@ class Machine(QObject):
             self.addItem(Item(i,'caffe sữa'  ,      dataget[4],    8800000000,  "caffeden.ngc" ))
 
         self.timeLoopGetPLC = 0
-
+        self.timecheckLOOP = 0
+        
     def returnOrder(self):
         self.state = self.ShowItemsState
         self.WaitMoneyToBuyState.state = 0
 
     def run(self,data = [0,0]):
+        
         self.state.checkAndChangeState(data)
         if (time.time() - self.timeLoopGetPLC > 60):
             self.timeLoopGetPLC = time.time()
             mucNuoc = self.plcVal.getData(1,3,28,14)
             print("mucNuoc",mucNuoc)
-        if self.plcVal.stateModbus == 'er' or self.myrobot.statusRobot == 'er':
-            pass
-        elif self.state.scan() == "7":
-            self.state = self.ShowItemsState
-            print("error")
+            self.plcVal.checkError(1)
+        #print("MACHINE LOOP ", time.time() - self.timecheckLOOP)
+        self.timecheckLOOP = time.time()
+
+
+    def checkError(self):
+        error = {'sts':False,'msg':''}
+        if self.plcVal.stateModbus == 'er':
+            error['sts'] = True
+            error['msg'] = 'PLC ERR'
+        if self.myrobot.statusRobot == 'er':
+            error['sts'] = True
+            error['msg'] = 'Robot ERR'
+        return error
 
     def scan(self):
         return self.state.scan()

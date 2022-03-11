@@ -10,12 +10,13 @@ class MainController(QObject):
         self._machine = Machine
         self._manageSysTem = checkSys()
         self.timeLOOPCheckSYS = 0
+        self.timeBeginOrder = 0
     #Call From GUI
     def run(self):
         self._machine.run()
         self.checkChangeState()
-        self._manageSysTem.run()
         self.checkMemory()
+        self.checkTimeOutDisplay()
 
     def checkChangeState(self):
         if (self.preState != self._machine.scan()):
@@ -29,6 +30,7 @@ class MainController(QObject):
 
     def setOrder(self,id,sl):
         #self._machine.myrobot.checkError()
+        self.timeBeginOrder = 0
         if self._machine.myrobot.checkEMC() == True:
             print("have order",id,sl,flush=True)
             self._machine.getOrder(id,sl)
@@ -40,4 +42,14 @@ class MainController(QObject):
 
     def getCurrentState(self):
         return self.preState
+
+    def checkTimeOutDisplay(self):
+        if self.timeBeginOrder ==0: return
+        elif time.time() -self.timeBeginOrder >30:
+            self.timeBeginOrder =0
+            self._machine.state = self._machine.ShowItemsState
+
+    def beginOrder(self):
+        self.timeBeginOrder = time.time()
+        self._machine.state = self._machine.WaitChooseItemState
        

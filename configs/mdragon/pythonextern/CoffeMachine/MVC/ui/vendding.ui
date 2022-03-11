@@ -32,7 +32,7 @@
    <widget class="QStackedWidget" name="stackedWidget">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>10</x>
       <y>10</y>
       <width>971</width>
       <height>771</height>
@@ -41,6 +41,54 @@
     <property name="currentIndex">
      <number>0</number>
     </property>
+    <widget class="QWidget" name="page_7">
+     <widget class="QLabel" name="videoslider">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>951</width>
+        <height>621</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>120</width>
+        <height>120</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>5000</width>
+        <height>5000</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap>:/FOOD/Food/2.jpg</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </widget>
     <widget class="QWidget" name="stackedWidgetPage1">
      <widget class="QStackedWidget" name="main_tab_widget">
       <property name="geometry">
@@ -55,7 +103,7 @@
        <enum>QFrame::Raised</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="main_tab_widget6">
        <widget class="QWidget" name="horizontalLayoutWidget">

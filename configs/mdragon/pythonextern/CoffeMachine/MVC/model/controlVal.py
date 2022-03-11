@@ -3,7 +3,7 @@ class ControlVal():
     def __init__(self,valveModbus):
         self.valveModbus=valveModbus
         self.stateModbus = 'ok'
-
+        self.valveModbus.settings(0.1)
     def run(self):
         pass
 
@@ -19,5 +19,6 @@ class ControlVal():
         else: 
             self.stateModbus = 'er'
             return False
-
-    
+    def checkError(self,id):
+        value = self.valveModbus.getData(id, 6, 0, 1)
+        self.stateModbus = value['status']          
