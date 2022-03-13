@@ -8,7 +8,8 @@ from PyQt5.QtGui import QPixmap, QIntValidator, QDoubleValidator , QTransform , 
 import setting.settings as settings
 from memory_profiler import profile
 import subprocess
-
+from until.mylog import getlogger
+my_logger=getlogger("__web___")
 class MyGUI(QtWidgets.QMainWindow):
 
     def __init__(self, machine, main_controller):
@@ -23,7 +24,9 @@ class MyGUI(QtWidgets.QMainWindow):
         goal_dir = os.path.abspath(goal_dir)
         qss_file = open(goal_dir).read()
         self.setStyleSheet(qss_file)
-
+        print("LOGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+        #self.logger = logging.getLogger(__name__) # What do I have to enter here?
+        my_logger.info('creating an instance of Class ##################################')
         self._machine = machine
         self._main_controller = main_controller
     
@@ -176,10 +179,6 @@ class MyGUI(QtWidgets.QMainWindow):
         elif self._main_controller.preState == "7":
             self.msgError.setText(str(self._machine.msgError))
             
-
-    def initialized__(self):        
-
-        print("sssssssssssssssssss")
 
     def initEvent(self):
         self.page_buttonGroup.buttonClicked.connect(self.main_tab_changed)

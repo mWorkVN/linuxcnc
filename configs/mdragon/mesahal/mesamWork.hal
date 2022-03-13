@@ -9,7 +9,7 @@ loadrt ddt count=8
 
 # hostmot2 driver
 loadrt hostmot2
-loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=1 num_pwmgens=1 num_stepgens=4 sserial_port_0=20000000 ssi_chan_0=steps%2bzencoder%12um enable_raw" 
+loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=1 num_pwmgens=0 num_rcpwmgens=1 num_stepgens=4 sserial_port_0=20000000 ssi_chan_0=steps%2bzencoder%12um enable_raw" 
 setp   hm2_7i80.0.watchdog.timeout_ns 60000000
 loadrt sum2 count=1
 #pwm gen
@@ -22,6 +22,7 @@ addf motion-controller        servo-thread
 addf hm2_7i80.0.write         servo-thread
 #addf pwmgen.make-pulses 	  base-thread 
 #addf pwmgen.update			  servo-thread
+
 setp hm2_7i80.0.dpll.01.timer-us -50
 setp hm2_7i80.0.dpll.02.timer-us -120
 setp hm2_7i80.0.dpll.03.timer-us -200
@@ -47,14 +48,23 @@ addf ddt.7 servo-thread
 
 #Laser
 
-setp hm2_7i80.0.pwmgen.00.out0.invert_output  1
-setp hm2_7i80.0.pwmgen.pwm_frequency 5000
-setp hm2_7i80.0.pwmgen.00.scale 5000
-setp hm2_7i80.0.pwmgen.00.output-type 1
+#setp hm2_7i80.0.pwmgen.00.out0.invert_output  1
+#setp hm2_7i80.0.pwmgen.pwm_frequency 5000
+#setp hm2_7i80.0.pwmgen.00.scale 5000
+#setp hm2_7i80.0.pwmgen.00.output-type 1
 
-net spindle-speed-cmd spindle.0.speed-out => hm2_[HOSTMOT2](BOARD).0.pwmgen.00.value
-net spindle-on spindle.0.on => hm2_[HOSTMOT2](BOARD).0.pwmgen.00.enable
-#End
+#net spindle-speed-cmd spindle.0.speed-out => hm2_[HOSTMOT2](BOARD).0.pwmgen.00.value
+#net spindle-on spindle.0.on => hm2_[HOSTMOT2](BOARD).0.pwmgen.00.enable
+
+
+
+setp hm2_7i80.0.rcpwmgen.rate 50 # hm2_7i80.0.rcpwmgen.ratehz
+setp hm2_7i80.0.rcpwmgen.00.width 0
+setp hm2_7i80.0.rcpwmgen.00.offset 1.0
+#    41  float IN              0  hm2_7i80.0.rcpwmgen.00.offset
+#    41  float IN              1  hm2_7i80.0.rcpwmgen.00.scale
+#    41  float IN              0  hm2_7i80.0.rcpwmgen.00.width
+#    41  float IN             50  hm2_7i80.0.rcpwmgen.rate
 
 # create HAL signals for position commands from motion module
 net J0pos hm2_[HOSTMOT2](BOARD).0.stepgen.00.position-cmd <= joint.0.motor-pos-cmd
@@ -187,6 +197,7 @@ setp hm2_[HOSTMOT2](BOARD).0.gpio.059.is_output true  #5
 setp hm2_[HOSTMOT2](BOARD).0.gpio.060.is_output true  #6
 setp hm2_[HOSTMOT2](BOARD).0.gpio.061.is_output true  #7
 setp hm2_[HOSTMOT2](BOARD).0.gpio.062.is_output true  #8
+
 setp hm2_[HOSTMOT2](BOARD).0.gpio.063.is_output true
 setp hm2_[HOSTMOT2](BOARD).0.gpio.064.is_output true
 setp hm2_[HOSTMOT2](BOARD).0.gpio.065.is_output true
@@ -196,6 +207,24 @@ setp hm2_[HOSTMOT2](BOARD).0.gpio.052.is_output true
 setp hm2_[HOSTMOT2](BOARD).0.gpio.054.is_output true
 setp hm2_[HOSTMOT2](BOARD).0.gpio.056.is_output true
 setp hm2_[HOSTMOT2](BOARD).0.gpio.058.is_output true
+
+setp hm2_[HOSTMOT2](BOARD).0.gpio.051.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.053.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.055.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.057.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.059.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.060.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.061.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.062.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.063.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.064.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.065.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.066.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.067.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.052.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.054.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.056.invert_output true
+setp hm2_[HOSTMOT2](BOARD).0.gpio.058.invert_output true
 
 
 net xena joint.0.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.00.enable
@@ -208,12 +237,12 @@ net aena joint.3.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.03.enable
 net aena joint.3.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.057.out
 
 # Cai home pin 
-net homeswitchesX <= hm2_[HOSTMOT2](BOARD).0.gpio.034.in
+net homeswitchesX <= hm2_[HOSTMOT2](BOARD).0.gpio.047.in
 net homeswitchesX => joint.0.home-sw-in
 #net homeswitchesX => joint.0.neg-lim-sw-in
 #net homeswitchesX => joint.0.pos-lim-sw-in
 
-net homeswitchesY <= hm2_[HOSTMOT2](BOARD).0.gpio.036.in
+net homeswitchesY <= hm2_[HOSTMOT2](BOARD).0.gpio.046.in
 net homeswitchesY => joint.1.home-sw-in
 #net homeswitchesX => joint.0.neg-lim-sw-in
 #net homeswitchesX => joint.0.pos-lim-sw-in
@@ -240,9 +269,11 @@ net aflt joint.3.amp-fault-in
 
 net :kinstype-select <= motion.analog-out-03 => motion.switchkins-type
 
-net pinOut1 motion.digital-out-01 => hm2_[HOSTMOT2](BOARD).0.gpio.058.out
-net pinOut0 motion.digital-out-00 => hm2_[HOSTMOT2](BOARD).0.gpio.059.out
-net pinOut2 motion.digital-out-02 => hm2_[HOSTMOT2](BOARD).0.gpio.060.out
+net pinOut1 motion.digital-out-01 => hm2_[HOSTMOT2](BOARD).0.gpio.063.out
+net pinOut0 motion.digital-out-00 => hm2_[HOSTMOT2](BOARD).0.gpio.064.out
+net pinOut2 motion.digital-out-02 => hm2_[HOSTMOT2](BOARD).0.gpio.065.out
+net pinOut3 motion.digital-out-03 => hm2_[HOSTMOT2](BOARD).0.gpio.066.out
+net pinOut4 motion.digital-out-04 => hm2_[HOSTMOT2](BOARD).0.gpio.067.out
 
 #net cyclestart <= hm2_[HOSTMOT2](BOARD).0.gpio.048.in => halui.program.run
 net pinIn1 <= hm2_[HOSTMOT2](BOARD).0.gpio.038.in => motion.digital-in-01

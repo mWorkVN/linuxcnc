@@ -26,3 +26,8 @@ if [ -f $LOCKFILE ]; then
 #exit
 #EOF
 #)
+
+
+# ICE default IO error handler doing an exit(), pid = ..., errno = 32
+
+mv ~/.ICEauthority ~/.ICEauthority.bak 

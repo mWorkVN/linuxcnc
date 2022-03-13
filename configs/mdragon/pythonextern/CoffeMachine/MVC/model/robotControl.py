@@ -17,9 +17,13 @@ class until:
     def closeGrib(self):
         self.number += 1
         pass
-    def checkFinish(self):
+
+    def checkFinish(self,pos=None):
         if (self.stateRobot.robot.checkStatusDoneMDI() != -1):
-            self.number += 1 
+            #if pos!=None:
+            #    self.moveJoinToPos(pos)
+            #else: self.number += 1
+            self.number += 1
         return False
 
     def moveJoinToPos(self,pos):
@@ -45,21 +49,25 @@ class TakeGlassState(until):
     def run(self,data):
         if (self.number ==0):
             self.openGrib()
-        elif (self.number ==1): #move to Glass 1
-            self.moveJoinToPos("TAKE_GLASS_" + str(data[3])) 
-        elif (self.number == 2): #wait done
+        elif (self.number ==1):
             self.checkFinish()
-        elif (self.number == 3): #move to Glass 2
+        elif (self.number ==2): #move to Glass 1
+            self.moveJoinToPos("TAKE_GLASS_" + str(data[3])) 
+        elif (self.number == 3): #wait done
+            self.checkFinish()
+        elif (self.number == 4): #move to Glass 2
             self.moveJoinToPos("TAKE_GLASS_END_" + str(data[3])) 
-        elif (self.number == 4): #Close Glass
+        elif (self.number == 5): #Close Glass
             self.checkFinish()
-        elif (self.number == 5): #move to Glass 1
-            self.closeGrib() 
         elif (self.number == 6): #move to Glass 1
-            self.moveJoinToPos("TAKE_GLASS_" + str(data[3])) 
+            self.closeGrib() 
         elif (self.number == 7): #move to Glass 1
             self.checkFinish()
         elif (self.number == 8): #move to Glass 1
+            self.moveJoinToPos("TAKE_GLASS_" + str(data[3])) 
+        elif (self.number == 9): #move to Glass 1
+            self.checkFinish()
+        elif (self.number == 10): #move to Glass 1
             self.number = 0
             self.stateRobot.stateRunStep = self.stateRobot.takeNguyenLieuState
         return 0
@@ -141,10 +149,12 @@ class DuaLyThanhPhamState(until):
         elif (self.number == 5): #move to Glass 1
             self.openGrib() 
         elif (self.number == 6): #move to Glass 1
-            self.moveJoinToPos("MOVE_END_FIRST") 
-        elif (self.number == 7): #move to Glass 1
             self.checkFinish()
+        elif (self.number == 7): #move to Glass 1
+            self.moveJoinToPos("MOVE_END_FIRST") 
         elif (self.number == 8): #move to Glass 1
+            self.checkFinish()
+        elif (self.number == 9): #move to Glass 1
             self.number = 0
             self.stateRobot.stateRunStep = self.stateRobot.goHomeState 
         return 0
@@ -234,24 +244,27 @@ class RobotControl(State):
         self.set_mdi_mode()
         self.isEMCRun = False
         self.stateRobot = StateRobot(self)
-        self.emccommand.maxvel(10.0)
+        self.emccommand.maxvel(13.0)
 
     def initstate(self):
         self.stateRobot.stateRunStep = self.stateRobot.initStats 
 
     def getER(self):
-        error = self.emcError.poll()
-        if error:
-            kind, text = error
-            if kind in (linuxcnc.NML_ERROR, linuxcnc.OPERATOR_ERROR):
-                typus = "error"
-            else:
-                typus = "info"
-            print(typus, text)
-            if "error finishing read! iter=" in text:
+        try :
+            error = self.emcError.poll()
+            if error:
+                kind, text = error
+                if kind in (linuxcnc.NML_ERROR, linuxcnc.OPERATOR_ERROR):
+                    typus = "error"
+                else:
+                    typus = "info"
                 print(typus, text)
-                return 'reboot'
-        return 'ok'
+                if "error finishing read! iter=" in text:
+                    print(typus, text)
+                    return 'reboot'
+            return 'ok'
+        except:
+            return
 
 
 
@@ -266,13 +279,7 @@ class RobotControl(State):
         del self.emccommand 
 
     def checkEMC(self):
-        try:  
-            self.emcstat.poll()
-            self.isEMCRun = True
-            self.statusRobot = 'ok'
-        except linuxcnc.error as e:
-            self.statusRobot = 'er_connect'
-            self.isEMCRun = False
+        self.pullRobot()
         if self.statusRobot != 'er_connect':
             if self.checkReady() == False :self.statusRobot = 'ok'
             if (self.statusRobot == 'e_NotHome'): self.homeAll()
@@ -286,8 +293,11 @@ class RobotControl(State):
         #self.emccommand = self.emc.command()
         
     def homeAll(self):
-        for i in range(4):
-            self.axis_home(i, self.emccommand, self.emcstat)
+        self.axis_home(1, self.emccommand, self.emcstat)
+        self.axis_home(0, self.emccommand, self.emcstat)
+        self.axis_home(2, self.emccommand, self.emcstat)
+        self.axis_home(3, self.emccommand, self.emcstat)
+        #self.axis_home(4, self.emccommand, self.emcstat)                    
 
     def init(self):
         pass
@@ -301,7 +311,7 @@ class RobotControl(State):
     def set_mdi_mode(self):
         if self.isEMCRun ==False:
             return
-        self.emcstat.poll()
+        self.pullRobot()
         if self.emcstat.task_mode != self.emc.MODE_MDI:
             self.emccommand.mode(self.emc.MODE_MDI)
             self.emccommand.wait_complete()
@@ -309,7 +319,7 @@ class RobotControl(State):
     def set_manual_mode(self):
         if self.isEMCRun ==False:
             return
-        self.emcstat.poll()
+        self.pullRobot()
         if self.emcstat.task_mode != self.emc.MODE_MANUAL:
             self.emccommand.mode(self.emc.MODE_MANUAL)
             self.emccommand.wait_complete()
@@ -327,6 +337,7 @@ class RobotControl(State):
 
 
     def axis_home(self, i, c, s):
+        if self.isEMCRun == False : return
         c.home(i)
         c.wait_complete(30.0) #This command without argument waits only 1 second.
         while s.homed[i] != 1:
@@ -335,7 +346,7 @@ class RobotControl(State):
             s.poll()
 
     def checkReady(self):
-        self.emcstat.poll()
+        self.pullRobot()
         if self.emcstat.task_state == self.emc.STATE_ESTOP:
             self.statusRobot = 'e_EMG'
             return True
@@ -360,20 +371,28 @@ class RobotControl(State):
             return True"""
         return False
 
+    def pullRobot(self): 
+        try:  
+            self.emcstat.poll()
+            self.isEMCRun = True
+            self.statusRobot = 'ok'
+        except :
+            self.statusRobot = 'er_connect'
+            self.isEMCRun = False
 
     def initLinuxcnc(self):
         time.sleep(2)
-        self.emcstat.poll()
+        self.pullRobot()
         
         while self.emcstat.task_state == self.emc.STATE_ESTOP:
             print("WAITING INITIALIZATION")
             time.sleep(1)
-            self.emcstat.poll()
+            self.pullRobot()
 
         self.emccommand.state(linuxcnc.STATE_ESTOP_RESET)
         time.sleep(1)
         print("ESTOP RELEASED")
-        self.emcstat.poll()
+        self.pullRobot()
         
         if self.emcstat.task_state == linuxcnc.STATE_ESTOP_RESET:
             self.emccommand.state(linuxcnc.STATE_ON)
@@ -381,14 +400,14 @@ class RobotControl(State):
             print("ESTOP RESET")
         else:
             print("ESTOP RESET ERROR")
-        self.emcstat.poll()
+        self.pullRobot()
         if self.emcstat.task_state == linuxcnc.STATE_ON:
             print("MACHINE IS READY")
         else:
             print("FAIL TO INITIALIZE THE MACHINE")	
     
     def startLinuxcnc(self, cmd):
-        cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
+        #cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
         cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/noGui.ini"]
         self.linuxCNCRun()
         proc = subprocess.Popen(cmd) #, stderr=subprocess.STDOUT 
