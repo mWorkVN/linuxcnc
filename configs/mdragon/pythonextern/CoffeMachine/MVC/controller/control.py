@@ -1,6 +1,8 @@
 from PyQt5.QtCore import QObject, pyqtSlot ,pyqtSignal
 from manage.checkSys import checkSys
 import time
+from until.mylog import getlogger
+my_logger=getlogger("__Control___")
 class MainController(QObject):
     even_changePage = pyqtSignal(str)
     state_robot_error = pyqtSignal(str)
@@ -26,16 +28,18 @@ class MainController(QObject):
     def checkMemory(self):
         if (time.time()- self.timeLOOPCheckSYS > 10):
             self.timeLOOPCheckSYS = time.time()
-            print("CPU,MEM ",self._manageSysTem.run())
+            my_logger.debug("Mempry {} ".format(self._manageSysTem.run()))
 
     def setOrder(self,id,sl):
         self.timeBeginOrder = 0
-        if self._machine.myrobot.checkEMC() == True:
-            print("have order",id,sl,flush=True)
+        my_logger.info("have order {} {}".format(id,sl))
+        self._machine.getOrder(id,sl)
+        """if self._machine.myrobot.checkEMC() == True:
+            my_logger.info("have order {} {}".format(id,sl))
             self._machine.getOrder(id,sl)
         else:
             self.state_robot_error.emit("ERR")
-
+        """
     def setMoneyGet(self,money):
         self._machine.SendMoney(money)
 

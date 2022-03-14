@@ -10,13 +10,13 @@ class State:
     def scan(self):
         return self.name
 
-    def mprint(self,msg):
+    """def mprint(self,msg):
         if (os.name == 'nt'): print(msg,flush=True) # win
-        elif (os.name == 'posix'): print(msg) # linux 
+        elif (os.name == 'posix'): print(msg) # linux """
 
-    def logdata(self,level,msg):
-        pass
-        getattr(self.machine.my_logger,level)(msg)
+    #def logdata(self,level,msg):
+    #    pass
+    #    getattr(self.machine.my_logger,level)(msg)
 
     def speak1(self,msg):
         while(1):
@@ -24,7 +24,6 @@ class State:
                 filename = "talk{}.mp3".format(str(int(time.time())))
                 msg = self.machine.queSpeaker.get() 
                 if (msg == "END"):continue
-                print("Play ",str(filename),flush=True)
                 #tts = gTTS(text=msg, lang='vi')
                 #tts.save(filename)
                 #audio_file =filename

@@ -24,9 +24,7 @@ class MyGUI(QtWidgets.QMainWindow):
         goal_dir = os.path.abspath(goal_dir)
         qss_file = open(goal_dir).read()
         self.setStyleSheet(qss_file)
-        print("LOGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
-        #self.logger = logging.getLogger(__name__) # What do I have to enter here?
-        my_logger.info('creating an instance of Class ##################################')
+        my_logger.info('init Gui')
         self._machine = machine
         self._main_controller = main_controller
     
@@ -61,7 +59,7 @@ class MyGUI(QtWidgets.QMainWindow):
     def mouseReleaseEvent(self, e):
         if self.stackedWidget.currentIndex() == 0 :
             self._main_controller.beginOrder()
-            print("MOUSE")
+
 
     def showfull(self):
         self.show()
@@ -110,13 +108,11 @@ class MyGUI(QtWidgets.QMainWindow):
 
     @pyqtSlot(str)
     def on_even_loadPAY(self, value):
-        print("begin load",time.time())
         self.webView.load(QUrl(value))
-        print("end load",time.time())
 
     @pyqtSlot(str)
     def on_state_robot_error(self, value):
-        print("ERR")
+        my_logger.info('ERR ROBOT')
         """msg = QMessageBox()
         msg.setWindowTitle("Tutorial on PyQt5")
         msg.setText("This is the main text!")
@@ -196,7 +192,6 @@ class MyGUI(QtWidgets.QMainWindow):
         if id is None: return
         sl = 1 #int(getattr(self, 'numSlID' +str(id) ).currentIndex())
         self._main_controller.setOrder(id,sl)
-        print("have order",id,sl)
 
     def naptien_click(self):
         pass

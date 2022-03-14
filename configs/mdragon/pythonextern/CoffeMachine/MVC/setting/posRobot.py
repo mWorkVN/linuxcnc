@@ -1,23 +1,40 @@
-TAKE_GLASS_1 = "X329 Y495 Z-1.7 C24"    # Lay Coc Loai 1
-TAKE_GLASS_END_1 = "X360 Y512 Z-1.7 C24"
-TAKE_GLASS_2 = "X329 Y495 Z-1.7 C24"    # Lay Coc Loai 2
-TAKE_GLASS_END_2 = "X360 Y512 Z-1.7 C24"
-TAKE_GLASS_3 = "X329 Y495 Z-1.7 C24"    # Lay Coc Loai 3
-TAKE_GLASS_END_3 = "X360 Y512 Z-1.7 C24"
+TAKE_GLASS_1 = "X450 y337 z-30 c26"    # Lay Coc Loai 1
+TAKE_GLASS_VAO_1 = "X604 y337 z-30 c26"    # Lay Coc Loai 1
+TAKE_GLASS_NANG_1 = "X604 y337 z-120 c26"    # Lay Coc Loai 1
+TAKE_GLASS_END_1 = "X534 y337 z-120 c26"
+
+TAKE_GLASS_2 = "X450 y337 z-30 c26"    # Lay Coc Loai 1
+TAKE_GLASS_VAO_2 = "X604 y337 z-30 c26"    # Lay Coc Loai 1
+TAKE_GLASS_NANG_2 = "X604 y337 z-90 c26"    # Lay Coc Loai 1
+TAKE_GLASS_END_2 = "X534 y337 z-90 c26"
+
+TAKE_GLASS_3 = "X450 y337 z-30 c26"    # Lay Coc Loai 1
+TAKE_GLASS_VAO_3 = "X604 y337 z-30 c26"    # Lay Coc Loai 1
+TAKE_GLASS_NANG_3 = "X604 y337 z-90 c26"    # Lay Coc Loai 1
+TAKE_GLASS_END_3 = "X534 y337 z-90 c26"
 
 
-MOVE_END_FIRST = "X640 Y80 Z-1.7 C24"  # Vi tri dua san pham
-MOVE_END_END = "X660 Y80 Z-1.7 C24"
-MOVE_HOME = "X314 Y95 Z-1.7 C24"           #vi tri cho
-MOVE_HOME_END = "X314 Y95 Z-1.7 C24"
+MOVE_END_FIRST = "450 y10 z-120 c26"  # Vi tri dua san pham
+MOVE_END_1 = "X657 y10 z-120 c26"  # Vi tri dua san pham
+MOVE_END_2 = "X657 y10 z-30 c26"  # Vi tri dua san pham
+MOVE_END_END = "450 y10 z-30 c26"
 
 
-TAKE_NL_1 = "X548 Y-380 Z-1.7 C24"
-TAKE_NL_END_1 = "X548 Y-380 Z-1.7 C24"
-TAKE_NL_2 = "X548 Y-300 Z-1.7 C24"
-TAKE_NL_END_2 = "X548 Y-300 Z-1.7 C24"
-TAKE_NL_3 = "X548 Y-250 Z-1.7 C24"
-TAKE_NL_END_3 = "X548 Y-250 Z-1.7 C24"
+MOVE_HOME = "X350 Y0 z-79 c26"           #vi tri cho
+MOVE_HOME_END = "X350 Y0 z-79 c26"
+
+
+TAKE_NL_1 = "x478 y-350 Z-79 c-65"
+TAKE_NL_END_1 = "x478 y-480 Z-79 c-65"
+
+TAKE_NL_2 = "x300 y-350 Z-79 c-65"
+TAKE_NL_END_2 = "x300 y-480 Z-79 c-65"
+
+TAKE_NL_3= "x140 y-350 Z-79 c-65"
+TAKE_NL_END_3 = "x140 y-459 Z-79 c-65"
+
+
+
 TAKE_NL_4 = "X548 Y-250 Z-1.7 C24"
 TAKE_NL_END_4 = "X548 Y-250 Z-1.7 C24"
 TAKE_NL_5 = "X400 Y-380 Z-1.7 C24"

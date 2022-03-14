@@ -9,12 +9,21 @@ def getlogger(name=None):
     else:
         my_logger = logging.getLogger(default)
     my_logger.setLevel(logging.DEBUG)
-    handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=5*1024*1024, backupCount=5)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    my_logger.addHandler(handler)
+    #handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=5*1024*1024, backupCount=5)
+    #handler.setFormatter(formatter)
+    #my_logger.addHandler(handler)
     return my_logger
 
+
+"""
+
+logging.debug('This is a debug message')
+logging.info('This is an info message')
+logging.warning('This is a warning message')
+logging.error('This is an error message')
+logging.critical('This is a critical message')
+"""
 
 """
 

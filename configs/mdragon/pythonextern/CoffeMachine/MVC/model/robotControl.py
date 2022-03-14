@@ -6,23 +6,24 @@ import imp
 import setting.posRobot as posRobot
 import subprocess
 from memory_profiler import profile
-
+from until.mylog import getlogger
+my_logger=getlogger("__Robot___")
 class until:
     def increseStep(self):
         self.number += 1
         
     def openGrib(self):
+        my_logger.debug("M463 P{} Q{}".format(0,1))
+        self.stateRobot.robot.sendMDI("M463 P{} Q{}".format(0.01,2))
+        time.sleep(0.05) 
         self.number += 1
-        pass
-    def closeGrib(self):
-        self.number += 1
-        pass
 
+    def closeGrib(self):
+        self.stateRobot.robot.sendMDI("M463 P{} Q{}".format(1.8,2))
+        time.sleep(0.05) 
+        self.number += 1
     def checkFinish(self,pos=None):
         if (self.stateRobot.robot.checkStatusDoneMDI() != -1):
-            #if pos!=None:
-            #    self.moveJoinToPos(pos)
-            #else: self.number += 1
             self.number += 1
         return False
 
@@ -50,24 +51,29 @@ class TakeGlassState(until):
         if (self.number ==0):
             self.openGrib()
         elif (self.number ==1):
+            #my_logger.debug("Check P{} Q{}".format(1,1))
             self.checkFinish()
         elif (self.number ==2): #move to Glass 1
             self.moveJoinToPos("TAKE_GLASS_" + str(data[3])) 
         elif (self.number == 3): #wait done
             self.checkFinish()
         elif (self.number == 4): #move to Glass 2
-            self.moveJoinToPos("TAKE_GLASS_END_" + str(data[3])) 
+            self.moveJoinToPos("TAKE_GLASS_VAO_" + str(data[3])) 
         elif (self.number == 5): #Close Glass
             self.checkFinish()
         elif (self.number == 6): #move to Glass 1
             self.closeGrib() 
         elif (self.number == 7): #move to Glass 1
             self.checkFinish()
-        elif (self.number == 8): #move to Glass 1
-            self.moveJoinToPos("TAKE_GLASS_" + str(data[3])) 
+        elif (self.number == 8): #move to Glass 2
+            self.moveJoinToPos("TAKE_GLASS_NANG_" + str(data[3])) 
         elif (self.number == 9): #move to Glass 1
             self.checkFinish()
         elif (self.number == 10): #move to Glass 1
+            self.moveJoinToPos("TAKE_GLASS_END_" + str(data[3])) 
+        elif (self.number == 11): #move to Glass 1
+            self.checkFinish()
+        elif (self.number == 12): #move to Glass 1
             self.number = 0
             self.stateRobot.stateRunStep = self.stateRobot.takeNguyenLieuState
         return 0
@@ -109,7 +115,6 @@ class TakeNguyenLieuState(until):
             else:self.checkTrySendModbus()
         elif (self.number == 6):
             modbusGet = self.stateRobot.robot.PLCModbus.getData(1,3,(self.runAt *2) +1,1)
-            #print(modbusGet)
             if (modbusGet['s'] == 'er'):
                 self.checkTrySendModbus()
             elif  int(modbusGet['d'][0])!= 1 and int(modbusGet['d'][0])!= 0:
@@ -143,18 +148,22 @@ class DuaLyThanhPhamState(until):
         elif (self.number == 2): #wait done
             self.checkFinish()
         elif (self.number == 3): #move to Glass 2
-            self.moveJoinToPos("MOVE_END_END") 
+            self.moveJoinToPos("MOVE_END_1") 
         elif (self.number == 4): #Close Glass
             self.checkFinish()
-        elif (self.number == 5): #move to Glass 1
-            self.openGrib() 
-        elif (self.number == 6): #move to Glass 1
+        elif (self.number == 5): #move to Glass 2
+            self.moveJoinToPos("MOVE_END_2") 
+        elif (self.number == 6): #Close Glass
             self.checkFinish()
         elif (self.number == 7): #move to Glass 1
-            self.moveJoinToPos("MOVE_END_FIRST") 
+            self.openGrib() 
         elif (self.number == 8): #move to Glass 1
             self.checkFinish()
         elif (self.number == 9): #move to Glass 1
+            self.moveJoinToPos("MOVE_END_END") 
+        elif (self.number == 10): #move to Glass 1
+            self.checkFinish()
+        elif (self.number == 11): #move to Glass 1
             self.number = 0
             self.stateRobot.stateRunStep = self.stateRobot.goHomeState 
         return 0
@@ -244,7 +253,7 @@ class RobotControl(State):
         self.set_mdi_mode()
         self.isEMCRun = False
         self.stateRobot = StateRobot(self)
-        self.emccommand.maxvel(13.0)
+        self.emccommand.maxvel(40.0)
 
     def initstate(self):
         self.stateRobot.stateRunStep = self.stateRobot.initStats 
@@ -258,18 +267,14 @@ class RobotControl(State):
                     typus = "error"
                 else:
                     typus = "info"
-                print(typus, text)
                 if "error finishing read! iter=" in text:
-                    print(typus, text)
                     return 'reboot'
             return 'ok'
         except:
             return
 
-
-
-
     def run(self, data):
+        #self.checkEMC()
         return self.stateRobot.run(data)
 
     def delInit(self):
@@ -279,6 +284,7 @@ class RobotControl(State):
         del self.emccommand 
 
     def checkEMC(self):
+        my_logger.info("checkEMC sssssssssssssssssssssssss")
         self.pullRobot()
         if self.statusRobot != 'er_connect':
             if self.checkReady() == False :self.statusRobot = 'ok'
@@ -293,8 +299,9 @@ class RobotControl(State):
         #self.emccommand = self.emc.command()
         
     def homeAll(self):
-        self.axis_home(1, self.emccommand, self.emcstat)
         self.axis_home(0, self.emccommand, self.emcstat)
+        self.axis_home(1, self.emccommand, self.emcstat)
+        
         self.axis_home(2, self.emccommand, self.emcstat)
         self.axis_home(3, self.emccommand, self.emcstat)
         #self.axis_home(4, self.emccommand, self.emcstat)                    
@@ -310,6 +317,7 @@ class RobotControl(State):
 
     def set_mdi_mode(self):
         if self.isEMCRun ==False:
+            my_logger.info("self.isEMCRun ==False ")
             return
         self.pullRobot()
         if self.emcstat.task_mode != self.emc.MODE_MDI:
@@ -331,6 +339,7 @@ class RobotControl(State):
 
     def sendMDI(self,msg):
         if self.isEMCRun ==False:
+            my_logger.info("send MDI self.isEMCRun ==False ")
             return
         self.set_mdi_mode() 
         data  = self.emccommand.mdi(msg)
@@ -341,7 +350,7 @@ class RobotControl(State):
         c.home(i)
         c.wait_complete(30.0) #This command without argument waits only 1 second.
         while s.homed[i] != 1:
-            print("wait H")
+            my_logger.info("wait Home {}".format(i))
             time.sleep(0.1)
             s.poll()
 
@@ -377,34 +386,35 @@ class RobotControl(State):
             self.isEMCRun = True
             self.statusRobot = 'ok'
         except :
+            my_logger.error("PULL EEEEEEEEEE")
             self.statusRobot = 'er_connect'
             self.isEMCRun = False
 
     def initLinuxcnc(self):
         time.sleep(2)
         self.pullRobot()
-        
-        while self.emcstat.task_state == self.emc.STATE_ESTOP:
-            print("WAITING INITIALIZATION")
-            time.sleep(1)
-            self.pullRobot()
+        if self.isEMCRun == True:
+            while self.emcstat.task_state == self.emc.STATE_ESTOP:
+                my_logger.info("WAITING INITIALIZATION")
+                time.sleep(1)
+                self.pullRobot()
 
-        self.emccommand.state(linuxcnc.STATE_ESTOP_RESET)
-        time.sleep(1)
-        print("ESTOP RELEASED")
-        self.pullRobot()
-        
-        if self.emcstat.task_state == linuxcnc.STATE_ESTOP_RESET:
-            self.emccommand.state(linuxcnc.STATE_ON)
-            time.sleep(2)
-            print("ESTOP RESET")
-        else:
-            print("ESTOP RESET ERROR")
-        self.pullRobot()
-        if self.emcstat.task_state == linuxcnc.STATE_ON:
-            print("MACHINE IS READY")
-        else:
-            print("FAIL TO INITIALIZE THE MACHINE")	
+            self.emccommand.state(linuxcnc.STATE_ESTOP_RESET)
+            time.sleep(1)
+            my_logger.info("ESTOP RELEASED")
+            self.pullRobot()
+            
+            if self.emcstat.task_state == linuxcnc.STATE_ESTOP_RESET:
+                self.emccommand.state(linuxcnc.STATE_ON)
+                time.sleep(2)
+                my_logger.info("ESTOP RESET")
+            else:
+                my_logger.error("ESTOP RESET ERROR")
+            self.pullRobot()
+            if self.emcstat.task_state == linuxcnc.STATE_ON:
+                my_logger.info("MACHINE IS READY")
+            else:
+                my_logger.error("FAIL TO INITIALIZE THE MACHINE")	
     
     def startLinuxcnc(self, cmd):
         #cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
@@ -416,7 +426,7 @@ class RobotControl(State):
         for i in range(30):
             time.sleep(1)
             if (self.checkProcess("axis") != False) and (self.checkProcess("linuxcnc") != False):
-                print("check")
+                my_logger.info("check")
                 break
 
     def getProcesses(self, str):
@@ -441,7 +451,7 @@ class RobotControl(State):
         strGrep = self.getProcesses(str)
         for i in range(len(strGrep) // 4):
             retVal.append([strGrep[4*i + 3], strGrep[4*i]])
-        print("CHECK", retVal)
+
         return retVal
 
     def killProcess(self, processId):

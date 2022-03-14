@@ -60,7 +60,7 @@ addf ddt.7 servo-thread
 
 setp hm2_7i80.0.rcpwmgen.rate 50 # hm2_7i80.0.rcpwmgen.ratehz
 setp hm2_7i80.0.rcpwmgen.00.width 0
-setp hm2_7i80.0.rcpwmgen.00.offset 1.0
+setp hm2_7i80.0.rcpwmgen.00.offset 0.1
 #    41  float IN              0  hm2_7i80.0.rcpwmgen.00.offset
 #    41  float IN              1  hm2_7i80.0.rcpwmgen.00.scale
 #    41  float IN              0  hm2_7i80.0.rcpwmgen.00.width
@@ -246,6 +246,10 @@ net homeswitchesY <= hm2_[HOSTMOT2](BOARD).0.gpio.046.in
 net homeswitchesY => joint.1.home-sw-in
 #net homeswitchesX => joint.0.neg-lim-sw-in
 #net homeswitchesX => joint.0.pos-lim-sw-in
+net homeswitchesZ <= hm2_[HOSTMOT2](BOARD).0.gpio.048.in
+net homeswitchesZ => joint.2.home-sw-in
+net homeswitchesC <= hm2_[HOSTMOT2](BOARD).0.gpio.049.in
+net homeswitchesC => joint.3.home-sw-in
 # amp control
 
 net xflt joint.0.amp-fault-in

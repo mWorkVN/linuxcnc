@@ -43,22 +43,22 @@ def m462OutAnDelay(self, **words):
     """ remap function which does the equivalent of M62, but via Python """
     print("begin",time.time())
     p = int(words['p']) #pin OUT
-    q = int(words['q']) #delay time
+    q = float(words['q']) #delay time
     #SET_MOTION_OUTPUT_BIT(p)
     self.execute("M64 P{}".format(p))
-    self.execute("M180 P%d"%(q))
+    self.execute("M180 P{}".format(q))
     self.execute("M65 P{}".format(p))
     yield INTERP_EXECUTE_FINISH
     #CLEAR_MOTION_OUTPUT_BIT(p)
     print("end",time.time())
     return INTERP_OK
 
-def m463OutAnDelay(self, **words):
-    """ remap function which does the equivalent of M62, but via Python """
-    
-    p = float(words['p']) #pin OUT
+def m463OutRCAnDelay(self, **words):
+    p = float(words['p']) # goc
+    q = float(words['q']) #delay time
     hal.set_p("hm2_7i80.0.rcpwmgen.00.width",str(p))
-    print("m463OutAnDelay",time.time(),str(p))
+    self.execute("M180 P{}".format(q))
+    yield INTERP_EXECUTE_FINISH
     return INTERP_OK
 
 def convertJoinMode(self):
