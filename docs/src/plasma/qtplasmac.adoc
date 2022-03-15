@@ -964,7 +964,7 @@ NOTE: During Paused Motion, this section will be shown on top of the JOGGING pan
 |HOME ALL|This button will home all of the axes in the order set by HOME_SEQUENCE in the <machine_name>.ini file.
 |WCS G54|This drop down button will change the current work offset.
 |CAMERA|This button will display a CAMVIEW panel on top of the PREVIEW WINDOW and will allow the user to set an origin with or without rotation. See the <<qt_camera, CAMERA section>> for detailed instructions.
-|LASER|This button will allow the user to set an origin with or without rotation. See the <<qt_laser, LASER section>> for detailed instructions.
+|LASER|This button will allow the user to use a laser to set an origin with or without rotation. See the <<qt_laser, LASER section>> for detailed instructions.
 |X0 Y0|This button will set the current position to X0 Y0.
 |HOME [AXIS]|This button will home the corresponding axis.
 |0 [AXIS]|This drop down button will display the following options: +
@@ -2174,6 +2174,10 @@ It is important to note that G-Code programs can be run from any selected line u
 
 Once the user has selected the starting place, the *CYCLE START* button will blink *"SELECTED nn"* where nn is the corresponding line number selected. Clicking this button will bring up the following Run From Line dialog box:
 
+It is not possible to use Run From Line from within a subroutine. If the user selects a line within a subroutine and clicks *"SELECTED nn"* then an error message will be displayed that includes the O-Code name of the subroutine.
+
+It is possible to select a new line while Run From Line is active.
+
 image::images/qtplasmac_run_from_line.png[width=350,align="center"]
 
 [width="100%",cols="4,16"]
@@ -2199,9 +2203,8 @@ After pressing *LOAD*, the blinking "SELECTED nn" button will change to *RUN FRO
 *Run From Line selections may be canceled in the following ways:*
 
 . Click the background of the preview window - this method will cancel a selection of either a cut line in the preview window, or a G-Code line in the G-Code window.
+. Click the first line of the G-Code program in the G-Code display - this method will cancel a selection of either a cut line in the preview window, or a G-Code line in the G-Code window.
 . Clicking *RELOAD* in the G-Code window header - this method will cancel the Run From Line process if LOAD was clicked on the Run From Line dialog box and "rfl.ngc" is displayed as the loaded file name in the G-Code window header. This will return the user to the originally loaded file.
-
-NOTE: It is not possible to select a new line once Run From Line is active. To select a different line, the user must press *RELOAD* and start over.
 
 [[qt_scribe]]
 
@@ -2374,6 +2377,7 @@ In order to utilize them, *KB Shortcuts* must be enabled in the *GUI SETTINGS* s
 |CTRL+H or HOME|Homes all axes if they are not yet homed and have a homing sequence set in the <machine_name>.ini file. If they are already homed, they will no longer be homed.
 |CTRL+R|Cycle Start if the program is not already running. Cycle Resume if the program is paused.
 |END|Touches off X and Y to 0.
+|DEL|Allows the user to use a laser to set an origin with or without rotation. See the <<qt_laser, LASER section>> for detailed instructions.
 |SPACE BAR|Pause motion.
 |O|Opens a new program.
 |L|Loads the previously opened program if no program is loaded. Reloads the current program if there is a program loaded.
@@ -3276,6 +3280,7 @@ The following HAL bit pins are always created. The HAL pin has the identical beh
 |Pause/Resume the loaded G-Code program|qtplasmac.ext_pause|CYCLE PAUSE
 |Abort the loaded G-Code program|qtplasmac.ext_abort|CYCLE STOP
 |Touchoff X & Y axes to zero|qtplasmac.ext_touchoff|X0Y0
+|Use a laser to set an origin with or without rotation|qtplasmac.ext_laser_touchoff|LASER
 |Run/Pause/Resume the loaded G-Code program|qtplasmac.ext_run_pause|CYCLE START, CYCLE PAUSE, CYCLE RESUME in sequence
 |Torch height override plus|qtplasmac.ext_height_ovr_plus|OVERRIDE +
 |Torch height override minus|qtplasmac.ext_height_ovr_minus|OVERRIDE -
