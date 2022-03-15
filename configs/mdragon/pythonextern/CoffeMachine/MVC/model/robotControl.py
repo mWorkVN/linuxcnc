@@ -7,7 +7,9 @@ import setting.posRobot as posRobot
 import subprocess
 from memory_profiler import profile
 from until.mylog import getlogger
+import threading
 my_logger=getlogger("__Robot___")
+
 class until:
     def increseStep(self):
         self.number += 1
@@ -19,7 +21,7 @@ class until:
         self.number += 1
 
     def closeGrib(self):
-        self.stateRobot.robot.sendMDI("M463 P{} Q{}".format(1.8,2))
+        self.stateRobot.robot.sendMDI("M463 P{} Q{}".format(0.8,2))
         time.sleep(0.05) 
         self.number += 1
     def checkFinish(self,pos=None):
@@ -92,28 +94,29 @@ class TakeNguyenLieuState(until):
             self.__checkrun(data)
         elif self.runAt == 14 :
             self.runAt = 0
-            self.stateRobot.stateRunStep = self.stateRobot.duaLyThanhPhamState
+            self.stateRobot.stateRunStep = self.stateRobot.dongNapState
         return 0
- #nect state
 
     def __checkrun(self,data):
         if (self.number ==0):
             self.increseStep()
         elif (self.number ==1): 
-            self.moveJoinToPos("TAKE_NL_" + str(self.runAt + 1)) 
+            self.moveJoinToPos("TAKE_NL_AFTER1_" + str(self.runAt + 1)) 
         elif (self.number == 2): #wait done
             self.checkFinish()
         elif (self.number == 3): 
-            self.moveJoinToPos("TAKE_NL_END_" + str(self.runAt + 1)) 
+            self.moveJoinToPos("TAKE_NL_AFTER2_" + str(self.runAt + 1)) 
         elif (self.number == 4): 
-            self.checkFinish()
+            self.moveJoinToPos("TAKE_NL_AFTER3_" + str(self.runAt + 1)) 
         elif (self.number == 5): 
+            self.checkFinish()
+        elif (self.number == 6): 
             modbusReturn = self.stateRobot.robot.PLCModbus.setData(1,6,int(self.runAt)*2,int( data[(int(self.runAt ))+5]))
             if (modbusReturn == True):
                 self.tryModbus =0
                 self.increseStep()
             else:self.checkTrySendModbus()
-        elif (self.number == 6):
+        elif (self.number == 7):
             modbusGet = self.stateRobot.robot.PLCModbus.getData(1,3,(self.runAt *2) +1,1)
             if (modbusGet['s'] == 'er'):
                 self.checkTrySendModbus()
@@ -121,11 +124,15 @@ class TakeNguyenLieuState(until):
                 self.tryModbus =0
                 self.stateRobot.robot.PLCModbus.setData(1,16,self.runAt *2 ,[0,0])
                 self.increseStep()
-        elif (self.number == 7): #move to Glass 1
-            self.moveJoinToPos("TAKE_NL_" + str(self.runAt + 1)) 
-        elif (self.number == 8): #wait done
+        elif (self.number == 8): #move to Glass 1
+            self.moveJoinToPos("TAKE_NL_BEFOR1_" + str(self.runAt + 1)) 
+        elif (self.number == 9): #wait done
             self.checkFinish()
-        elif (self.number == 9): #move to Glass 1
+        elif (self.number == 10): #move to Glass 1
+            self.moveJoinToPos("TAKE_NL_BEFOR2_" + str(self.runAt + 1)) 
+        elif (self.number == 11): #wait done
+            self.checkFinish()
+        elif (self.number == 12): #move to Glass 1
             self.number = 0
             self.runAt += 1
         
@@ -134,6 +141,16 @@ class TakeNguyenLieuState(until):
         if self.tryModbus >5:
             self.tryModbus = 0
             self.increseStep()
+
+class DongNapState(until):
+    __slots__ = ['stateRobot', 'number']
+    def __init__(self,robot):
+        self.stateRobot = robot
+        self.number = 0
+
+    def run(self,data):
+        self.stateRobot.stateRunStep = self.stateRobot.duaLyThanhPhamState
+        return 0
 
 class DuaLyThanhPhamState(until):
     __slots__ = ['robot', 'number','stateRobot']
@@ -210,8 +227,8 @@ class InitStats(until):
         return 0    
 
 class StateRobot():
-    __slots__ = ['robot', 'initStats', 'takeGlassState', 'takeNguyenLieuState',\
-                   'duaLyThanhPhamState',  'goHomeState','finishState','waitState','stateRunStep']
+    __slots__ = ['robot', 'initStats', 'takeGlassState', 'dongNapState' , 'takeNguyenLieuState',\
+            'duaLyThanhPhamState',  'goHomeState','finishState','waitState','stateRunStep']
     def __init__(self,robot):
         super().__init__()
 
@@ -220,6 +237,7 @@ class StateRobot():
         self.initStats = InitStats(self)
         self.takeGlassState = TakeGlassState(self)
         self.takeNguyenLieuState = TakeNguyenLieuState(self)
+        self.dongNapState = DongNapState(self)
         self.duaLyThanhPhamState = DuaLyThanhPhamState(self)
         self.goHomeState = GoHomeState(self)
         self.finishState = FinishState(self)
@@ -237,23 +255,29 @@ class RobotControl(State):
         self.PLCModbus=PLCModbus
         self.statusRobot = 'ok'
         self.isRUNLCNC = False
-        startCmd = "/home/mwork/mworkcnc/scripts/linuxcnc /home/mwork/mworkcnc/configs/mdragon/scara.ini"
-        self.cleanLinuxcnc()
-        self.startLinuxcnc(startCmd)
+
 
     def initRobot(self):
-        self.isEMCRun = True
-        self.emc = linuxcnc
-        self.emcstat = self.emc.stat() # create a connection to the status channel
-        self.emccommand = self.emc.command()
-        self.emcError = self.emc.error_channel()
-        self.initLinuxcnc()
-        self.set_manual_mode()
-        self.homeAll()
-        self.set_mdi_mode()
-        self.isEMCRun = False
-        self.stateRobot = StateRobot(self)
-        self.emccommand.maxvel(40.0)
+        def startThread():
+            self.statusRobot = 'er_start'
+            #cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
+            startCmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/noGui.ini"]
+            self.startLinuxcnc(startCmd)
+            self.isEMCRun = True
+            self.emc = linuxcnc
+            self.emcstat = self.emc.stat() # create a connection to the status channel
+            self.emccommand = self.emc.command()
+            self.emcError = self.emc.error_channel()
+            self.initLinuxcnc()
+            self.set_manual_mode()
+            self.homeAll()
+            self.set_mdi_mode()
+            self.isEMCRun = False
+            self.stateRobot = StateRobot(self)
+            self.emccommand.maxvel(40.0)
+            self.statusRobot = 'ok'
+        t1 = threading.Thread(target=startThread, args=())
+        t1.start()
 
     def initstate(self):
         self.stateRobot.stateRunStep = self.stateRobot.initStats 
@@ -284,6 +308,7 @@ class RobotControl(State):
         del self.emccommand 
 
     def checkEMC(self):
+        
         my_logger.info("checkEMC sssssssssssssssssssssssss")
         self.pullRobot()
         if self.statusRobot != 'er_connect':
@@ -381,6 +406,7 @@ class RobotControl(State):
         return False
 
     def pullRobot(self): 
+        
         try:  
             self.emcstat.poll()
             self.isEMCRun = True
@@ -417,9 +443,7 @@ class RobotControl(State):
                 my_logger.error("FAIL TO INITIALIZE THE MACHINE")	
     
     def startLinuxcnc(self, cmd):
-        #cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/scara.ini"]
-        cmd = ["/home/mwork/mworkcnc/scripts/linuxcnc","/home/mwork/mworkcnc/configs/mdragon/noGui.ini"]
-        self.linuxCNCRun()
+        self.checkLinuxcnc()
         proc = subprocess.Popen(cmd) #, stderr=subprocess.STDOUT 
         if (self.isRUNLCNC == True):
             time.sleep(20)
@@ -468,7 +492,7 @@ class RobotControl(State):
         return False
 
 
-    def cleanLinuxcnc(self):
+    def checkLinuxcnc(self):
         if self.linuxCNCRun():
             self.isRUNLCNC = True
        

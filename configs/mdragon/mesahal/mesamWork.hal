@@ -61,24 +61,24 @@ addf ddt.7 servo-thread
 setp hm2_7i80.0.rcpwmgen.rate 50 # hm2_7i80.0.rcpwmgen.ratehz
 setp hm2_7i80.0.rcpwmgen.00.width 0
 setp hm2_7i80.0.rcpwmgen.00.offset 0.1
-#    41  float IN              0  hm2_7i80.0.rcpwmgen.00.offset
-#    41  float IN              1  hm2_7i80.0.rcpwmgen.00.scale
-#    41  float IN              0  hm2_7i80.0.rcpwmgen.00.width
-#    41  float IN             50  hm2_7i80.0.rcpwmgen.rate
+
 
 # create HAL signals for position commands from motion module
-net J0pos hm2_[HOSTMOT2](BOARD).0.stepgen.00.position-cmd <= joint.0.motor-pos-cmd
-net J1pos hm2_[HOSTMOT2](BOARD).0.stepgen.01.position-cmd <= joint.1.motor-pos-cmd
+
+
 
 #set gain for sum2 = in0*gain0 + in1*gain1
 setp sum2.0.gain0 1
-#gain1 = (gear-cAxis/gear-zAxis)
 setp sum2.0.gain1 0.069333333333337
 net J2pos sum2.0.in0 <= joint.2.motor-pos-cmd
 net J3pos hm2_[HOSTMOT2](BOARD).0.stepgen.03.position-cmd sum2.0.in1 <= joint.3.motor-pos-cmd
 net J2posE hm2_[HOSTMOT2](BOARD).0.stepgen.02.position-cmd <= sum2.0.out 
 
 # timing parameters
+
+#http://linuxcnc.org/docs/devel/html/man/man9/stepgen.9.html
+
+net J0pos hm2_[HOSTMOT2](BOARD).0.stepgen.00.position-cmd <= joint.0.motor-pos-cmd
 setp hm2_7i80.0.stepgen.00.dirsetup        [JOINT_0]DIRSETUP
 setp hm2_7i80.0.stepgen.00.dirhold         [JOINT_0]DIRHOLD
 setp hm2_7i80.0.stepgen.00.steplen         [JOINT_0]STEPLEN
@@ -88,6 +88,7 @@ setp hm2_7i80.0.stepgen.00.maxvel          [JOINT_0]STEPGEN_MAX_VEL
 setp hm2_7i80.0.stepgen.00.maxaccel        [JOINT_0]STEPGEN_MAX_ACC
 setp hm2_7i80.0.stepgen.00.step_type       0
 
+net J1pos hm2_[HOSTMOT2](BOARD).0.stepgen.01.position-cmd <= joint.1.motor-pos-cmd
 setp hm2_7i80.0.stepgen.01.dirsetup        [JOINT_1]DIRSETUP
 setp hm2_7i80.0.stepgen.01.dirhold         [JOINT_1]DIRHOLD
 setp hm2_7i80.0.stepgen.01.steplen         [JOINT_1]STEPLEN

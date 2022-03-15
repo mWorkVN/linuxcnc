@@ -347,7 +347,7 @@ class Machine(QObject):
         if (timeNow - self.timeLoopGetPLC > settings.TIME_CHECK_NGUYENLIEU):
             self.timeLoopGetPLC = timeNow
             mucNuoc = self.plcVal.getData(1,3,28,14)
-            my_logger.debug("Muc Nguyen Lieu {} ".format(mucNuoc))
+            my_logger.debug("NL {} ".format(mucNuoc))
             if mucNuoc['s'] == 'ok': self.mucNguyenLieu = mucNuoc['d']
             #self.plcVal.checkError(1) # READ COIN 
         self.timecheckLOOP = timeNow
