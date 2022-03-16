@@ -2,7 +2,6 @@
 import sys, time ,os
 import linuxcnc
 from PyQt5.QtCore import QObject, pyqtSignal
-#from until.vnpay import vnpay
 from model.state import State
 from model.robotControl import RobotControl
 from model.controlVal import ControlVal
@@ -17,6 +16,7 @@ import datetime
 import subprocess
 from memory_profiler import profile
 from until.mylog import getlogger
+
 my_logger=getlogger("__machine___")
 
 class Item:
@@ -54,7 +54,7 @@ class WaitChooseItemState(State):
             elif self.machine.queSpeaker.empty():
                 self.status = 0
                 self.machine.state = self.machine.WaitMoneyToBuyState
-                my_logger.info('***************\nSwitching to WaitChooseItemState')  
+                my_logger.info('***************\nSwitching to WaitMoneyToBuyState')  
 
     def haveOrder(self,id,sl = 1):
         if sl==0:
@@ -136,7 +136,7 @@ class WaitMoneyToBuyState(State):
             self.machine.inforpayment['day'] = timebegin.strftime('%Y%m%d%H%M%S')  
             self.createPayment(price,self.machine.inforpayment['id'],self.machine.inforpayment['day'])
             self.timeLoop = time.time()
-            
+            my_logger.info('Order pay',price,self.machine.inforpayment['id'],self.machine.inforpayment['day'])
         elif (self.state == 2):
             if (self.machine.queueWebIN.empty() == False):
                 self.machine.msgFromVNPAY = self.machine.queueWebIN.get()
@@ -171,6 +171,7 @@ class WaitMoneyToBuyState(State):
     def increMoney(self, moneyGet):
         if (moneyGet !=0):
             self.machine.moneyGet = self.machine.moneyGet + int(moneyGet)
+            
     def createPayment(self,price,orderID,day):
         url = self.machine.RunVNPAY.payment(price,orderID,day)  
         self.machine.even_loadPAY.emit(url)
@@ -280,8 +281,7 @@ class CheckRefundState(State):
                 self.machine.moneyGet = 0
                 time.sleep(2)
             self.machine.item.numBuy = 0
-            my_logger.info('CheckRefundState OK ' )
-            my_logger.info('Thank you, have a nice day!\n')
+            my_logger.info('Done order!\n')
             time.sleep(2)
             self.machine.inforpayment['id'] = ''
             self.machine.inforpayment['day'] = ''
@@ -391,9 +391,8 @@ class Machine(QObject):
         if self.dataOrder[19] == "END":
             self.state = self.WaitChooseItemState
             self.WaitChooseItemState.haveOrder(value,sl)
-            my_logger.info("hve oder")
         else:
-            my_logger.error("get Order From Ui sai DATABASE")
+            my_logger.error("get Order From Ui sai DATABASE : ",value)
 
 
     def getPrice(self,ID):
