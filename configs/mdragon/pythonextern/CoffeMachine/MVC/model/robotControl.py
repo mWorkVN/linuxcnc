@@ -24,6 +24,7 @@ class until:
         self.stateRobot.robot.sendMDI("M463 P{} Q{}".format(0.8,2))
         time.sleep(0.05) 
         self.number += 1
+
     def checkFinish(self,pos=None):
         if (self.stateRobot.robot.checkStatusDoneMDI() != -1):
             self.number += 1
@@ -32,8 +33,9 @@ class until:
     def moveJoinToPos(self,pos):
         if (self.stateRobot.robot.checkStatusDoneMDI() != -1):
             pos = getattr(posRobot,str(pos))
-            self.stateRobot.robot.sendMDI("G0.1 "+ pos)
-            time.sleep(0.05)    
+            if (pos != "None"): 
+                self.stateRobot.robot.sendMDI("G0.1 "+ pos)
+                time.sleep(0.05)    
             self.number += 1   
 
     def moveWToPos(self,pos):
@@ -53,14 +55,13 @@ class TakeGlassState(until):
         if (self.number ==0):
             self.openGrib()
         elif (self.number ==1):
-            #my_logger.debug("Check P{} Q{}".format(1,1))
             self.checkFinish()
         elif (self.number ==2): #move to Glass 1
-            self.moveJoinToPos("TAKE_GLASS_" + str(data[3])) 
+            self.moveJoinToPos("TAKE_GLASS_{}".format(str(data[3]))) 
         elif (self.number == 3): #wait done
             self.checkFinish()
         elif (self.number == 4): #move to Glass 2
-            self.moveJoinToPos("TAKE_GLASS_VAO_" + str(data[3])) 
+            self.moveJoinToPos("TAKE_GLASS_VAO_{}".format(str(data[3])))
         elif (self.number == 5): #Close Glass
             self.checkFinish()
         elif (self.number == 6): #move to Glass 1
@@ -68,11 +69,11 @@ class TakeGlassState(until):
         elif (self.number == 7): #move to Glass 1
             self.checkFinish()
         elif (self.number == 8): #move to Glass 2
-            self.moveJoinToPos("TAKE_GLASS_NANG_" + str(data[3])) 
+            self.moveJoinToPos("TAKE_GLASS_NANG_{}".format(str(data[3])))
         elif (self.number == 9): #move to Glass 1
             self.checkFinish()
         elif (self.number == 10): #move to Glass 1
-            self.moveJoinToPos("TAKE_GLASS_END_" + str(data[3])) 
+            self.moveJoinToPos("TAKE_GLASS_END_{}".format(str(data[3])))
         elif (self.number == 11): #move to Glass 1
             self.checkFinish()
         elif (self.number == 12): #move to Glass 1
@@ -100,14 +101,14 @@ class TakeNguyenLieuState(until):
     def __checkrun(self,data):
         if (self.number ==0):
             self.increseStep()
-        elif (self.number ==1): 
-            self.moveJoinToPos("TAKE_NL_AFTER1_" + str(self.runAt + 1)) 
+        elif (self.number ==1):  
+            self.moveJoinToPos("TAKE_NL_AFTER1_{}".format(str(self.runAt + 1)))
         elif (self.number == 2): #wait done
             self.checkFinish()
         elif (self.number == 3): 
-            self.moveJoinToPos("TAKE_NL_AFTER2_" + str(self.runAt + 1)) 
+            self.moveJoinToPos("TAKE_NL_AFTER2_{}".format(str(self.runAt + 1)))
         elif (self.number == 4): 
-            self.moveJoinToPos("TAKE_NL_AFTER3_" + str(self.runAt + 1)) 
+            self.moveJoinToPos("TAKE_NL_AFTER3_{}".format(str(self.runAt + 1)))
         elif (self.number == 5): 
             self.checkFinish()
         elif (self.number == 6): 
@@ -125,11 +126,11 @@ class TakeNguyenLieuState(until):
                 self.stateRobot.robot.PLCModbus.setData(1,16,self.runAt *2 ,[0,0])
                 self.increseStep()
         elif (self.number == 8): #move to Glass 1
-            self.moveJoinToPos("TAKE_NL_BEFOR1_" + str(self.runAt + 1)) 
+            self.moveJoinToPos("TAKE_NL_BEFOR1_{}".format(str(self.runAt + 1)))
         elif (self.number == 9): #wait done
             self.checkFinish()
         elif (self.number == 10): #move to Glass 1
-            self.moveJoinToPos("TAKE_NL_BEFOR2_" + str(self.runAt + 1)) 
+            self.moveJoinToPos("TAKE_NL_BEFOR2_{}".format(str(self.runAt + 1)))
         elif (self.number == 11): #wait done
             self.checkFinish()
         elif (self.number == 12): #move to Glass 1
@@ -273,9 +274,9 @@ class RobotControl(State):
             self.homeAll()
             self.set_mdi_mode()
             self.isEMCRun = False
-            self.stateRobot = StateRobot(self)
             self.emccommand.maxvel(40.0)
             self.statusRobot = 'ok'
+            self.stateRobot = StateRobot(self)
         t1 = threading.Thread(target=startThread, args=())
         t1.start()
 
@@ -369,6 +370,12 @@ class RobotControl(State):
         self.set_mdi_mode() 
         data  = self.emccommand.mdi(msg)
 
+    def homeALL1(self):
+        if self.isEMCRun == False : return
+        self.emccommand.home(0)
+        self.emccommand.home(1)
+        self.emccommand.home(2)
+        self.emccommand.wait_complete(30.0) #This command without argument waits only 1 second.  
 
     def axis_home(self, i, c, s):
         if self.isEMCRun == False : return
@@ -376,7 +383,7 @@ class RobotControl(State):
         c.wait_complete(30.0) #This command without argument waits only 1 second.
         while s.homed[i] != 1:
             my_logger.info("wait Home {}".format(i))
-            time.sleep(0.1)
+            time.sleep(1)
             s.poll()
 
     def checkReady(self):
@@ -412,7 +419,7 @@ class RobotControl(State):
             self.isEMCRun = True
             self.statusRobot = 'ok'
         except :
-            my_logger.error("PULL EEEEEEEEEE")
+            my_logger.error("pullRobot")
             self.statusRobot = 'er_connect'
             self.isEMCRun = False
 
@@ -467,7 +474,6 @@ class RobotControl(State):
         for i in range(len(ioGrep) // 4):
             if len(ioGrep[4*i + 3]) == 2:
                 return ioGrep[4*i + 3], ioGrep[4*i]
-    
         return False
 
     def checkProcess(self, str):
@@ -475,7 +481,6 @@ class RobotControl(State):
         strGrep = self.getProcesses(str)
         for i in range(len(strGrep) // 4):
             retVal.append([strGrep[4*i + 3], strGrep[4*i]])
-
         return retVal
 
     def killProcess(self, processId):
@@ -483,14 +488,11 @@ class RobotControl(State):
         sproc = subprocess.Popen(killCommand)
         sproc.wait()
 
-        
-
     def linuxCNCRun(self):
         for lockname in ("/tmp/linuxcnc.lock", "/tmp/emc.lock"):
             if os.path.exists(lockname):
                 return True
         return False
-
 
     def checkLinuxcnc(self):
         if self.linuxCNCRun():

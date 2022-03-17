@@ -11,7 +11,7 @@ import subprocess
 from until.mylog import getlogger
 my_logger=getlogger("__web___")
 class MyGUI(QtWidgets.QMainWindow):
-
+    order_infor=[]
     def __init__(self, machine, main_controller):
         super(MyGUI, self).__init__()
         

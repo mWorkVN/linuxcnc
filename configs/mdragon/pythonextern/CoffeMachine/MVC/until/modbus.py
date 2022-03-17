@@ -8,19 +8,22 @@ import serial.tools.list_ports as prtlst
 
 class ModbusPull():
     def __init__(self):    
+        self.msgError = ''
+        self.initCom(1)
         
-        self.initCom()
-        self.settings(1.0)
 
-    def initCom(self):
+    def initCom(self,timeout = 0.5):
         PORT = self.getCOMs()
-        print(PORT)
-        self.master = modbus_rtu.RtuMaster(
-            serial.Serial(port=PORT, baudrate=19200, bytesize=8, parity='N', stopbits=1, xonxoff=0)
-        )
+        if self.msgError == 'ok':
+            self.master = modbus_rtu.RtuMaster(
+                serial.Serial(port=PORT, baudrate=19200, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+            )
+        else:self.master = None
+        self.settings(timeout)
         #self.settings(1.0)
 
     def settings(self,set_timeout):
+        if self.msgError != 'ok': return
         self.master.set_timeout(set_timeout)
         #self.master.set_verbose(True)
 
@@ -31,7 +34,14 @@ class ModbusPull():
         for pt in pts:
             if 'USB' in pt[1]: #check 'USB' string in device description
                 COMs.append(pt[0])
-        return COMs[0]
+        try:     
+            self.msgError = 'ok'
+            return COMs[0]
+        except:
+            self.msgError = 'NO COM'
+            return 0
+        
+        
 
     def getData(self,id,function,begin,end):
         dataJ = {

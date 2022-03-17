@@ -24,11 +24,12 @@ class State:
                 filename = "talk{}.mp3".format(str(int(time.time())))
                 msg = self.machine.queSpeaker.get() 
                 if (msg == "END"):continue
-                tts = gTTS(text=msg, lang='vi')
+                """tts = gTTS(text=msg, lang='vi')
                 tts.save(filename)
                 audio_file =filename
                 playsound(audio_file)
-                os.remove(audio_file)
+                os.remove(audio_file)"""
+            time.sleep(1)
 
     def speak(self,msg):
         t = Thread(target=self.speak1, args=(msg,))
