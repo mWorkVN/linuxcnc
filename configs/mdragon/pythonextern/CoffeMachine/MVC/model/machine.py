@@ -47,22 +47,42 @@ class WaitChooseItemState(State):
     def checkAndChangeState(self,data = [0,0]):
         if (self.status != 0):
             if self.status == 1:
-                self.machine.queSpeaker.put("Bạn Sẽ Mua {} số lượng {}".format(self.machine.item.name,self.machine.item.numBuy))
-                self.machine.queSpeaker.put("Tổng Tiền Cần thanh toán là {}".format(self.machine.item.price * self.machine.item.numBuy))
-                self.machine.queSpeaker.put("END")
+                #self.machine.queSpeaker.put("Bạn Sẽ Mua {} số lượng {}".format(self.machine.item.name,self.machine.item.numBuy))
+                #self.machine.queSpeaker.put("Tổng Tiền Cần thanh toán là {}".format(self.machine.item.price * self.machine.item.numBuy))
+                #self.machine.queSpeaker.put("END")
                 self.status = 2
             elif self.machine.queSpeaker.empty():
                 self.status = 0
                 self.machine.state = self.machine.WaitMoneyToBuyState
                 my_logger.info('***************\nSwitching to WaitMoneyToBuyState')  
 
-    def haveOrder(self,id,sl = 1):
+    def haveOrder1(self,id,sl = 1):
         if sl==0:
-            return
+            return 
+        
         if self.containsItem(id):
             self.machine.item = self.getItem(id)
+            self.machine.totalOderMoney += self.machine.item.prices
+            
             self.machine.item.numBuy = sl
             self.status = 1
+
+
+    #thislist = ["apple", "banana", "cherry"]
+    #del thislist[0]
+    #print(thislist) mylist = thislist.copy()
+    def haveOrder(self,list):
+        if len(list)==0:
+            return 
+        self.machine.totalOderMoney =0
+        for id in list:
+            if self.containsItem(id):
+                item = self.getItem(id)
+                self.machine.totalOderMoney += item.price
+                #self.machine.item = self.getItem(id)
+                #self.machine.item.numBuy = 1
+                self.status = 1
+        #self.orders_list
 
     def containsItem(self, wanted):
         ret = False
@@ -119,7 +139,9 @@ class WaitMoneyToBuyState(State):
         self.timeLoop = 0
 
     def checkAndChangeState(self,data = [0,0]):
-        price = self.machine.item.price * self.machine.item.numBuy
+        #price = self.machine.item.price * self.machine.item.numBuy
+        price = self.machine.totalOderMoney
+        #my_logger.info("TOTAL VNPAY {}".format(price))
         if (self.state == 0): # NEED CHECK ROBOT AND VALVE STATE, IF it don't have err then change state
             self.machine.myrobot.checkEMC()
             if self.machine.checkError() == True :
@@ -136,7 +158,7 @@ class WaitMoneyToBuyState(State):
             self.machine.inforpayment['day'] = timebegin.strftime('%Y%m%d%H%M%S')  
             self.createPayment(price,self.machine.inforpayment['id'],self.machine.inforpayment['day'])
             self.timeLoop = time.time()
-            my_logger.info('Order pay',price,self.machine.inforpayment['id'],self.machine.inforpayment['day'])
+            my_logger.info('Order pay {}, {}, {}'.format(price,self.machine.inforpayment['id'],self.machine.inforpayment['day']))
         elif (self.state == 2):
             if (self.machine.queueWebIN.empty() == False):
                 self.machine.msgFromVNPAY = self.machine.queueWebIN.get()
@@ -197,13 +219,13 @@ class BuyItemState(State):
         self.machine = machine
         self.timeout = 0
     def checkAndChangeState(self,data = [0,0]):
-
-        if self.machine.moneyGet < self.machine.item.price:
-            my_logger.info('You can\'t buy this item. Insert more coins.') # then obvs you cant buy this item
-            self.machine.state = self.machine.WaitChooseItemState
-        else:
-            self.machine.item.buyFromStock() # call this function to decrease the item inventory by 1
-            self.machine.state = self.machine.TakeCoffeeState
+        self.machine.state = self.machine.TakeCoffeeState
+        #if self.machine.moneyGet < self.machine.item.price:
+        #    my_logger.info('You can\'t buy this item. Insert more coins.') # then obvs you cant buy this item
+        #    self.machine.state = self.machine.WaitChooseItemState
+        #else:
+        #    self.machine.item.buyFromStock() # call this function to decrease the item inventory by 1
+        #    self.machine.state = self.machine.TakeCoffeeState
             #my_logger.info("info",'oder: ' + str(self.machine.orderNum) + 'Buy: ' + str(self.machine.item.id) + " Success")
 
 class TakeCoffeeState(State):
@@ -219,9 +241,11 @@ class TakeCoffeeState(State):
     def checkAndChangeState(self,data = [0,0]):
         if (self.stateRobot == "init"):
             self.gcode = []
+            my_logger.info("TAKE oDER {} {}".format(self.machine.orders_list[0] , len(self.machine.orders_list)))
             #self.dataSQL=self.machine.mysql.getData(str(self.machine.item.id))
             #if self.dataSQL[19] != "END":
             #    self.machine.state = self.machine.CheckRefundState
+            self.dataOrder=self.machine.mysql.getData(str(self.machine.orders_list[0]))
             self.numLine = 0
             self.stateRobot = "Control"
             self.machine.myrobot.initstate()
@@ -231,10 +255,16 @@ class TakeCoffeeState(State):
                 self.stateRobot = "finish"
 
         elif (self.stateRobot == "finish"):
+            del self.machine.orders_list[0]
+            #my_logger.info("TAKE oDER  f {} {}".format(self.machine.orders_list[0] , len(self.machine.orders_list)))
             self.stateRobot = "init"
-            my_logger.info('Robot take Finish')
-            self.machine.moneyGet -= (self.machine.item.price * self.machine.item.numBuy)
-            self.machine.state = self.machine.CheckRefundState
+            if len(self.machine.orders_list)==0:
+                
+                my_logger.info('Robot take Finish')
+                #self.machine.moneyGet -= (self.machine.item.price * self.machine.item.numBuy)
+                self.machine.state = self.machine.CheckRefundState
+            else:
+                my_logger.info("BEGIN OTHER {}".format(self.machine.orders_list[0]))
 
 class ErrorMachineState(State):
     def __init__(self, machine,namestate):
@@ -280,7 +310,7 @@ class CheckRefundState(State):
                 #self.mprint(str(self.machine.moneyGet) + " refunded.")
                 self.machine.moneyGet = 0
                 time.sleep(2)
-            self.machine.item.numBuy = 0
+            #self.machine.item.numBuy = 0
             my_logger.info('Done order!\n')
             time.sleep(2)
             self.machine.inforpayment['id'] = ''
@@ -290,6 +320,7 @@ class CheckRefundState(State):
 class Machine(QObject):
     even_loadPAY = pyqtSignal(str)
     even_loads = pyqtSignal(str)
+    orders_list = []
     @profile
     def __init__(self,my_logger,queueWEB,valveModbus, RunVNPAY):
         super().__init__()
@@ -300,8 +331,9 @@ class Machine(QObject):
         self.my_logger = my_logger
         self.moneyGet = 0
         self.items = [] # all items contained in this list right here
-        self.item=None 
+        self.itemOders=None 
         self.msgFromVNPAY = ''
+        self.totalOderMoney = 0
         self.timeout = 10 
         #self.orderNum = 0
 
@@ -364,6 +396,8 @@ class Machine(QObject):
         self.myrobot.initRobot()
 
 
+
+
     def checkError(self):
         if self.plcVal.stateModbus == 'er':
             self.msgError = "PLC ERROR"
@@ -386,7 +420,7 @@ class Machine(QObject):
     def addItem(self, item):
         self.items.append(item) 
 
-    def getOrder(self, value,sl):
+    def getOrder1(self, value,sl):
         self.dataOrder=self.mysql.getData(str(value))
         if self.dataOrder[19] == "END":
             self.state = self.WaitChooseItemState
@@ -394,6 +428,20 @@ class Machine(QObject):
         else:
             my_logger.error("get Order From Ui sai DATABASE : ",value)
 
+    def getOrder(self, orders_list):
+        self.orders_list = orders_list.copy()
+        self.state = self.WaitChooseItemState
+        self.WaitChooseItemState.haveOrder(self.orders_list)
+        my_logger.error("Have oder {}".format(self.orders_list))
+        pass
+        """
+        self.dataOrder=self.mysql.getData(str(value))
+        if self.dataOrder[19] == "END":
+            self.state = self.WaitChooseItemState
+            self.WaitChooseItemState.haveOrder(value,sl)
+        else:
+            my_logger.error("get Order From Ui sai DATABASE : ",value)
+        """
 
     def getPrice(self,ID):
         for item in self.items:

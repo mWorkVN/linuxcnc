@@ -1,8 +1,16 @@
 from PyQt5 import QtGui, QtCore, QtWidgets, uic
 
-class ListNuocChai(QtWidgets.QWidget):
+class ListChai(QtWidgets.QWidget):
     def __init__(self):
-        super(ListNuocChai, self).__init__()
+        super(ListChai, self).__init__()
         uic.loadUi("view/nuocngot.ui", self)
+        self.initEvent()
 
-    
+    def initEvent(self):
+        self.buy_buttonGroup.buttonClicked.connect(self.addOrder)
+
+
+    def addOrder(self,btn):
+        id = btn.property('ID')
+        if id is None: return
+        print("SSSSSSSSSSSSSSSSSSSss")

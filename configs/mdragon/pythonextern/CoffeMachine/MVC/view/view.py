@@ -11,7 +11,8 @@ import subprocess
 from until.mylog import getlogger
 my_logger=getlogger("__web___")
 class MyGUI(QtWidgets.QMainWindow):
-    order_infor=[]
+    order_infor={'i':0,'s':0}
+    orders = []
     def __init__(self, machine, main_controller):
         super(MyGUI, self).__init__()
         
@@ -47,10 +48,9 @@ class MyGUI(QtWidgets.QMainWindow):
 
         self.videoslider.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
 
-        """from view.nuocChaiList import ListNuocChai
-        self.CHOOSEACTUATOR = ListNuocChai()
-        self.CHOOSEACTUATOR.setObjectName('CHOOSEACTUATOR')
-        self.actuator.addWidget(self.CHOOSEACTUATOR)"""
+        self.table_orders.rowCount()
+        self.table_orders.setColumnCount(2)
+        
 
         self.sttImage = 1
         self.timeDisplaySlider = 0
@@ -75,6 +75,39 @@ class MyGUI(QtWidgets.QMainWindow):
 
     def loopGui(self):
         self._main_controller.run()
+
+    def addOrderToView(self):
+        self.clearTable()
+        if (len(self.orders) == 0):
+            my_logger.info('ORder empty')
+            return
+        i =0     
+        for id in self.orders:
+            total = self._machine.getPrice(id)   
+            name = getattr(self, 'nameID' + str(id)).text()
+            self.tableSetItem(i,str(total),name)
+            i+=1
+
+    def tableSetItem(self,row,price,name):
+        self.table_orders.setItem(row, 0, QtWidgets.QTableWidgetItem(price))
+        self.table_orders.setItem(row , 1, QtWidgets.QTableWidgetItem(name))
+
+    def clearTable(self):
+        self.table_orders.clear()
+        self.table_orders.setHorizontalHeaderLabels(['Giá Tiền','Tân sản phẩm'])
+        #while (self.table_orders.rowCount() > 0):
+        #    self.table_orders.removeRow(0)
+
+    def btn_dtlSelectOrder_click(self):
+        current  = int(self.table_orders.currentRow())
+        if (len(self.orders) == 0):return
+        elif current > len(self.orders)-1:
+            print("Lon HON")
+            return
+        del self.orders[current]
+        self.addOrderToView()
+        self.updateTotalPrices()
+
 
     def paintEvent(self, event):
         if (time.time() - self.timeDisplaySlider > 2): 
@@ -135,6 +168,7 @@ class MyGUI(QtWidgets.QMainWindow):
         del goal_dir"""
     
     def initUi(self):
+        self.setMoneyToLabel(0)
         pass
         #self.setImage(1)
         #self.setImage(2)
@@ -153,7 +187,7 @@ class MyGUI(QtWidgets.QMainWindow):
             pass
         elif self._main_controller.preState == "2":
             self.webView.load(QUrl("http://localhost:8081"))
-            money = self._machine.item.numBuy * self._machine.item.price
+  
 
         #x =  {"order":"","sts":"","amount":"","time":""}
         elif self._main_controller.preState == "4": #Success
@@ -167,7 +201,6 @@ class MyGUI(QtWidgets.QMainWindow):
 
         elif self._main_controller.preState == "6":
             self.webView.history().clear()
-            money = self._machine.item.numBuy * self._machine.item.price
             self.moneyRefund.setText(str(self._machine.moneyGet))
             self.idRefund.setText(str(self._machine.inforpayment['id']))
             self.dayRefund.setText(str(self._machine.inforpayment['day']))
@@ -178,23 +211,61 @@ class MyGUI(QtWidgets.QMainWindow):
 
     def initEvent(self):
         self.page_buttonGroup.buttonClicked.connect(self.main_tab_changed)
-        self.buy_buttonGroup.buttonClicked.connect(self.haveOrder)
+        self.buy_buttonGroup.buttonClicked.connect(self.addOrder)
         self.btnReturn.clicked.connect(self.returnOrder)
+        self.btn_buy.clicked.connect(self.buyOrder)
+        self.btn_deleteOrder.clicked.connect(self.dtlOrderList)
+        self.btn_dtlSelectOrder.clicked.connect(self.btn_dtlSelectOrder_click)
 
     def main_tab_changed(self, btn):
         index = btn.property("index")
         if index is None: return
+        if int(index ) == 3:
+            self.addOrderToView()
+            my_logger.info("NEED CACULATER")
         self.main_tab_widget.setCurrentIndex(int(index))
         self.update()
 
-    def haveOrder(self,btn):
+    def setMoneyToLabel(self,money):
+        self.lbl_totalMoney.setText(str(money))
+
+    def updateTotalPrices(self):
+        total = 0
+        if len(self.orders)>0:
+            for id in self.orders:
+                total += self._machine.getPrice(id)
+        self.setMoneyToLabel(total)
+
+    def addOrder(self,btn):
+        self._main_controller.timeBeginOrder =  time.time() #reset timeout to display
         id = btn.property('ID')
         if id is None: return
-        sl = 1 #int(getattr(self, 'numSlID' +str(id) ).currentIndex())
-        self._main_controller.setOrder(id,sl)
+        dataOrder=self._machine.mysql.getData(str(id))
+        if dataOrder[19] != "END":
+            my_logger.error("get Order From Ui sai DATABASE : ")
+        elif self._machine.checkNLofOrder() == True :
+            my_logger.error("Order : ERROR PLC")
+        else:
+            sl = 1 #int(getattr(self, 'numSlID' +str(id) ).currentIndex())
+            self.orders.append(id)
+            self.updateTotalPrices()
+
+    def buyOrder(self):
+        if (len(self.orders) == 0):
+            my_logger.info('ORder empty')
+            return
+        self._main_controller.setOrder(self.orders)
+        self.orders = []
+        self.updateTotalPrices()
+
 
     def naptien_click(self):
         pass
+
+    def dtlOrderList(self):
+        self.orders = []
+        self.updateTotalPrices()
+        self.addOrderToView()
 
     def returnOrder(self,value):
         self.webView.history().clear()
@@ -209,6 +280,44 @@ class MyGUI(QtWidgets.QMainWindow):
         price = str(self.getPrice(idDevide))
         sl = 1 #int(self.sender().currentIndex())
         total = int(price)*sl
+
+    """
+        self.dataGroupBox = QGroupBox("Inbox")
+        self.dataView = QTreeView()
+        self.dataView.setRootIsDecorated(False)
+        self.dataView.setAlternatingRowColors(True)
+        
+        dataLayout = QHBoxLayout()
+        dataLayout.addWidget(self.dataView)
+        self.dataGroupBox.setLayout(dataLayout)
+        
+        model = self.createMailModel(self)
+        self.dataView.setModel(model)
+        self.addMail(model, 'service@github.com', 'Your Github Donation','03/25/2017 02:05 PM')
+        self.addMail(model, 'support@github.com', 'Github Projects','02/02/2017 03:05 PM')
+        self.addMail(model, 'service@phone.com', 'Your Phone Bill','01/01/2017 04:05 PM')
+
+
+    def createMailModel(self,parent):
+        model = QStandardItemModel(0, 3, parent)
+        model.setHeaderData(self.FROM, Qt.Horizontal, "From")
+        model.setHeaderData(self.SUBJECT, Qt.Horizontal, "Subject")
+        model.setHeaderData(self.DATE, Qt.Horizontal, "Date")
+        return model
+    
+    def addMail(self,model, mailFrom, subject, date):
+        model.insertRow(0)
+        model.setData(model.index(0, self.FROM), mailFrom)
+        model.setData(model.index(0, self.SUBJECT), subject)
+        model.setData(model.index(0, self.DATE), date)
+    
+    
+    
+    """
+
+
+
+
 
     def load_resources(self):
         def qrccompile(qrcname, qrcpy):

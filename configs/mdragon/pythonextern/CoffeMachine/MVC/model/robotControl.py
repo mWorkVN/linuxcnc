@@ -16,12 +16,12 @@ class until:
         
     def openGrib(self):
         my_logger.debug("M463 P{} Q{}".format(0,1))
-        self.stateRobot.robot.sendMDI("M463 P{} Q{}".format(0.01,2))
+        self.stateRobot.robot.sendMDI("M463 P{} Q{}".format(0.01,0))
         time.sleep(0.05) 
         self.number += 1
 
     def closeGrib(self):
-        self.stateRobot.robot.sendMDI("M463 P{} Q{}".format(0.8,2))
+        self.stateRobot.robot.sendMDI("M463 P{} Q{}".format(0.8,0))
         time.sleep(0.05) 
         self.number += 1
 
@@ -278,6 +278,7 @@ class RobotControl(State):
             self.statusRobot = 'ok'
             self.stateRobot = StateRobot(self)
         t1 = threading.Thread(target=startThread, args=())
+        t1.setDaemon(True)
         t1.start()
 
     def initstate(self):

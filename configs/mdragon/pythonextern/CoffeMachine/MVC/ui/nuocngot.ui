@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>945</width>
-    <height>570</height>
+    <width>1040</width>
+    <height>628</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,10 @@
   <widget class="QStackedWidget" name="main_tab_widget">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>961</width>
-     <height>641</height>
+     <x>10</x>
+     <y>70</y>
+     <width>991</width>
+     <height>591</height>
     </rect>
    </property>
    <property name="frameShadow">
@@ -256,6 +256,13 @@
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton">
+                 <property name="text">
+                  <string>PushButton</string>
                  </property>
                 </widget>
                </item>
@@ -5032,7 +5039,4 @@
  </widget>
  <resources/>
  <connections/>
-<buttongroups>
-  <buttongroup name="buy_buttonGroup"/>
- </buttongroups>
 </ui>

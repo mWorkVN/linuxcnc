@@ -30,7 +30,13 @@ class MainController(QObject):
             self.timeLOOPCheckSYS = time.time()
             my_logger.debug("Mempry {} ".format(self._manageSysTem.run()))
 
-    def setOrder(self,id,sl):
+
+    def setOrder(self,orders):
+        self.timeBeginOrder = 0
+        my_logger.info("have order {} ".format(orders))
+        self._machine.getOrder(orders)
+
+    def setOrder1(self,id,sl):
         self.timeBeginOrder = 0
         my_logger.info("have order {} {}".format(id,sl))
         self._machine.getOrder(id,sl)
