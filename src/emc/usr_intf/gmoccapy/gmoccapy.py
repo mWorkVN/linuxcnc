@@ -979,7 +979,11 @@ class gmoccapy(object):
             self.widgets.hbtb_touch_off.pack_start(btn,True,True,0)
             btn.show()
 
-        btn = Gtk.Button.new_with_label(_("    set\nselected"))
+        lbl = Gtk.Label.new(_("set\nselected"))
+        lbl.set_visible(True)
+        lbl.set_justify(Gtk.Justification.CENTER)
+        btn = Gtk.Button.new()
+        btn.add(lbl)
         btn.connect("clicked", self._on_btn_set_selected_clicked)
         btn.set_property("tooltip-text", _("Press to set the selected coordinate system to be the active one"))
         btn.set_property("name", "set_active")
@@ -2849,6 +2853,15 @@ class gmoccapy(object):
         self.command.state(linuxcnc.STATE_ESTOP)
         Gtk.main_quit()
 
+    def on_focus_out(self, widget, data=None):
+        self.stat.poll()
+        if self.stat.enabled and self.stat.task_mode == linuxcnc.MODE_MANUAL and self.stat.current_vel > 0:
+            # cancel any joints jogging
+            JOGMODE = self._get_jog_mode()
+            for jnum in range(self.stat.joints):
+                self.command.jog(linuxcnc.JOG_STOP, JOGMODE, jnum)
+            print("Stopped jogging on focus-out-event")
+
     # What to do if a macro button has been pushed
     def _on_btn_macro_pressed( self, widget = None, data = None ):
         o_codes = data.split()
@@ -3039,7 +3052,7 @@ class gmoccapy(object):
                 return
 
             if (keyname == "R" or keyname == "r") and self.stat.interp_state == linuxcnc.INTERP_IDLE:
-                if event.state & Gdk.CONTROL_MASK:
+                if event.state & Gdk.ModifierType.CONTROL_MASK:
                     print("R und Control gedrückt")
                     self.widgets.hal_action_reload.emit("activate")
                 else:
