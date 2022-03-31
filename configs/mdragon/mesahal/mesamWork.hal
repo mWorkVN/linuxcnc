@@ -9,7 +9,8 @@ loadrt ddt count=8
 
 # hostmot2 driver
 loadrt hostmot2
-loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=1 num_pwmgens=0 num_rcpwmgens=1 num_stepgens=4 sserial_port_0=20000000 ssi_chan_0=steps%2bzencoder%12um enable_raw" 
+loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=1 num_pwmgens=0 num_rcpwmgens=1 num_stepgens=4 sserial_port_0=20000000 ssi_chan_0=steps%2bzencoder%12s enable_raw"
+#ssi_chan_0=steps%2bzencoder%12um 
 setp   hm2_7i80.0.watchdog.timeout_ns 60000000
 loadrt sum2 count=1
 #pwm gen
@@ -121,18 +122,21 @@ setp hm2_7i80.0.stepgen.03.step_type       0
 #net motor.00.pos-fb <= hm2_[HOSTMOT2](BOARD).0.stepgen.00.position-fb
 #net motor.00.pos-fb => joint.0.motor-pos-fb
 #mwork: open loop
-net J0pos => joint.0.motor-pos-fb
+#net J0pos => joint.0.motor-pos-fb
 net J1pos => joint.1.motor-pos-fb
 net J3pos => joint.3.motor-pos-fb
 net J2pos => joint.2.motor-pos-fb
 
 setp hm2_7i80.0.ssi.00.frequency-khz 300  
 setp hm2_7i80.0.ssi.00.timer-number 2
-setp hm2_7i80.0.ssi.00.zencoder-scalemax 0.5
-#setp hm2_7i80.0.ssi.00.zencoder.scale 535
-#setp hm2_7i80.0.ssi.00.zencoder.index-enable 0
-#setp hm2_7i80.0.ssi.00.zencoder.counts-per-rev 4095
+setp hm2_7i80.0.ssi.00.zencoder-scalemax 180
 net z-pos-fbss  hm2_7i80.0.ssi.00.zencoder
+net z-pos-fbss => joint.0.motor-pos-fb
+
+#setp joint.0.motor-offset 0
+#net motor.00.pos-fb <= hm2_[HOSTMOT2](BOARD).0.stepgen.00.position-fb
+#net motor.00.pos-fb => joint.0.motor-pos-fb
+
 #.position
 #net z-pos-fb => joint.2.motor-pos-fb
 #net z-pos-rawcountsww <= hm2_7i80.0.ssi.00.zencoder.rawcounts

@@ -96,6 +96,7 @@ def convertWorldMode(self):
         value = hal.get_value("motion.switchkins-type")
         angleX = hal.get_value("axis.x.pos-cmd") 
         angleY = hal.get_value("axis.y.pos-cmd")
+
         if (value == 0):
             self.execute("M66 E0 L0")
         elif (float(angleY)>= 0):
@@ -242,3 +243,43 @@ def g11remapskins(self, **words):
         return INTERP_ERROR
     return INTERP_OK
     
+def g02remapskins(self, **words):
+    global lenghtArm
+    global xold
+    global yold
+    pos={'x':0,'y':0,'z':0,'c':0}
+    fcmd =""
+    hasF = False
+    try:
+        value = hal.get_value("motion.switchkins-type")
+        if (value == 0):
+            convertJoinMode(self)
+        self.execute("M66 E0 L0")
+        yield INTERP_EXECUTE_FINISH
+        xposvalue = 0
+        yposvalue = 0
+        statusKin = 0
+        cmd = {'x':"",'y':"",'z':"",'c':"",'f':""}
+        typeGcode = "g0"
+        for name in cmd:
+            if name == "f":
+                if name in words:
+                    typeGcode = "g1"
+                    cmd[name] = "F{} ".format(words[name])     
+            elif name in words:
+                pos[name] = float(words[name])
+                cmd[name] = "{}{} ".format(name,words[name])
+                statusKin = 1
+            else: 
+                pos[name]  = float(hal.get_value('axis.{}.pos-commanded'.format(name)))   
+        gcodecmd="G53 %s X%f Y%f Z %f C %f %s "%(typeGcode, pos['x'] ,pos['y'] ,pos['z'] ,pos['c'], cmd["f"])
+        self.execute(gcodecmd )
+        yield INTERP_EXECUTE_FINISH
+        if (value==0):
+            convertWorldMode(self)
+        self.execute("M66 E0 L0")
+        yield INTERP_EXECUTE_FINISH
+    except Exception as e:
+        self.set_errormsg(e)
+        return INTERP_ERROR
+    return INTERP_OK
