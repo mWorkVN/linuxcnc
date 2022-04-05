@@ -240,6 +240,7 @@ class ActionButton(IndicatedPushButton, _HalWidgetBase):
             STATUS.connect('state-estop', lambda w: self.setEnabled(False))
             STATUS.connect('interp-idle', lambda w: self.setEnabled(STATUS.machine_is_on()))
             STATUS.connect('interp-run', lambda w: self.setEnabled(False))
+            STATUS.connect('interp-paused', lambda w: self.setEnabled(False))
             if self.jog_joint_pos:
                 self.pressed.connect(lambda: self.jog_action(1))
                 self.released.connect(lambda: self.jog_action(0))
@@ -265,9 +266,12 @@ class ActionButton(IndicatedPushButton, _HalWidgetBase):
             STATUS.connect('interp-run', lambda w: self.setEnabled(False))
             STATUS.connect('all-homed', lambda w: self.setEnabled(True))
             STATUS.connect('not-all-homed', lambda w, data: self.setEnabled(False))
-            STATUS.connect('interp-paused', lambda w: self.setEnabled(True))
             if True in (self.run, self.run_from_status, self.run_from_slot):
                 STATUS.connect('file-loaded', lambda w, f: self.setEnabled(True))
+                STATUS.connect('interp-paused', lambda w: self.setEnabled(True))
+            else:
+                STATUS.connect('interp-paused', lambda w: self.setEnabled(False))
+
             if self.run_from_status:
                 STATUS.connect('gcode-line-selected', lambda w, line: self.updateRunFromLine(line))
 
@@ -290,18 +294,23 @@ class ActionButton(IndicatedPushButton, _HalWidgetBase):
             pass
         elif self.launch_calibration:
             pass
-        elif self.auto:
-            STATUS.connect('mode-auto', lambda w: _safecheck(True))
-            STATUS.connect('mode-mdi', lambda w: _safecheck(False))
-            STATUS.connect('mode-manual', lambda w: _safecheck(False))
-        elif self.mdi:
-            STATUS.connect('mode-mdi', lambda w: _safecheck(True))
-            STATUS.connect('mode-manual', lambda w: _safecheck(False))
-            STATUS.connect('mode-auto', lambda w: _safecheck(False))
-        elif self.manual:
-            STATUS.connect('mode-manual', lambda w: _safecheck(True))
-            STATUS.connect('mode-mdi', lambda w: _safecheck(False))
-            STATUS.connect('mode-auto', lambda w: _safecheck(False))
+        elif self.auto or self.mdi or self.manual:
+            STATUS.connect('interp-run', lambda w: self.setEnabled(False))
+            STATUS.connect('interp-paused', lambda w: self.setEnabled(False))
+            STATUS.connect('interp-idle', lambda w: self.setEnabled(True))
+            if self.auto:
+                STATUS.connect('mode-auto', lambda w: _safecheck(True))
+                STATUS.connect('mode-mdi', lambda w: _safecheck(False))
+                STATUS.connect('mode-manual', lambda w: _safecheck(False))
+            elif self.mdi:
+                STATUS.connect('mode-mdi', lambda w: _safecheck(True))
+                STATUS.connect('mode-manual', lambda w: _safecheck(False))
+                STATUS.connect('mode-auto', lambda w: _safecheck(False))
+            elif self.manual:
+                STATUS.connect('mode-manual', lambda w: _safecheck(True))
+                STATUS.connect('mode-mdi', lambda w: _safecheck(False))
+                STATUS.connect('mode-auto', lambda w: _safecheck(False))
+
         elif self.jog_incr:
             STATUS.connect('metric-mode-changed', lambda w, data:  self.incr_action())
             STATUS.connect('jogincrement-changed', lambda w, value, text: _checkincrements(value, text))

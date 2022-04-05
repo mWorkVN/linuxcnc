@@ -96,7 +96,7 @@ class MyApplication(QtWidgets.QApplication):
         return self._input_focus_widget
 
 
-class QTVCP: 
+class QTVCP:
     def __init__(self):
         sys.excepthook = self.excepthook
         INIPATH = None
@@ -121,7 +121,7 @@ class QTVCP:
         # so web engine can load local images
         sys.argv.append("--disable-web-security")
 
-        # initialize QApp so we can pop up dialogs now. 
+        # initialize QApp so we can pop up dialogs now.
         self.app = MyApplication(sys.argv)
 
         # we import here so that the QApp is initialized before
@@ -245,7 +245,7 @@ Pressing cancel will close linuxcnc.""" % target)
 
         # initialize the window
         window = qt_makegui.VCPWindow(self.hal, PATH)
- 
+
         # give reference to user command line options
         if opts.useropts:
             window.USEROPTIONS_ = opts.useropts
@@ -275,7 +275,7 @@ Pressing cancel will close linuxcnc.""" % target)
         if INIPATH:
             if (INITITLE == ""):
                 INITITLE='QTvcp-Screen-%s'% opts.component
-            title = INITITLE 
+            title = INITITLE
         else:
             title = 'QTvcp-Panel-%s'% opts.component
         window.setWindowTitle(title)
@@ -307,7 +307,7 @@ Pressing cancel will close linuxcnc.""" % target)
                 cmd = ["halcmd", "-f", opts.halfile]
             res = subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
             if res:
-                print >> sys.stderr, "'%s' exited with %d" %(' '.join(cmd), res)
+                print("'%s' exited with %d" %(' '.join(cmd), res), file=sys.stderr)
                 self.shutdown()
 
         # User components are set up so report that we are ready
@@ -323,7 +323,7 @@ Pressing cancel will close linuxcnc.""" % target)
                 LOG.critical('Forwarding events to AXIS is not well tested yet')
                 if forward:
                     xembed.XEmbedForwarding(window, forward)
-            except Exception as e
+            except Exception as e:
                 LOG.critical('Embedding error:{}'.format(e))
 
         # push the window id for embedment into an external program
@@ -446,7 +446,7 @@ Pressing cancel will close linuxcnc.""" % target)
             pass
         sys.exit(0)
 
-        # Throws up a dialog with debug info when an error is encountered 
+        # Throws up a dialog with debug info when an error is encountered
     def excepthook(self, exc_type, exc_obj, exc_tb):
         global ERROR_COUNT
         ERROR_COUNT +=1
@@ -477,7 +477,7 @@ Pressing cancel will close linuxcnc.""" % target)
             for i in msg.buttons():
                 if msg.buttonRole(i) == QtWidgets.QMessageBox.ActionRole:
                     i.click()
-           
+
             retval = msg.exec_()
             if retval == QtWidgets.QMessageBox.Abort: #cancel button
                 LOG.critical("Aborted from Error Dialog\n {}\n{}\n".format(self._message,''.join(lines)))
