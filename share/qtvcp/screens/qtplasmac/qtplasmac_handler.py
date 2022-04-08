@@ -1,4 +1,4 @@
-VERSION = '1.223.181'
+VERSION = '1.223.182'
 
 '''
 qtplasmac_handler.py
@@ -1248,6 +1248,7 @@ class HandlerClass:
 
     def power_state(self, state):
         if state:
+            self.w.power.setChecked(True)
             self.set_buttons_state([self.idleOnList], True)
             if self.tpButton and not self.w.torch_enable.isChecked():
                 self.w[self.tpButton].setEnabled(False)
@@ -3775,6 +3776,7 @@ class HandlerClass:
                 ACTION.CALL_MDI('G53 G1 X{:0.2f}'.format(xMax))
                 ACTION.CALL_MDI('G53 G1 Y{:0.2f}'.format(yMin))
                 ACTION.CALL_MDI('G53 G1 X{:0.2f}'.format(xMin))
+                ACTION.CALL_MDI('G0 X0 Y0')
 
     def single_cut(self):
         self.set_buttons_state([self.idleList, self.idleOnList, self.idleHomedList], False)
@@ -5441,7 +5443,7 @@ class HandlerClass:
         return self.keyboard_shortcuts() and not event.isAutoRepeat() and not self.w.main_tab_widget.currentIndex() and self.w['jog_{}'.format(key)].isEnabled()
 
     def on_keycall_ESTOP(self, event, state, shift, cntrl):
-        if self.key_is_valid(event, state):
+        if self.key_is_valid(event, state) and self.w.estopButton == 2:
             ACTION.SET_ESTOP_STATE(STATUS.estop_is_clear())
 
     def on_keycall_POWER(self, event, state, shift, cntrl):
