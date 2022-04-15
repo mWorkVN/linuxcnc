@@ -97,9 +97,9 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>100</y>
+        <y>50</y>
         <width>941</width>
-        <height>601</height>
+        <height>651</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -109,7 +109,7 @@
        <enum>QFrame::Raised</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="main_tab_widget6">
        <widget class="QWidget" name="horizontalLayoutWidget">
@@ -5213,7 +5213,7 @@
          <number>0</number>
         </property>
         <attribute name="horizontalHeaderVisible">
-         <bool>true</bool>
+         <bool>false</bool>
         </attribute>
         <attribute name="horizontalHeaderCascadingSectionResizes">
          <bool>true</bool>
@@ -5234,7 +5234,7 @@
          <bool>true</bool>
         </attribute>
         <attribute name="verticalHeaderVisible">
-         <bool>true</bool>
+         <bool>false</bool>
         </attribute>
         <attribute name="verticalHeaderCascadingSectionResizes">
          <bool>true</bool>
@@ -5292,100 +5292,6 @@
        </rect>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_34">
-       <item>
-        <widget class="QPushButton" name="btn_tabCaffe">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>CÀ PHÊ</string>
-         </property>
-         <property name="index" stdset="0">
-          <number>0</number>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">page_buttonGroup</string>
-         </attribute>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_tabEp">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>NƯỚC ÉP</string>
-         </property>
-         <property name="index" stdset="0">
-          <number>1</number>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">page_buttonGroup</string>
-         </attribute>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_tabEp_2">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>NUOC CHAI</string>
-         </property>
-         <property name="index" stdset="0">
-          <number>2</number>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">page_buttonGroup</string>
-         </attribute>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_checkout">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>100</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>CHECKOUT</string>
-         </property>
-         <property name="index" stdset="0">
-          <number>3</number>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">page_buttonGroup</string>
-         </attribute>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="horizontalLayoutWidget_3">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>60</y>
-        <width>941</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QLabel" name="imageAc_40">
          <property name="sizePolicy">
@@ -5501,6 +5407,31 @@
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_checkout">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>100</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>CHECKOUT</string>
+         </property>
+         <property name="index" stdset="0">
+          <number>3</number>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">page_buttonGroup</string>
+         </attribute>
         </widget>
        </item>
       </layout>
@@ -6733,7 +6664,7 @@
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buy_buttonGroup"/>
   <buttongroup name="page_buttonGroup"/>
+  <buttongroup name="buy_buttonGroup"/>
  </buttongroups>
 </ui>

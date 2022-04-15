@@ -122,7 +122,7 @@ setp hm2_7i80.0.stepgen.03.step_type       0
 #net motor.00.pos-fb <= hm2_[HOSTMOT2](BOARD).0.stepgen.00.position-fb
 #net motor.00.pos-fb => joint.0.motor-pos-fb
 #mwork: open loop
-#net J0pos => joint.0.motor-pos-fb
+net J0pos => joint.0.motor-pos-fb
 net J1pos => joint.1.motor-pos-fb
 net J3pos => joint.3.motor-pos-fb
 net J2pos => joint.2.motor-pos-fb
@@ -131,7 +131,7 @@ setp hm2_7i80.0.ssi.00.frequency-khz 300
 setp hm2_7i80.0.ssi.00.timer-number 2
 setp hm2_7i80.0.ssi.00.zencoder-scalemax 180
 net z-pos-fbss  hm2_7i80.0.ssi.00.zencoder
-net z-pos-fbss => joint.0.motor-pos-fb
+#net z-pos-fbss => joint.0.motor-pos-fb
 
 #setp joint.0.motor-offset 0
 #net motor.00.pos-fb <= hm2_[HOSTMOT2](BOARD).0.stepgen.00.position-fb
