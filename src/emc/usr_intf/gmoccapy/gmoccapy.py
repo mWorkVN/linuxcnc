@@ -176,9 +176,12 @@ class gmoccapy(object):
             button {
                 padding: 0;
             }
-            #gcode_edit { 
+            #gcode_edit {
                 padding: 3px;
                 margin: 1px;
+            }
+            #notification_close {
+                padding: 8px;
             }
         """
         provider.load_from_data(css)
@@ -2638,7 +2641,7 @@ class gmoccapy(object):
     def on_hal_status_state_estop(self, widget=None):
         self.widgets.tbtn_estop.set_active(True)
         self.widgets.tbtn_estop.set_image(self.widgets.img_emergency)
-        self.widgets.tbtn_on.set_image(self.widgets.img_machine_on)
+        self.widgets.tbtn_on.set_image(self.widgets.img_machine_off)
         self.widgets.tbtn_on.set_sensitive(False)
         self.widgets.tbtn_on.set_active(False)
         self.command.mode(linuxcnc.MODE_MANUAL)
