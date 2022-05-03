@@ -1,4 +1,4 @@
-VERSION = '1.223.185'
+VERSION = '1.223.186'
 
 '''
 qtplasmac_handler.py
@@ -930,6 +930,9 @@ class HandlerClass:
         self.w.gcodegraphics._font = 'monospace 11'
         self.w.conv_preview.set_cone_basesize(0.1)
         self.w.conv_preview.set_view('Z')
+        self.w.conv_preview.show_tool = False
+        self.w.conv_preview.show_limits = False
+        self.w.conv_preview.draw_small_origin = False
         self.w.conv_preview.set_alpha_mode(True)
         self.w.conv_preview.setShowOffsets(False)
         self.w.conv_preview._font = 'monospace 11'
@@ -1486,11 +1489,7 @@ class HandlerClass:
         if self.w.main_tab_widget.currentIndex():
             self.w.main_tab_widget.setCurrentIndex(0)
         if self.fileOpened:
-            if self.w.view_p.isChecked():
-                self.w.gcodegraphics.set_view('P')
-            elif self.w.view_z.isChecked():
-                self.w.gcodegraphics.set_view('Z')
-            else:
+            if not (self.w.view_p.isChecked() or self.w.view_z.isChecked()):
                 self.view_t_pressed()
         else:
             self.view_t_pressed()
@@ -1959,15 +1958,6 @@ class HandlerClass:
         while time.time() < t:
             QApplication.processEvents()
         if tab == 0:
-            if self.fileOpened:
-                if self.w.view_p.isChecked():
-                    self.w.gcodegraphics.set_view('P')
-                elif self.w.view_z.isChecked():
-                    self.w.gcodegraphics.set_view('Z')
-                else:
-                    self.view_t_pressed()
-            else:
-                self.view_t_pressed()
             if self.w.preview_stack.currentIndex() == 2:
                 self.vkb_show()
             else:
