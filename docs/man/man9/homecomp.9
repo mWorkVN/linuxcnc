@@ -1,4 +1,4 @@
-.TH HOMECOMP "9" "2022-04-12" "LinuxCNC Documentation" "HAL Component"
+.TH HOMECOMP "9" "2022-05-05" "LinuxCNC Documentation" "HAL Component"
 .de TQ
 .br
 .ns
@@ -18,9 +18,22 @@ Custom Homing module loaded with \fB[EMCMOT]HOMEMOD=homecomp\fR
 Example of a homing module buildable with halcompile.
 Demonstrates required code for #includes, function definitions, etc.
 
-An  actual homing scheme is \fBnot\fR implemented but all necessary
-functions are included as skeleton code.   (All joints are
-effectively homed at all times and cannot be unhomed).
+If \fBHOMING_BASE\fR is #defined and points to a valid homing.c file,
+an example of a customized homing module is built.  This module
+creates input hal pins joint.n.request-custom-homing that enable an
+alternate joint homing state machine for requested joints.  A hal output
+pin joint.N.is_custom-homing verifies selection"
+
+The customized homing module utilizes many of the base homing api
+routines from homing.c without modification but augments other base
+functions to add support for custom hal pins and custom joint homing
+state machines.  A user-built module will likely replace additional
+api functions or augment them with other customizations.
+
+If \fBHOMING_BASE\fR Is not #defined, an  actual homing scheme is
+\fBnot\fR implemented but all necessary functions are included as
+skeleton code.   (All joints are effectively homed at all times and
+cannot be unhomed).
 
 See the source code file: src/emc/motion/homing.c for the baseline
 implementation that includes all functions for the default \fBhomemod\fR

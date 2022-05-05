@@ -285,6 +285,7 @@ config.h: config.h.in config.status
 
 INFILES = \
         ../scripts/linuxcnc ../scripts/realtime \
+	../scripts/mworkcnc \
 	../scripts/linuxcnc_info \
 	../scripts/haltcl ../scripts/rtapi.conf Makefile.inc Makefile.modinc \
 	../tcl/linuxcnc.tcl ../scripts/halrun ../scripts/rip-environment \
@@ -664,6 +665,7 @@ install-kernel-indep: install-dirs
 
 	$(EXE) $(filter-out ../bin/rtapi_app ../bin/linuxcnc_module_helper ../bin/pci_write ../bin/pci_read ../bin/test_rtapi_vsnprintf, $(filter ../bin/%,$(TARGETS))) $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/linuxcnc $(DESTDIR)$(bindir)
+	$(EXE) ../scripts/mworkcnc $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/linuxcnc_info $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/linuxcnc_var $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/monitor-xhc-hb04 $(DESTDIR)$(bindir)
