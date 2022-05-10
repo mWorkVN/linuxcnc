@@ -210,14 +210,14 @@ def run_from_line(P, W, ACTION, STATUS, linuxcnc):
         if cutComp:
             msg0 = _translate('HandlerClass', 'Cannot run from line while')
             msg1 = _translate('HandlerClass', 'cutter compensation is active')
-            STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{}{}\n'.format(head, msg0, msg1))
-        elif oSub:
+            STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{}\n'.format(head, msg0, msg1))
+        if oSub:
             msg0 = _translate('HandlerClass', 'Cannot do run from line')
             msg1 = _translate('HandlerClass', 'inside subroutine')
             msg2 = ''
             for sub in oSub:
                 msg2 += ' {}'.format(sub)
-        STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{}{}\n'.format(head, msg0, msg1, msg2))
+            STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{}{}\n'.format(head, msg0, msg1, msg2))
         P.rflActive = False
         P.set_run_button_state()
         P.startLine = 0
