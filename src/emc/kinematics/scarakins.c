@@ -103,6 +103,15 @@ int scaraKinematicsForward(const double * joint,
     world->tran.x = x;
     world->tran.y = y;
     world->tran.z = z;
+    /*
+    double c_angle = c * 180 / PM_PI;
+    if (c_angle >180){
+        c_angle = c_angle - 360;
+    }
+    else if  (c_angle < -180){
+        c_angle = c_angle + 360;
+    }
+    */
     world->c = c * 180 / PM_PI;
 
     world->a = joint[4];

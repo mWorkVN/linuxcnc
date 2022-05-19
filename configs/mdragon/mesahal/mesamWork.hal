@@ -3,59 +3,41 @@
 # load RT modules
 loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT   servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS  num_dio=20
-loadrt ddt count=8
+
 #base_period_nsec=[EMCMOT]BASE_PERIOD
 # load parameters save
 
 # hostmot2 driver
 loadrt hostmot2
-loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=1 num_pwmgens=0 num_rcpwmgens=1 num_stepgens=4 sserial_port_0=20000000 ssi_chan_0=steps%2bzencoder%12s enable_raw"
-#ssi_chan_0=steps%2bzencoder%12um 
+loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=2 num_pwmgens=0 num_rcpwmgens=1 num_stepgens=5 sserial_port_0=20000000 ssi_chan_0=steps%2bzencoder%12s ssi_chan_1=steps%2byencoder%12s enable_raw"
 setp   hm2_7i80.0.watchdog.timeout_ns 60000000
-loadrt sum2 count=1
-#pwm gen
-#loadrt pwmgen output_type=0
-#BASE_PERIOD
-addf sum2.0 servo-thread
-addf hm2_7i80.0.read          servo-thread
+loadrt stepgen step_type=0,0,0,0,0 ctrl_type=v,v,p,p,p
+setp hm2_7i80.0.stepgen.timer-number 1
+
+
+
+
+
 addf motion-command-handler   servo-thread
 addf motion-controller        servo-thread
+addf hm2_7i80.0.read          servo-thread
 addf hm2_7i80.0.write         servo-thread
-#addf pwmgen.make-pulses 	  base-thread 
-#addf pwmgen.update			  servo-thread
 
 setp hm2_7i80.0.dpll.01.timer-us -50
-setp hm2_7i80.0.dpll.02.timer-us -120
-setp hm2_7i80.0.dpll.03.timer-us -200
+setp hm2_7i80.0.dpll.02.timer-us -100
+setp hm2_7i80.0.dpll.03.timer-us -150
 setp hm2_7i80.0.dpll.04.timer-us -200
-setp hm2_7i80.0.stepgen.timer-number 1
+
+
 setp hm2_7i80.0.packet-error-limit  500
 
-setp scarakins.D1 400.0
-setp scarakins.D2 350.0
-setp scarakins.D3 75.0
-setp scarakins.D4 350.0
-setp scarakins.D5 200.0
+setp scarakins.D1 300.0
+setp scarakins.D2 330.0  #join0
+setp scarakins.D3 118.0
+setp scarakins.D4 220.0
+setp scarakins.D5 50.0
 setp scarakins.D6 0.0
 
-addf ddt.0 servo-thread
-addf ddt.1 servo-thread
-addf ddt.2 servo-thread
-addf ddt.3 servo-thread
-addf ddt.4 servo-thread
-addf ddt.5 servo-thread
-addf ddt.6 servo-thread
-addf ddt.7 servo-thread
-
-#Laser
-
-#setp hm2_7i80.0.pwmgen.00.out0.invert_output  1
-#setp hm2_7i80.0.pwmgen.pwm_frequency 5000
-#setp hm2_7i80.0.pwmgen.00.scale 5000
-#setp hm2_7i80.0.pwmgen.00.output-type 1
-
-#net spindle-speed-cmd spindle.0.speed-out => hm2_[HOSTMOT2](BOARD).0.pwmgen.00.value
-#net spindle-on spindle.0.on => hm2_[HOSTMOT2](BOARD).0.pwmgen.00.enable
 
 
 
@@ -64,107 +46,6 @@ setp hm2_7i80.0.rcpwmgen.00.width 0
 setp hm2_7i80.0.rcpwmgen.00.offset 0.1
 
 
-# create HAL signals for position commands from motion module
-
-
-
-#set gain for sum2 = in0*gain0 + in1*gain1
-setp sum2.0.gain0 1
-setp sum2.0.gain1 0.069333333333337
-net J2pos sum2.0.in0 <= joint.2.motor-pos-cmd
-net J3pos hm2_[HOSTMOT2](BOARD).0.stepgen.03.position-cmd sum2.0.in1 <= joint.3.motor-pos-cmd
-net J2posE hm2_[HOSTMOT2](BOARD).0.stepgen.02.position-cmd <= sum2.0.out 
-
-# timing parameters
-
-#http://linuxcnc.org/docs/devel/html/man/man9/stepgen.9.html
-
-net J0pos hm2_[HOSTMOT2](BOARD).0.stepgen.00.position-cmd <= joint.0.motor-pos-cmd
-setp hm2_7i80.0.stepgen.00.dirsetup        [JOINT_0]DIRSETUP
-setp hm2_7i80.0.stepgen.00.dirhold         [JOINT_0]DIRHOLD
-setp hm2_7i80.0.stepgen.00.steplen         [JOINT_0]STEPLEN
-setp hm2_7i80.0.stepgen.00.stepspace       [JOINT_0]STEPSPACE
-setp hm2_7i80.0.stepgen.00.position-scale  [JOINT_0]STEP_SCALE
-setp hm2_7i80.0.stepgen.00.maxvel          [JOINT_0]STEPGEN_MAX_VEL
-setp hm2_7i80.0.stepgen.00.maxaccel        [JOINT_0]STEPGEN_MAX_ACC
-setp hm2_7i80.0.stepgen.00.step_type       0
-
-net J1pos hm2_[HOSTMOT2](BOARD).0.stepgen.01.position-cmd <= joint.1.motor-pos-cmd
-setp hm2_7i80.0.stepgen.01.dirsetup        [JOINT_1]DIRSETUP
-setp hm2_7i80.0.stepgen.01.dirhold         [JOINT_1]DIRHOLD
-setp hm2_7i80.0.stepgen.01.steplen         [JOINT_1]STEPLEN
-setp hm2_7i80.0.stepgen.01.stepspace       [JOINT_1]STEPSPACE
-setp hm2_7i80.0.stepgen.01.position-scale  [JOINT_1]STEP_SCALE
-setp hm2_7i80.0.stepgen.01.maxvel          [JOINT_1]STEPGEN_MAX_VEL
-setp hm2_7i80.0.stepgen.01.maxaccel        [JOINT_1]STEPGEN_MAX_ACC
-setp hm2_7i80.0.stepgen.01.step_type       0
-
-setp hm2_7i80.0.stepgen.02.dirsetup        [JOINT_2]DIRSETUP
-setp hm2_7i80.0.stepgen.02.dirhold         [JOINT_2]DIRHOLD
-setp hm2_7i80.0.stepgen.02.steplen         [JOINT_2]STEPLEN
-setp hm2_7i80.0.stepgen.02.stepspace       [JOINT_2]STEPSPACE
-setp hm2_7i80.0.stepgen.02.position-scale  [JOINT_2]STEP_SCALE
-setp hm2_7i80.0.stepgen.02.maxvel          [JOINT_2]STEPGEN_MAX_VEL
-setp hm2_7i80.0.stepgen.02.maxaccel        [JOINT_2]STEPGEN_MAX_ACC
-setp hm2_7i80.0.stepgen.02.step_type       0
-
-setp hm2_7i80.0.stepgen.03.dirsetup        [JOINT_3]DIRSETUP
-setp hm2_7i80.0.stepgen.03.dirhold         [JOINT_3]DIRHOLD
-setp hm2_7i80.0.stepgen.03.steplen         [JOINT_3]STEPLEN
-setp hm2_7i80.0.stepgen.03.stepspace       [JOINT_3]STEPSPACE
-setp hm2_7i80.0.stepgen.03.position-scale  [JOINT_3]STEP_SCALE
-setp hm2_7i80.0.stepgen.03.maxvel          [JOINT_3]STEPGEN_MAX_VEL
-setp hm2_7i80.0.stepgen.03.maxaccel        [JOINT_3]STEPGEN_MAX_ACC
-setp hm2_7i80.0.stepgen.03.step_type       0
-
-# loop position commands back to motion module feedback
-#mwork: close loop
-#net motor.00.pos-fb <= hm2_[HOSTMOT2](BOARD).0.stepgen.00.position-fb
-#net motor.00.pos-fb => joint.0.motor-pos-fb
-#mwork: open loop
-net J0pos => joint.0.motor-pos-fb
-net J1pos => joint.1.motor-pos-fb
-net J3pos => joint.3.motor-pos-fb
-net J2pos => joint.2.motor-pos-fb
-
-setp hm2_7i80.0.ssi.00.frequency-khz 300  
-setp hm2_7i80.0.ssi.00.timer-number 2
-setp hm2_7i80.0.ssi.00.zencoder-scalemax 180
-net z-pos-fbss  hm2_7i80.0.ssi.00.zencoder
-#net z-pos-fbss => joint.0.motor-pos-fb
-
-#setp joint.0.motor-offset 0
-#net motor.00.pos-fb <= hm2_[HOSTMOT2](BOARD).0.stepgen.00.position-fb
-#net motor.00.pos-fb => joint.0.motor-pos-fb
-
-#.position
-#net z-pos-fb => joint.2.motor-pos-fb
-#net z-pos-rawcountsww <= hm2_7i80.0.ssi.00.zencoder.rawcounts
-#setp hm2_7i80.0.raw.read_address 0x6900 
-#show pin hm2_7i80.0.read_data
-# send the position commands thru differentiators to
-# generate velocity and accel signals
-# define the signals, and hook them up
-
-net J0pos => ddt.0.in
-net J0vel <= ddt.0.out
-net J0vel => ddt.1.in
-net J0acc <= ddt.1.out
-
-net J1pos => ddt.2.in
-net J1vel <= ddt.2.out
-net J1vel => ddt.3.in
-net J1acc <= ddt.3.out
-
-net J2pos => ddt.4.in
-net J2vel <= ddt.4.out
-net J2vel => ddt.5.in
-net J2acc <= ddt.5.out
-
-net J3pos => ddt.6.in
-net J3vel <= ddt.6.out
-net J3vel => ddt.7.in
-net J3acc <= ddt.7.out
 
 # estop loopback
 net estop-loop iocontrol.0.user-enable-out iocontrol.0.emc-enable-in
@@ -232,15 +113,14 @@ setp hm2_[HOSTMOT2](BOARD).0.gpio.056.invert_output true
 setp hm2_[HOSTMOT2](BOARD).0.gpio.058.invert_output true
 
 
-net xena joint.0.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.00.enable
-net xena => hm2_[HOSTMOT2](BOARD).0.gpio.051.out
-net yena joint.1.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.01.enable
-net yena joint.1.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.053.out
+
+net x-amp-enable => hm2_[HOSTMOT2](BOARD).0.gpio.051.out
+net y-amp-enable => hm2_[HOSTMOT2](BOARD).0.gpio.053.out
 net zena joint.2.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.02.enable
 net zena joint.2.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.055.out
 net aena joint.3.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.03.enable
 net aena joint.3.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.057.out
-
+net cena joint.4.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.04.enable
 # Cai home pin 
 net homeswitchesX <= hm2_[HOSTMOT2](BOARD).0.gpio.047.in
 net homeswitchesX => joint.0.home-sw-in

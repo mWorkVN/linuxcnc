@@ -6038,7 +6038,7 @@ MM/MIN</string>
                           <string>Adjust linear jog rate</string>
                          </property>
                          <property name="maximum">
-                          <number>2000</number>
+                          <number>5000</number>
                          </property>
                          <property name="singleStep">
                           <number>100</number>
@@ -11611,7 +11611,7 @@ PLATE</string>
             <number>2</number>
            </property>
            <property name="text">
-            <string>03:31:43 PM</string>
+            <string>02:55:24 PM</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -12562,10 +12562,10 @@ PLATE</string>
   <slot>btn_view_machine_clicked()</slot>
  </slots>
  <buttongroups>
-  <buttongroup name="swkins_buttonGroup"/>
   <buttongroup name="mode_buttonGroup"/>
+  <buttongroup name="swkins_buttonGroup"/>
   <buttongroup name="mpage_buttonGroup"/>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="page_buttonGroup"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

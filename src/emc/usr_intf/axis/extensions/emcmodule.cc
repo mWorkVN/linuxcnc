@@ -1295,6 +1295,11 @@ static PyObject *set_min_limit(pyCommandChannel *s, PyObject *o) {
     return Py_None;
 }
 
+
+
+
+
+
 static PyObject *set_max_limit(pyCommandChannel *s, PyObject *o) {
     EMC_JOINT_SET_MAX_POSITION_LIMIT m;
     if(!PyArg_ParseTuple(o, "id", &m.joint, &m.limit))

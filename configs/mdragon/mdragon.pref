@@ -1,5 +1,5 @@
 [DIALOG_GEOMETRY]
-LncMessage-geometry = 634 369 321 120
+LncMessage-geometry = 634 369 286 120
 ToolChangeDialog-geometry = 634 369 99 29
 FileDialog-geometry = 375 176 617 415
 CalculatorDialog-geometry = 634 369 472 354
@@ -22,15 +22,15 @@ KeyboardDialog_play_sound = True
 KeyboardDialog_sound_type = READY
 
 [BOOK_KEEPING]
-last_loaded_directory = 
-last_loaded_file = None
+last_loaded_directory = /home/mwork/Desktop
+last_loaded_file = /home/mwork/Desktop/loop.ngc
 style_QSS_Path = DEFAULT
 RecentPath_5 = None
 RecentPath_4 = None
 RecentPath_3 = None
 RecentPath_2 = None
 RecentPath_1 = None
-RecentPath_0 = None
+RecentPath_0 = /home/mwork/Desktop/loop.ngc
 
 [ORIGINOFFSET_SYSTEM_NAMES]
 __dialogOffsetViewWidget-G54 = User System 1
@@ -58,7 +58,7 @@ desktop_notify = False
 notify_max_msgs = 1
 shutdown_check = True
 sound_player_on = False
-mainwindow_geometry = -389 104 1360 760
+mainwindow_geometry = 44 186 1360 760
 overlay_play_sound = False
 overlay_sound_type = RING
 
@@ -196,7 +196,7 @@ Pnp_SpeedZD = 0
 Pnp_InputBad = 0
 
 [CHOOSE_ACTUATOR]
-Nhan Test = 168
+Nhan Test = 408
 Type Actuator = 0
 scum_close_ex2_type = 0
 scum_open_ex2_type = 0

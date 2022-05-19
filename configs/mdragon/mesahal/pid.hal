@@ -1,0 +1,172 @@
+loadrt ddt count=10
+loadrt pid names=pid.x,pid.y,pid.z,pid.a
+
+#addf ddt.0 servo-thread
+#addf ddt.1 servo-thread
+#addf ddt.2 servo-thread
+#addf ddt.3 servo-thread
+#addf ddt.4 servo-thread
+#addf ddt.5 servo-thread
+addf ddt.6 servo-thread
+addf ddt.7 servo-thread
+#addf ddt.8 servo-thread
+#addf ddt.9 servo-thread
+
+addf pid.x.do-pid-calcs       servo-thread
+addf pid.y.do-pid-calcs       servo-thread
+addf pid.z.do-pid-calcs       servo-thread
+addf pid.a.do-pid-calcs       servo-thread
+
+# X
+
+#net J0pos hm2_[HOSTMOT2](BOARD).0.stepgen.00.velocity-cmd <= joint.0.motor-pos-cmd
+setp   pid.x.Pgain     [JOINT_0]P
+setp   pid.x.Igain     [JOINT_0]I
+setp   pid.x.Dgain     [JOINT_0]D
+setp   pid.x.bias      [JOINT_0]BIAS
+setp   pid.x.FF0       [JOINT_0]FF0
+setp   pid.x.FF1       [JOINT_0]FF1
+setp   pid.x.FF2       [JOINT_0]FF2
+setp   pid.x.deadband  [JOINT_0]DEADBAND
+setp   pid.x.maxoutput [JOINT_0]MAX_OUTPUT
+setp   pid.x.error-previous-target true
+#setp   pid.x.maxerror 0.000001
+net x-index-enable  <=> pid.x.index-enable
+net x-amp-enable    =>  pid.x.enable
+net x-pos-cmd       =>  pid.x.command
+net x-pos-cmd       =>  pid.x.feedback
+#net j0-pos-fbss       =>  pid.x.feedback
+net x-output        <=  pid.x.output
+setp hm2_7i80.0.stepgen.00.dirsetup        [JOINT_0]DIRSETUP
+setp hm2_7i80.0.stepgen.00.dirhold         [JOINT_0]DIRHOLD
+setp hm2_7i80.0.stepgen.00.steplen         [JOINT_0]STEPLEN
+setp hm2_7i80.0.stepgen.00.stepspace       [JOINT_0]STEPSPACE
+setp hm2_7i80.0.stepgen.00.position-scale  [JOINT_0]STEP_SCALE
+setp hm2_7i80.0.stepgen.00.maxvel          [JOINT_0]STEPGEN_MAX_VEL
+setp hm2_7i80.0.stepgen.00.maxaccel        [JOINT_0]STEPGEN_MAX_ACC
+setp hm2_7i80.0.stepgen.00.step_type       0
+setp hm2_7i80.0.stepgen.00.control-type     1
+
+# ---closedloop stepper signals---
+
+net x-pos-cmd    <= joint.0.motor-pos-cmd
+net x-vel-cmd    <= joint.0.vel-cmd
+net x-output    <= hm2_[HOSTMOT2](BOARD).0.stepgen.00.velocity-cmd
+net x-amp-enable joint.0.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.00.enable
+
+setp hm2_7i80.0.ssi.00.frequency-khz 250  
+setp hm2_7i80.0.ssi.00.timer-number 2
+setp hm2_7i80.0.ssi.00.zencoder-scalemax 180
+net j0-pos-fbss  hm2_7i80.0.ssi.00.zencoder
+net x-pos-cmd  => joint.0.motor-pos-fb
+
+setp joint.0.jog-vel-mode 1
+setp axis.x.jog-vel-mode 1
+
+
+# Y
+setp   pid.y.Pgain     [JOINT_1]P
+setp   pid.y.Igain     [JOINT_1]I
+setp   pid.y.Dgain     [JOINT_1]D
+setp   pid.y.bias      [JOINT_1]BIAS
+setp   pid.y.FF0       [JOINT_1]FF0
+setp   pid.y.FF1       [JOINT_1]FF1
+setp   pid.y.FF2       [JOINT_1]FF2
+setp   pid.y.deadband  [JOINT_1]DEADBAND
+setp   pid.y.maxoutput [JOINT_1]MAX_OUTPUT
+setp   pid.y.error-previous-target true
+#setp   pid.y.maxerror 0.0001
+net y-index-enable  <=> pid.y.index-enable
+net y-amp-enable    =>  pid.y.enable
+net y-pos-cmd       =>  pid.y.command
+net j1-pos-fbss       =>  pid.y.feedback
+net y-output        <=  pid.y.output
+#net J1pos hm2_[HOSTMOT2](BOARD).0.stepgen.01.position-cmd <= joint.1.motor-pos-cmd
+setp hm2_7i80.0.stepgen.01.dirsetup        [JOINT_1]DIRSETUP
+setp hm2_7i80.0.stepgen.01.dirhold         [JOINT_1]DIRHOLD
+setp hm2_7i80.0.stepgen.01.steplen         [JOINT_1]STEPLEN
+setp hm2_7i80.0.stepgen.01.stepspace       [JOINT_1]STEPSPACE
+setp hm2_7i80.0.stepgen.01.position-scale  [JOINT_1]STEP_SCALE
+setp hm2_7i80.0.stepgen.01.maxvel          [JOINT_1]STEPGEN_MAX_VEL
+setp hm2_7i80.0.stepgen.01.maxaccel        [JOINT_1]STEPGEN_MAX_ACC
+setp hm2_7i80.0.stepgen.01.step_type       0
+setp hm2_7i80.0.stepgen.01.control-type     1
+
+net y-pos-cmd    <= joint.1.motor-pos-cmd
+net y-vel-cmd    <= joint.1.vel-cmd
+net y-output     <= hm2_[HOSTMOT2](BOARD).0.stepgen.01.velocity-cmd
+net y-amp-enable joint.1.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.01.enable
+
+setp hm2_7i80.0.ssi.01.frequency-khz 250  
+setp hm2_7i80.0.ssi.01.timer-number 2
+setp hm2_7i80.0.ssi.01.yencoder-scalemax 180
+net j1-pos-fbss  hm2_7i80.0.ssi.01.yencoder
+net j1-pos-fbss => joint.1.motor-pos-fb
+net y-pos-fb     <=  hm2_[HOSTMOT2](BOARD).0.stepgen.01.position-fb
+setp joint.1.jog-vel-mode 1
+setp axis.y.jog-vel-mode 1
+
+
+net J2pos hm2_[HOSTMOT2](BOARD).0.stepgen.02.position-cmd <= joint.2.motor-pos-cmd
+setp hm2_7i80.0.stepgen.02.dirsetup        [JOINT_2]DIRSETUP
+setp hm2_7i80.0.stepgen.02.dirhold         [JOINT_2]DIRHOLD
+setp hm2_7i80.0.stepgen.02.steplen         [JOINT_2]STEPLEN
+setp hm2_7i80.0.stepgen.02.stepspace       [JOINT_2]STEPSPACE
+setp hm2_7i80.0.stepgen.02.position-scale  [JOINT_2]STEP_SCALE
+setp hm2_7i80.0.stepgen.02.maxvel          [JOINT_2]STEPGEN_MAX_VEL
+setp hm2_7i80.0.stepgen.02.maxaccel        [JOINT_2]STEPGEN_MAX_ACC
+setp hm2_7i80.0.stepgen.02.step_type       0
+
+net J3pos hm2_[HOSTMOT2](BOARD).0.stepgen.03.position-cmd <= joint.3.motor-pos-cmd
+setp hm2_7i80.0.stepgen.03.dirsetup        [JOINT_3]DIRSETUP
+setp hm2_7i80.0.stepgen.03.dirhold         [JOINT_3]DIRHOLD
+setp hm2_7i80.0.stepgen.03.steplen         [JOINT_3]STEPLEN
+setp hm2_7i80.0.stepgen.03.stepspace       [JOINT_3]STEPSPACE
+setp hm2_7i80.0.stepgen.03.position-scale  [JOINT_3]STEP_SCALE
+setp hm2_7i80.0.stepgen.03.maxvel          [JOINT_3]STEPGEN_MAX_VEL
+setp hm2_7i80.0.stepgen.03.maxaccel        [JOINT_3]STEPGEN_MAX_ACC
+setp hm2_7i80.0.stepgen.03.step_type       0
+
+
+net J4pos hm2_[HOSTMOT2](BOARD).0.stepgen.04.position-cmd <= joint.4.motor-pos-cmd
+setp hm2_7i80.0.stepgen.04.dirsetup        [JOINT_4]DIRSETUP
+setp hm2_7i80.0.stepgen.04.dirhold         [JOINT_4]DIRHOLD
+setp hm2_7i80.0.stepgen.04.steplen         [JOINT_4]STEPLEN
+setp hm2_7i80.0.stepgen.04.stepspace       [JOINT_4]STEPSPACE
+setp hm2_7i80.0.stepgen.04.position-scale  [JOINT_4]STEP_SCALE
+setp hm2_7i80.0.stepgen.04.maxvel          [JOINT_4]STEPGEN_MAX_VEL
+setp hm2_7i80.0.stepgen.04.maxaccel        [JOINT_4]STEPGEN_MAX_ACC
+setp hm2_7i80.0.stepgen.04.step_type       0
+
+
+#net J0pos => joint.0.motor-pos-fb
+#net J1pos => joint.1.motor-pos-fb
+net J3pos => joint.3.motor-pos-fb
+net J2pos => joint.2.motor-pos-fb
+net J4pos => joint.4.motor-pos-fb
+
+
+#net J0pos => ddt.0.in
+#net J0vel <= ddt.0.out
+#net J0vel => ddt.1.in
+#net J0acc <= ddt.1.out
+
+#net J1pos => ddt.2.in
+#net J1vel <= ddt.2.out
+#net J1vel => ddt.3.in
+#net J1acc <= ddt.3.out
+
+#net J2pos => ddt.4.in
+#net J2vel <= ddt.4.out
+#net J2vel => ddt.5.in
+#net J2acc <= ddt.5.out
+
+net J3pos => ddt.6.in
+net J3vel <= ddt.6.out
+net J3vel => ddt.7.in
+net J3acc <= ddt.7.out
+
+#net J4pos => ddt.8.in
+#net J4vel <= ddt.8.out
+#net J4vel => ddt.9.in
+#net J4acc <= ddt.9.out
