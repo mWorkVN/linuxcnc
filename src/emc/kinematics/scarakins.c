@@ -96,9 +96,9 @@ int scaraKinematicsForward(const double * joint,
     z = joint[2];
     c = a3;
 
-    *iflags = 0;
-    if (joint[1] < 0)
-        *iflags = 1;
+    *iflags = 1;
+    if (joint[1] > 0)
+        *iflags = 0;
     
     world->tran.x = x;
     world->tran.y = y;
