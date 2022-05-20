@@ -188,7 +188,7 @@ def g01remapskins(self, **words):
                 statusKin = 1
             else: 
                 #pos[name]  = float(hal.get_value("axis."+name+".pos-cmd")) 
-                pos[name]  = float(hal.get_value('axis.{}.pos-commanded'.format(name)))   
+                pos[name]  = float(hal.get_value('axis.{}.pos-cmd'.format(name)))   
         anglepos = scarakinematicInver(pos)
         xcmd = ""
         if (xold != anglepos[0]) or (yold != anglepos[1]):
@@ -257,18 +257,22 @@ def g02remapskins(self, **words):
         yposvalue = 0
         statusKin = 0
         cmd = {'x':"",'y':"",'z':"",'c':"",'f':""}
-        typeGcode = "g0"
+        typeGcode = "G0"
+        gcodestr=""
         for name in cmd:
             if name == "f":
                 if name in words:
-                    typeGcode = "g1"
+                    typeGcode = "G1"
+                    gcodestr="{} F{}".format(gcodestr,words[name])
                     cmd[name] = "F{} ".format(words[name])     
             elif name in words:
                 pos[name] = float(words[name])
                 cmd[name] = "{}{} ".format(name,words[name])
-        gcodecmd="%s X%f Y%f Z %f C %f %s "%(typeGcode, pos['x'] ,pos['y'] ,pos['z'] ,pos['c'], cmd["f"])
+                gcodestr="{} {}{}".format(gcodestr,name,pos[name])
+        gcodecmd="{} {}".format(typeGcode, gcodestr)
+        print(gcodecmd)
         self.execute(gcodecmd )
-        yield INTERP_EXECUTE_FINISH
+        #yield INTERP_EXECUTE_FINISH  
         if (value==0):
             convertWorldMode(self)
         self.execute("M66 E0 L0")

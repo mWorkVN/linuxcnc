@@ -639,7 +639,7 @@ class HandlerClass:
             ACTION.OPEN_PROGRAM(filename)
     # nurb 
     def btn_popup_nurb_click(self):
-	    pass
+        pass
         #NURBSEDITOR.load_dialog()
 
     def btn_open_teach_click(self):
@@ -1068,8 +1068,7 @@ class HandlerClass:
         if (joint == 2):
             rate = rate / 10
         if state:
-            if fast:
-                rate = rate * 2
+            if fast:rate = rate * 2
             ACTION.JOG(joint, direction, rate, distance)
         else:
             ACTION.JOG(joint, 0, 0, 0)
