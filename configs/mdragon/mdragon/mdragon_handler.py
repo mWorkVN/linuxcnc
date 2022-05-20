@@ -676,6 +676,7 @@ class HandlerClass:
     # DRO frame
     def btn_home_all_clicked(self, obj):
         if self.home_all is False:
+            """
             value = hal.get_value("motion.switchkins-type")
             #XJoint = hal.get_value("axis.x.pos-cmd")
             #YJoint = hal.get_value("axis.y.pos-cmd")
@@ -691,7 +692,8 @@ class HandlerClass:
                 mess = {'NAME':'MESSAGE', 'ID':'_unhome_', 'MESSAGE':'UNHOME ALL', 'MORE':info, 'TYPE':'OKCANCEL'}
                 ACTION.CALL_DIALOG(mess)
             else:   
-                ACTION.SET_MACHINE_HOMING(-1)
+             """  
+            ACTION.SET_MACHINE_HOMING(-1)
         else:
         # instantiate dialog box
             info = "Unhome All Axes?"

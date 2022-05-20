@@ -17,7 +17,7 @@ addf pid.y.do-pid-calcs       servo-thread
 addf pid.z.do-pid-calcs       servo-thread
 addf pid.a.do-pid-calcs       servo-thread
 
-# X
+# # --- X ---
 
 #net J0pos hm2_[HOSTMOT2](BOARD).0.stepgen.00.velocity-cmd <= joint.0.motor-pos-cmd
 setp   pid.x.Pgain     [JOINT_0]P
@@ -30,13 +30,14 @@ setp   pid.x.FF2       [JOINT_0]FF2
 setp   pid.x.deadband  [JOINT_0]DEADBAND
 setp   pid.x.maxoutput [JOINT_0]MAX_OUTPUT
 setp   pid.x.error-previous-target true
-#setp   pid.x.maxerror 0.000001
+
 net x-index-enable  <=> pid.x.index-enable
 net x-amp-enable    =>  pid.x.enable
 net x-pos-cmd       =>  pid.x.command
 net x-pos-cmd       =>  pid.x.feedback
-#net j0-pos-fbss       =>  pid.x.feedback
+#net j0-pos-fbss       =>  pid.x.feedback  # Need PID
 net x-output        <=  pid.x.output
+
 setp hm2_7i80.0.stepgen.00.dirsetup        [JOINT_0]DIRSETUP
 setp hm2_7i80.0.stepgen.00.dirhold         [JOINT_0]DIRHOLD
 setp hm2_7i80.0.stepgen.00.steplen         [JOINT_0]STEPLEN
@@ -47,8 +48,6 @@ setp hm2_7i80.0.stepgen.00.maxaccel        [JOINT_0]STEPGEN_MAX_ACC
 setp hm2_7i80.0.stepgen.00.step_type       0
 setp hm2_7i80.0.stepgen.00.control-type     1
 
-# ---closedloop stepper signals---
-
 net x-pos-cmd    <= joint.0.motor-pos-cmd
 net x-vel-cmd    <= joint.0.vel-cmd
 net x-output    <= hm2_[HOSTMOT2](BOARD).0.stepgen.00.velocity-cmd
@@ -58,13 +57,13 @@ setp hm2_7i80.0.ssi.00.frequency-khz 250
 setp hm2_7i80.0.ssi.00.timer-number 2
 setp hm2_7i80.0.ssi.00.zencoder-scalemax 180
 net j0-pos-fbss  hm2_7i80.0.ssi.00.zencoder
-net x-pos-cmd  => joint.0.motor-pos-fb
+net x-pos-cmd  => joint.0.motor-pos-fb  # Need PID
 
 setp joint.0.jog-vel-mode 1
 setp axis.x.jog-vel-mode 1
 
 
-# Y
+# # --- Y ---
 setp   pid.y.Pgain     [JOINT_1]P
 setp   pid.y.Igain     [JOINT_1]I
 setp   pid.y.Dgain     [JOINT_1]D
@@ -75,12 +74,14 @@ setp   pid.y.FF2       [JOINT_1]FF2
 setp   pid.y.deadband  [JOINT_1]DEADBAND
 setp   pid.y.maxoutput [JOINT_1]MAX_OUTPUT
 setp   pid.y.error-previous-target true
-#setp   pid.y.maxerror 0.0001
+
 net y-index-enable  <=> pid.y.index-enable
 net y-amp-enable    =>  pid.y.enable
 net y-pos-cmd       =>  pid.y.command
-net j1-pos-fbss       =>  pid.y.feedback
+net y-pos-cmd     =>  pid.y.feedback
+#net j1-pos-fbss     =>  pid.y.feedback  # Need PID
 net y-output        <=  pid.y.output
+
 #net J1pos hm2_[HOSTMOT2](BOARD).0.stepgen.01.position-cmd <= joint.1.motor-pos-cmd
 setp hm2_7i80.0.stepgen.01.dirsetup        [JOINT_1]DIRSETUP
 setp hm2_7i80.0.stepgen.01.dirhold         [JOINT_1]DIRHOLD
@@ -101,12 +102,13 @@ setp hm2_7i80.0.ssi.01.frequency-khz 250
 setp hm2_7i80.0.ssi.01.timer-number 2
 setp hm2_7i80.0.ssi.01.yencoder-scalemax 180
 net j1-pos-fbss  hm2_7i80.0.ssi.01.yencoder
-net j1-pos-fbss => joint.1.motor-pos-fb
-net y-pos-fb     <=  hm2_[HOSTMOT2](BOARD).0.stepgen.01.position-fb
+net y-pos-cmd => joint.1.motor-pos-fb
+#net j1-pos-fbss => joint.1.motor-pos-fb  # Need PID
+
 setp joint.1.jog-vel-mode 1
 setp axis.y.jog-vel-mode 1
 
-
+# # --- Z ---
 net J2pos hm2_[HOSTMOT2](BOARD).0.stepgen.02.position-cmd <= joint.2.motor-pos-cmd
 setp hm2_7i80.0.stepgen.02.dirsetup        [JOINT_2]DIRSETUP
 setp hm2_7i80.0.stepgen.02.dirhold         [JOINT_2]DIRHOLD
@@ -116,7 +118,8 @@ setp hm2_7i80.0.stepgen.02.position-scale  [JOINT_2]STEP_SCALE
 setp hm2_7i80.0.stepgen.02.maxvel          [JOINT_2]STEPGEN_MAX_VEL
 setp hm2_7i80.0.stepgen.02.maxaccel        [JOINT_2]STEPGEN_MAX_ACC
 setp hm2_7i80.0.stepgen.02.step_type       0
-
+net J2pos => joint.2.motor-pos-fb
+# # --- C ---
 net J3pos hm2_[HOSTMOT2](BOARD).0.stepgen.03.position-cmd <= joint.3.motor-pos-cmd
 setp hm2_7i80.0.stepgen.03.dirsetup        [JOINT_3]DIRSETUP
 setp hm2_7i80.0.stepgen.03.dirhold         [JOINT_3]DIRHOLD
@@ -126,8 +129,8 @@ setp hm2_7i80.0.stepgen.03.position-scale  [JOINT_3]STEP_SCALE
 setp hm2_7i80.0.stepgen.03.maxvel          [JOINT_3]STEPGEN_MAX_VEL
 setp hm2_7i80.0.stepgen.03.maxaccel        [JOINT_3]STEPGEN_MAX_ACC
 setp hm2_7i80.0.stepgen.03.step_type       0
-
-
+net J3pos => joint.3.motor-pos-fb
+# # --- A ---
 net J4pos hm2_[HOSTMOT2](BOARD).0.stepgen.04.position-cmd <= joint.4.motor-pos-cmd
 setp hm2_7i80.0.stepgen.04.dirsetup        [JOINT_4]DIRSETUP
 setp hm2_7i80.0.stepgen.04.dirhold         [JOINT_4]DIRHOLD
@@ -137,14 +140,7 @@ setp hm2_7i80.0.stepgen.04.position-scale  [JOINT_4]STEP_SCALE
 setp hm2_7i80.0.stepgen.04.maxvel          [JOINT_4]STEPGEN_MAX_VEL
 setp hm2_7i80.0.stepgen.04.maxaccel        [JOINT_4]STEPGEN_MAX_ACC
 setp hm2_7i80.0.stepgen.04.step_type       0
-
-
-#net J0pos => joint.0.motor-pos-fb
-#net J1pos => joint.1.motor-pos-fb
-net J3pos => joint.3.motor-pos-fb
-net J2pos => joint.2.motor-pos-fb
 net J4pos => joint.4.motor-pos-fb
-
 
 #net J0pos => ddt.0.in
 #net J0vel <= ddt.0.out

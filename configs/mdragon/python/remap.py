@@ -99,15 +99,12 @@ def convertWorldMode(self):
 
         if (value == 0):
             self.execute("M66 E0 L0")
-        elif (float(angleY)>= 0):
-            info= "Error SwitchKins M439 3001 - YJoint >= 0 degree {}".format(str(angleY))
-            self.set_errormsg(info)
         else:
-            numberCoor = int(CoordinateNumber-1)
-            if (numberCoor > 8):
-                pass
-            else:
-                self.execute(CoordinateGcode[numberCoor]) # return CoordinateGcode
+            #numberCoor = int(CoordinateNumber-1)
+            #if (numberCoor > 8):
+            #    pass
+            #else:
+            #    self.execute(CoordinateGcode[numberCoor]) # return CoordinateGcode
             SWITCHKINS_PIN = 3
             kinstype = 0
             self.execute("M128")
@@ -269,10 +266,7 @@ def g02remapskins(self, **words):
             elif name in words:
                 pos[name] = float(words[name])
                 cmd[name] = "{}{} ".format(name,words[name])
-                statusKin = 1
-            else: 
-                pos[name]  = float(hal.get_value('axis.{}.pos-commanded'.format(name)))   
-        gcodecmd="G53 %s X%f Y%f Z %f C %f %s "%(typeGcode, pos['x'] ,pos['y'] ,pos['z'] ,pos['c'], cmd["f"])
+        gcodecmd="%s X%f Y%f Z %f C %f %s "%(typeGcode, pos['x'] ,pos['y'] ,pos['z'] ,pos['c'], cmd["f"])
         self.execute(gcodecmd )
         yield INTERP_EXECUTE_FINISH
         if (value==0):
