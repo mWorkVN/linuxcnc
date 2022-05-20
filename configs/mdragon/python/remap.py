@@ -158,8 +158,13 @@ def check_coords(self, axis, wanted):
     else:
         self.execute("(%s: %0.1f = %0.1f)" % (axis, actual, wanted))
         #print("(%s: %0.1f = %0.1f)" % (axis, actual, wanted))
-
-def g01remapskins(self, **words):
+#
+# Move Joint in world mode
+# ex: Move to X50 Y50 in world mode
+# my code will caculater invert kinematic to get joint pos
+# After conver mode to joint mode, move and return world mode
+#
+def g01_move_joint_by_world(self, **words):
     global lenghtArm
     global xold
     global yold
@@ -239,8 +244,12 @@ def g11remapskins(self, **words):
     except Exception as e:
         return INTERP_ERROR
     return INTERP_OK
-    
-def g02remapskins(self, **words):
+#
+# Move Joint. If world mode, my code will convert to joint mode to move and back to world mode
+# Ex: G0.2 X20 Y30 
+# Or with F: G0.2 X20 Y30 F1000
+#
+def g02_move_joint(self, **words):
     global lenghtArm
     global xold
     global yold
