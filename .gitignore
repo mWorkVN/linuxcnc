@@ -42,11 +42,7 @@ position.txt
 *.glade.h
 # Ignore test results
 *.result
-
-*.pyc
-*.pyc
-*.files
-*.dat
-configs/mdragon/pythonextern/noupdate
-configs/mdragon/pythonextern/calibcamera/noupdate
-configs/mdragon/pythonextern/CoffeMachine/MVC/~$data.xlsx
+# Temporary
+!docs/LinuxCNC_Getting_Started_cn.pdf
+!docs/LinuxCNC_Documentation_ja.pdf
+!docs/LinuxCNC_Manual_Pages_ja.pdf
