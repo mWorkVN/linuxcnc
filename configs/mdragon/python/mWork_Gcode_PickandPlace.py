@@ -45,6 +45,8 @@ def scarakinematicInver(pos):
             cc = 1
         q1 = math.acos(cc)
         iflags = 1
+        joint1= float(hal.get_value("joint.1.motor-pos-cmd"))
+        if (joint1 > 0):iflags = 0
         if (iflags==1):
             q1 = -q1
         q0 = math.atan2(yt, xt)
@@ -57,10 +59,12 @@ def scarakinematicInver(pos):
         anglepos[1] = q1
         anglepos[2] = z
         anglepos[3] = c - ( q0 + q1)
+        """
         if (anglepos[3] > 180):
             anglepos[3] =  anglepos[3] - 360
         elif (anglepos[3] < -180):
             anglepos[3] =   360 - anglepos[3]
+        """
     except Exception as e:
         print(" - %s" % ( e.error_message))
     return anglepos
