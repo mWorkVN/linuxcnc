@@ -318,9 +318,10 @@ class mwork_pickandplace(QtWidgets.QWidget,_HalWidgetBase): #
             self.HAL_GCOMP_.setp ('mdragon.pap.Pnp_' +name + axis,position)
         if status:
             self.mdi_callloadJoinMode()    
-        self.mbox("Ssss")
+  
+
     def finishThread(self):
-        self.mbox("Ssss")
+        pass
         #self.mdi_callloadJoinMode()
     def updateUiToHal(self, name): #motion.switchkins-type = changescara
         statusScara = False

@@ -1,6 +1,7 @@
---- Qtvcp Screen Started on: Mon, May 23 2022 08:33:06 AM ---
-Mon23 08:33 Machine OFF
-Mon23 08:33 Override limits set
-Mon23 08:33 Hard Limits Are Reset To Active!
-Mon23 08:33 Hard limits tripped
-Mon23 08:33 
+--- Qtvcp Screen Started on: Mon, May 23 2022 04:06:51 PM ---
+Mon23 16:06 Machine OFF
+Mon23 16:06 Hard limits tripped
+Mon23 16:06 Tool 0: No Tool
+Mon23 16:07 Machine ON
+Mon23 17:31 hm2/hm2_7i80.0: error finishing read! iter=3391038
+
