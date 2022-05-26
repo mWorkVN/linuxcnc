@@ -13,15 +13,17 @@ loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=2 num_pwmgens=0 num_
 setp   hm2_7i80.0.watchdog.timeout_ns 60000000
 loadrt stepgen step_type=0,0,0,0,0 ctrl_type=v,v,p,p,p
 setp hm2_7i80.0.stepgen.timer-number 1
+loadrt pid names=pid.x,pid.y,pid.z,pid.a
 
 
-
-
-
+addf hm2_7i80.0.read          servo-thread  # read first
+addf pid.x.do-pid-calcs       servo-thread  # PID
+addf pid.y.do-pid-calcs       servo-thread
+addf pid.z.do-pid-calcs       servo-thread
+addf pid.a.do-pid-calcs       servo-thread
 addf motion-command-handler   servo-thread
 addf motion-controller        servo-thread
-addf hm2_7i80.0.read          servo-thread
-addf hm2_7i80.0.write         servo-thread
+addf hm2_7i80.0.write         servo-thread  # Last write
 
 setp hm2_7i80.0.dpll.01.timer-us -50
 setp hm2_7i80.0.dpll.02.timer-us -100
