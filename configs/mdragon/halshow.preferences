@@ -1,8 +1,8 @@
 # Halshow settings
 # This file is generated automatically.
-wm geometry . 1368x707+266+221
-placeFrames 0.49127906976744184
-set ::ratio 0.49127906976744184
+wm geometry . 1920x1019+-65+900
+placeFrames 0.2883480825958702
+set ::ratio 0.2883480825958702
 set ::old_w_leftf 160
 set ::watchlist {
     pin+hm2_7i80.0.ssi.00.zencoder
@@ -22,8 +22,26 @@ set ::watchlist {
     pin+pid.x.output
     pin+pid.x.error
     pin+hm2_7i80.0.stepgen.02.control-type
+    pin+hm2_7i80.0.stepgen.03.control-type
+    pin+hm2_7i80.0.stepgen.03.position-cmd
+    pin+hm2_7i80.0.stepgen.03.position-reset
+    pin+hm2_7i80.0.stepgen.03.position-fb
+    pin+hm2_7i80.0.stepgen.03.counts
+    pin+hm2_7i80.0.stepgen.03.dbg_err_at_match
+    pin+hm2_7i80.0.stepgen.03.dbg_ff_vel
+    pin+hm2_7i80.0.stepgen.03.dbg_pos_minus_prev_cmd
+    pin+hm2_7i80.0.stepgen.03.dbg_s_to_match
+    pin+hm2_7i80.0.stepgen.03.dbg_step_rate
+    pin+hm2_7i80.0.stepgen.03.dbg_vel_error
+    pin+hm2_7i80.0.stepgen.03.enable
+    pin+hm2_7i80.0.stepgen.03.velocity-cmd
+    pin+hm2_7i80.0.stepgen.03.velocity-fb
+    param+hm2_7i80.0.stepgen.03.position-scale
+    pin+hm2_7i80.0.stepgen.03.position-update
+    pin+joint.3.pos-cmd
+    pin+joint.3.pos-fb
 }
-set ::workmode showhal
+set ::workmode watchhal
 set ::watchInterval 100
 set ::col1_width 100
 set ::ffmts 

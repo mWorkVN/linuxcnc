@@ -1048,6 +1048,7 @@ typedef struct {
             hal_bit_t *enable;
             hal_bit_t *control_type;   // 0="position control", 1="velocity control"
             hal_bit_t *position_reset; // reset position when true
+            hal_bit_t *position_update; // reset position when true
             hal_bit_t *index_enable;	
             hal_bit_t *index_polarity;
             hal_bit_t *latch_enable;

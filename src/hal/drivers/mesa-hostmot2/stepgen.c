@@ -332,6 +332,9 @@ void hm2_stepgen_prepare_tram_write(hostmot2_t *hm2, long l_period_ns) {
     int i;
     for (i = 0; i < hm2->stepgen.num_instances; i ++) {
         if (*(hm2->stepgen.instance[i].hal.pin.enable) == 0) {
+            if ((*hm2->stepgen.instance[i].hal.pin.position_update) != 0) {
+                hm2->stepgen.instance[i].subcounts = (*(hm2->stepgen.instance[i].hal.pin.position_cmd) * hm2->stepgen.instance[i].hal.param.position_scale * 65536.0);
+            }
             hm2->stepgen.step_rate_reg[i] = 0;
             hm2->stepgen.instance[i].old_position_cmd = *(hm2->stepgen.instance[i].hal.pin.position_cmd);
             *(hm2->stepgen.instance[i].hal.pin.velocity_fb) = 0;
@@ -944,6 +947,14 @@ int hm2_stepgen_parse_md(hostmot2_t *hm2, int md_index) {
                 goto fail5;
             }
 
+            rtapi_snprintf(name, sizeof(name), "%s.stepgen.%02d.position-update", hm2->llio->name, i);
+            r = hal_pin_bit_new(name, HAL_IN, &(hm2->stepgen.instance[i].hal.pin.position_update), hm2->llio->comp_id);
+            if (r < 0) {
+                HM2_ERR("error adding pin '%s', aborting\n", name);
+                r = -ENOMEM;
+                goto fail5;
+            }
+
             if (hm2->stepgen.firmware_supports_index) {
 
                 rtapi_snprintf(name, sizeof(name), "%s.stepgen.%02d.position-latch", hm2->llio->name, i);
@@ -1153,6 +1164,7 @@ int hm2_stepgen_parse_md(hostmot2_t *hm2, int md_index) {
             *(hm2->stepgen.instance[i].hal.pin.enable) = 0;
             *(hm2->stepgen.instance[i].hal.pin.control_type) = 0;
             *(hm2->stepgen.instance[i].hal.pin.position_reset) = 0;
+            *(hm2->stepgen.instance[i].hal.pin.position_update) = 0;
             if (hm2->stepgen.firmware_supports_index) {
                 *(hm2->stepgen.instance[i].hal.pin.index_enable) = 0;
                 *(hm2->stepgen.instance[i].hal.pin.latch_enable) = 0;

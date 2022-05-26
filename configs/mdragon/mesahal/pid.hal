@@ -129,7 +129,8 @@ setp hm2_7i80.0.stepgen.03.position-scale  [JOINT_3]STEP_SCALE
 setp hm2_7i80.0.stepgen.03.maxvel          [JOINT_3]STEPGEN_MAX_VEL
 setp hm2_7i80.0.stepgen.03.maxaccel        [JOINT_3]STEPGEN_MAX_ACC
 setp hm2_7i80.0.stepgen.03.step_type       0
-net J3pos => joint.3.motor-pos-fb
+#net J3pos => joint.3.motor-pos-fb
+setp  joint.3.motor-pos-fb 50
 # # --- A ---
 net J4pos hm2_[HOSTMOT2](BOARD).0.stepgen.04.position-cmd <= joint.4.motor-pos-cmd
 setp hm2_7i80.0.stepgen.04.dirsetup        [JOINT_4]DIRSETUP

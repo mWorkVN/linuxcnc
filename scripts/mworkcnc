@@ -16,16 +16,16 @@
 ################################################################################
 
 # -1. Get all rip-environment items if we are RIP
-if test "xyes" = "xno"; then
-    if test "${EMC2_HOME:-}" != "/usr"; then
-        exec /usr/scripts/rip-environment linuxcnc "$@"
+if test "xyes" = "xyes"; then
+    if test "${EMC2_HOME:-}" != "/home/mwork/linuxcnc"; then
+        exec /home/mwork/linuxcnc/scripts/rip-environment linuxcnc "$@"
     fi
 fi
 
 ################################################################################
 # 0. Values that come from configure
 ################################################################################
-prefix=/usr
+prefix=/home/mwork/linuxcnc
 exec_prefix=${prefix}
 
 PIDOF="/usr/bin/pidof -x"
@@ -35,19 +35,19 @@ GREP=/usr/bin/grep
 IPCS=/usr/bin/ipcs
 KILL=/usr/bin/kill
 
-LINUXCNC_HOME=/usr; export LINUXCNC_HOME
+LINUXCNC_HOME=/home/mwork/linuxcnc; export LINUXCNC_HOME
 
-LINUXCNC_BIN_DIR=/usr/bin
-LINUXCNC_TCL_DIR=/usr/lib/tcltk/linuxcnc
-LINUXCNC_HELP_DIR=/usr/share/doc/linuxcnc
-LINUXCNC_RTLIB_DIR=/usr/lib/linuxcnc/modules
-LINUXCNC_CONFIG_PATH="~/linuxcnc/configs:/usr/local/etc/linuxcnc/configs:/usr/share/doc/linuxcnc/examples/sample-configs"
-LINUXCNC_NCFILES_DIR=/usr/share/linuxcnc/ncfiles
-LINUXCNC_LANG_DIR=/usr/lib/tcltk/linuxcnc/msgs
-REALTIME=/usr/lib/linuxcnc/realtime
-LINUXCNC_IMAGEDIR=/usr/share/linuxcnc
-LINUXCNC_TCL_LIB_DIR=/usr/lib/tcltk/linuxcnc
-HALLIB_DIR=/usr/share/linuxcnc/hallib; export HALLIB_DIR
+LINUXCNC_BIN_DIR=/home/mwork/linuxcnc/bin
+LINUXCNC_TCL_DIR=/home/mwork/linuxcnc/tcl
+LINUXCNC_HELP_DIR=/home/mwork/linuxcnc/docs/help
+LINUXCNC_RTLIB_DIR=/home/mwork/linuxcnc/rtlib
+LINUXCNC_CONFIG_PATH="~/linuxcnc/configs:/home/mwork/linuxcnc/configs"
+LINUXCNC_NCFILES_DIR=/home/mwork/linuxcnc/nc_files
+LINUXCNC_LANG_DIR=/home/mwork/linuxcnc/src/objects
+REALTIME=/home/mwork/linuxcnc/scripts/realtime
+LINUXCNC_IMAGEDIR=/home/mwork/linuxcnc
+LINUXCNC_TCL_LIB_DIR=/home/mwork/linuxcnc/tcl
+HALLIB_DIR=/home/mwork/linuxcnc/lib/hallib; export HALLIB_DIR
 
 #HALLIB_PATH: see also -H option
 HALLIB_PATH=.:$HALLIB_DIR; export HALLIB_PATH
@@ -65,7 +65,7 @@ PATH=$LINUXCNC_BIN_DIR:$PATH
 #ditto scripts if not RIP
 [ -d $LINUXCNC_HOME/scripts ] && PATH=$LINUXCNC_HOME/scripts:$PATH
 
-if test "xyes" = "xno"; then
+if test "xyes" = "xyes"; then
 	if [ -z "$LD_LIBRARY_PATH" ]; then
 	    LD_LIBRARY_PATH=$LINUXCNC_HOME/lib
 	else
@@ -262,7 +262,7 @@ fi
 EXTRA_ARGS="$@"
 
 # 1.3.1. Determine if we have run-in place or installed system
-RUN_IN_PLACE=no
+RUN_IN_PLACE=yes
 echo RUN_IN_PLACE=$RUN_IN_PLACE >>$PRINT_FILE
 
 LINUXCNCVERSION="m
@@ -558,7 +558,7 @@ case $EMCDISPLAY in
 esac
 
 # 2.9. get NML config information
-GetFromIniEx NML_FILE LINUXCNC NML_FILE EMC /usr/share/linuxcnc/linuxcnc.nml
+GetFromIniEx NML_FILE LINUXCNC NML_FILE EMC /home/mwork/linuxcnc/configs/common/linuxcnc.nml
 NMLFILE=$retval
 export NMLFILE
 
@@ -853,7 +853,7 @@ eval $HALCMD loadrt "$HOMEMOD"
 TWOPASS=`$INIVAR -ini "$INIFILE" -var TWOPASS -sec HAL -num 1 2> /dev/null`
 if [ -n "$TWOPASS" ] ; then
   # 4.3.6.1. if [HAL]TWOPASS is defined, handle all [HAL]HALFILE entries here:
-  CFGFILE=/usr/lib/tcltk/linuxcnc/twopass.tcl
+  CFGFILE=/home/mwork/linuxcnc/tcl/twopass.tcl
   export PRINT_FILE # twopass can append to PRINT_FILE
   if ! haltcl -i "$INIFILE" $CFGFILE && [ "$DASHK" = "" ]; then
       Cleanup
