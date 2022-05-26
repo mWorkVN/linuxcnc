@@ -334,6 +334,7 @@ void hm2_stepgen_prepare_tram_write(hostmot2_t *hm2, long l_period_ns) {
         if (*(hm2->stepgen.instance[i].hal.pin.enable) == 0) {
             if ((*hm2->stepgen.instance[i].hal.pin.position_update) != 0) {
                 hm2->stepgen.instance[i].subcounts = (*(hm2->stepgen.instance[i].hal.pin.position_cmd) * hm2->stepgen.instance[i].hal.param.position_scale * 65536.0);
+                *hm2->stepgen.instance[i].hal.pin.position_update  = 0;
             }
             hm2->stepgen.step_rate_reg[i] = 0;
             hm2->stepgen.instance[i].old_position_cmd = *(hm2->stepgen.instance[i].hal.pin.position_cmd);
