@@ -1,10 +1,5 @@
---- Qtvcp Screen Started on: Thu, May 26 2022 01:45:57 PM ---
-Thu26 13:45 Machine OFF
-Thu26 13:45 Hard limits tripped
-Thu26 13:45 Tool 0: No Tool
-Thu26 13:46 Machine ON
-Thu26 13:46 Machine OFF
-Thu26 13:58 hm2/hm2_7i80.0: Data transmission not complete on channel hm2_7i80.0.ssi.00 read. You  may need to change the timing of the hm2dpll timer. This warning  will not repeat
-
-Thu26 13:58 hm2/hm2_7i80.0: Data transmission not complete on channel hm2_7i80.0.ssi.01 read. You  may need to change the timing of the hm2dpll timer. This warning  will not repeat
-
+--- Qtvcp Screen Started on: Sat, May 28 2022 09:39:58 AM ---
+Sat28 09:40 Machine OFF
+Sat28 09:40 Hard limits tripped
+Sat28 09:40 Tool 0: No Tool
+Sat28 09:40 Machine ON

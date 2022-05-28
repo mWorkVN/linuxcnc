@@ -1,20 +1,13 @@
-# core HAL config file for simulation - 4 axis
-
-# load RT modules
 loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT   servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS  num_dio=20
-
-#base_period_nsec=[EMCMOT]BASE_PERIOD
-# load parameters save
-
-# hostmot2 driver
 loadrt hostmot2
 loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=2 num_pwmgens=0 num_rcpwmgens=1 num_stepgens=5 sserial_port_0=20000000 ssi_chan_0=steps%2bzencoder%12s ssi_chan_1=steps%2byencoder%12s enable_raw"
-setp   hm2_7i80.0.watchdog.timeout_ns 60000000
 loadrt stepgen step_type=0,0,0,0,0 ctrl_type=v,v,p,p,p
-setp hm2_7i80.0.stepgen.timer-number 1
 loadrt pid names=pid.x,pid.y,pid.z,pid.a
 
+setp   hm2_7i80.0.watchdog.timeout_ns 60000000
+setp hm2_7i80.0.stepgen.timer-number 1
+setp hm2_7i80.0.packet-error-limit  500
 
 addf hm2_7i80.0.read          servo-thread  # read first
 addf pid.x.do-pid-calcs       servo-thread  # PID
@@ -31,8 +24,6 @@ setp hm2_7i80.0.dpll.03.timer-us -150
 setp hm2_7i80.0.dpll.04.timer-us -200
 
 
-setp hm2_7i80.0.packet-error-limit  500
-
 setp scarakins.D1 300.0
 setp scarakins.D2 330.0  #join0
 setp scarakins.D3 118.0
@@ -43,7 +34,7 @@ setp scarakins.D6 0.0
 
 
 
-setp hm2_7i80.0.rcpwmgen.rate 50 # hm2_7i80.0.rcpwmgen.ratehz
+setp hm2_7i80.0.rcpwmgen.rate 50 
 setp hm2_7i80.0.rcpwmgen.00.width 0
 setp hm2_7i80.0.rcpwmgen.00.offset 0.1
 
@@ -123,40 +114,24 @@ net zena joint.2.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.055.out
 net aena joint.3.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.03.enable
 net aena joint.3.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.057.out
 net cena joint.4.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.04.enable
+
 # Cai home pin 
 net homeswitchesX <= hm2_[HOSTMOT2](BOARD).0.gpio.047.in
 net homeswitchesX => joint.0.home-sw-in
-#net homeswitchesX => joint.0.neg-lim-sw-in
-#net homeswitchesX => joint.0.pos-lim-sw-in
-
 net homeswitchesY <= hm2_[HOSTMOT2](BOARD).0.gpio.046.in
 net homeswitchesY => joint.1.home-sw-in
-#net homeswitchesX => joint.0.neg-lim-sw-in
-#net homeswitchesX => joint.0.pos-lim-sw-in
 net homeswitchesZ <= hm2_[HOSTMOT2](BOARD).0.gpio.048.in
 net homeswitchesZ => joint.2.home-sw-in
 net homeswitchesC <= hm2_[HOSTMOT2](BOARD).0.gpio.049.in
 net homeswitchesC => joint.3.home-sw-in
-# amp control
 
+# amp control
 net xflt joint.0.amp-fault-in
 net yflt joint.1.amp-fault-in
 net zflt joint.2.amp-fault-in
 net aflt joint.3.amp-fault-in
 
 
-
-#loadusr -W mworkscaragui
-#loadusr -W scaragui
-
-#net j0 joint.0.pos-fb mworkscaragui.joint0
-#net j1 joint.1.pos-fb mworkscaragui.joint1
-#net z-pos-fb mworkscaragui.joint2
-#net j3 joint.3.pos-fb mworkscaragui.joint3
-#net j0 joint.0.pos-fb scaragui.joint0
-#net j1 joint.1.pos-fb scaragui.joint1
-#net j2 joint.2.pos-fb scaragui.joint2
-#net j3 joint.3.pos-fb scaragui.joint3
 
 net :kinstype-select <= motion.analog-out-03 => motion.switchkins-type
 

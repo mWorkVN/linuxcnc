@@ -61,6 +61,9 @@ def m463OutRCAnDelay(self, **words):
     yield INTERP_EXECUTE_FINISH
     return INTERP_OK
 
+
+
+
 def convertJoinMode(self):
     global offsetPosi
     global AxisJoint
@@ -68,8 +71,6 @@ def convertJoinMode(self):
     global CoordinateGcode
     try:
         value = hal.get_value("motion.switchkins-type")
-        XJoint = hal.get_value("joint.0.pos-cmd")
-        YJoint = hal.get_value("joint.1.pos-cmd")
         if (value == 1):
             self.execute("M66 E0 L0")
         else:
@@ -94,8 +95,6 @@ def convertWorldMode(self):
     global CoordinateGcode
     try:
         value = hal.get_value("motion.switchkins-type")
-        angleX = hal.get_value("axis.x.pos-cmd") 
-        angleY = hal.get_value("axis.y.pos-cmd")
 
         if (value == 0):
             self.execute("M66 E0 L0")
@@ -177,9 +176,6 @@ def g01_move_joint_by_world(self, **words):
             convertJoinMode(self)
         self.execute("M66 E0 L0")
         yield INTERP_EXECUTE_FINISH
-        xposvalue = 0
-        yposvalue = 0
-        statusKin = 0
         cmd = {'x':"",'y':"",'z':"",'c':"",'f':""}
         typeGcode = "g0"
         for name in cmd:
@@ -190,9 +186,7 @@ def g01_move_joint_by_world(self, **words):
             elif name in words:
                 pos[name] = float(words[name])
                 cmd[name] = "{}{} ".format(name,words[name])
-                statusKin = 1
             else: 
-                #pos[name]  = float(hal.get_value("axis."+name+".pos-cmd")) 
                 pos[name]  = float(hal.get_value('axis.{}.pos-cmd'.format(name)))   
         anglepos = scarakinematicInver(pos)
         xcmd = ""
@@ -201,10 +195,7 @@ def g01_move_joint_by_world(self, **words):
             xold= anglepos[0]
             yold= anglepos[1]
         gcodecmd="G53 %s X%f Y%f Z %f C %f %s "%(typeGcode, anglepos[0] ,anglepos[1] ,anglepos[2] ,anglepos[3], cmd["f"])
-        #gcodecmd="G53 %s %s z%.2f C%.4f %s "%(typeGcode, xcmd ,anglepos[2] ,anglepos[3], cmd["f"])
-        #print("G01 ", gcodecmd , "in ",time.time())
         self.execute(gcodecmd )
-        #yield INTERP_EXECUTE_FINISH
         check_coords(self, 'z', anglepos[2])
         if (value==0):
             convertWorldMode(self)
@@ -254,17 +245,12 @@ def g02_move_joint(self, **words):
     global xold
     global yold
     pos={'x':0,'y':0,'z':0,'c':0}
-    fcmd =""
-    hasF = False
     try:
         value = hal.get_value("motion.switchkins-type")
         if (value == 0):
             convertJoinMode(self)
         self.execute("M66 E0 L0")
         yield INTERP_EXECUTE_FINISH
-        xposvalue = 0
-        yposvalue = 0
-        statusKin = 0
         cmd = {'x':"",'y':"",'z':"",'c':"",'f':""}
         typeGcode = "G0"
         gcodestr=""
@@ -279,9 +265,7 @@ def g02_move_joint(self, **words):
                 cmd[name] = "{}{} ".format(name,words[name])
                 gcodestr="{} {}{}".format(gcodestr,name,pos[name])
         gcodecmd="{} {}".format(typeGcode, gcodestr)
-        print(gcodecmd)
-        self.execute(gcodecmd )
-        #yield INTERP_EXECUTE_FINISH  
+        self.execute(gcodecmd ) 
         if (value==0):
             convertWorldMode(self)
         self.execute("M66 E0 L0")

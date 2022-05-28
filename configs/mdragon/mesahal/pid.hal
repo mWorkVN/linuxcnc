@@ -1,5 +1,5 @@
 loadrt ddt count=10
-loadrt pid names=pid.x,pid.y,pid.z,pid.a
+
 
 #addf ddt.0 servo-thread
 #addf ddt.1 servo-thread
@@ -12,10 +12,7 @@ addf ddt.7 servo-thread
 #addf ddt.8 servo-thread
 #addf ddt.9 servo-thread
 
-addf pid.x.do-pid-calcs       servo-thread
-addf pid.y.do-pid-calcs       servo-thread
-addf pid.z.do-pid-calcs       servo-thread
-addf pid.a.do-pid-calcs       servo-thread
+
 
 # # --- X ---
 
@@ -57,7 +54,8 @@ setp hm2_7i80.0.ssi.00.frequency-khz 250
 setp hm2_7i80.0.ssi.00.timer-number 2
 setp hm2_7i80.0.ssi.00.zencoder-scalemax 180
 net j0-pos-fbss  hm2_7i80.0.ssi.00.zencoder
-net x-pos-cmd  => joint.0.motor-pos-fb  # Need PID
+net x-pos-cmd   => joint.0.motor-pos-fb 
+#net j0-pos-fbss  => joint.0.motor-pos-fb  # Need PID
 
 setp joint.0.jog-vel-mode 1
 setp axis.x.jog-vel-mode 1
@@ -129,8 +127,8 @@ setp hm2_7i80.0.stepgen.03.position-scale  [JOINT_3]STEP_SCALE
 setp hm2_7i80.0.stepgen.03.maxvel          [JOINT_3]STEPGEN_MAX_VEL
 setp hm2_7i80.0.stepgen.03.maxaccel        [JOINT_3]STEPGEN_MAX_ACC
 setp hm2_7i80.0.stepgen.03.step_type       0
-#net J3pos => joint.3.motor-pos-fb
-setp  joint.3.motor-pos-fb 50
+net J3pos => joint.3.motor-pos-fb
+#setp  joint.3.motor-pos-fb 50
 # # --- A ---
 net J4pos hm2_[HOSTMOT2](BOARD).0.stepgen.04.position-cmd <= joint.4.motor-pos-cmd
 setp hm2_7i80.0.stepgen.04.dirsetup        [JOINT_4]DIRSETUP
