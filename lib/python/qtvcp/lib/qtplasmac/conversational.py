@@ -147,7 +147,7 @@ def conv_save_pressed(P, W):
     P.vkb_show(True)
 
 def conv_settings_pressed(P, W):
-    P.color_button_image(P.oldConvButton, P.foreColor)
+    P.color_item(P.oldConvButton, P.foreColor, 'button')
     W[P.oldConvButton].setStyleSheet(\
             'QPushButton {{ background: {0} }} \
              QPushButton:pressed {{ background: {0} }}'.format(P.backColor))
@@ -283,12 +283,12 @@ def conv_active_shape(P, W):
 
 def conv_button_color(P, W, button):
     if P.oldConvButton:
-        P.color_button_image(P.oldConvButton, P.foreColor)
+        P.color_item(P.oldConvButton, P.foreColor, 'button')
         W[P.oldConvButton].setStyleSheet(\
                 'QPushButton {{ background: {0} }} \
                  QPushButton:pressed {{ background: {0} }}'.format(P.backColor))
     P.oldConvButton = button
-    P.color_button_image(button, P.backColor)
+    P.color_item(button, P.backColor, 'button')
     W[button].setStyleSheet(\
             'QPushButton {{ background: {0} }} \
              QPushButton:pressed {{ background: {0} }}'.format(P.foreColor))
@@ -475,7 +475,7 @@ def conv_clear_widgets(P, W, settings=False):
             elif name in ['cnEntry', 'rnEntry']:
                 widget.setText('1')
             elif name in ['scEntry']:
-                name.setText('1.0')
+                widget.setText('1.0')
             elif name in ['ocEntry']:
                 widget.setText('{}'.format(4 * P.unitsPerMm))
         W.entries.removeWidget(widget)
