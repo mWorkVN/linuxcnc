@@ -19,7 +19,7 @@ addf motion-controller        servo-thread
 addf hm2_7i80.0.write         servo-thread  # Last write
 
 setp hm2_7i80.0.dpll.01.timer-us -50
-setp hm2_7i80.0.dpll.02.timer-us -100
+setp hm2_7i80.0.dpll.02.timer-us -150
 setp hm2_7i80.0.dpll.03.timer-us -150
 setp hm2_7i80.0.dpll.04.timer-us -200
 

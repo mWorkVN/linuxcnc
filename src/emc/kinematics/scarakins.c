@@ -167,7 +167,12 @@ static int scaraKinematicsInverse(const EmcPose * world,
     /* q0 and q1 are still in radians. convert them to degrees */
     q0 = q0 * (180 / PM_PI);
     q1 = q1 * (180 / PM_PI);
-
+    if (q0 > 180){
+        q0 = q0-360;
+    }
+    else if (q0 < -180){
+        q0 = 360 + q0;
+    }
     joint[0] = q0;
     joint[1] = q1;
     //joint[2] = D1 + D3 - D5 - z;

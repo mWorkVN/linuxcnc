@@ -1066,7 +1066,7 @@ class HandlerClass:
             distance = STATUS.get_jog_increment_angular()
             rate = STATUS.get_jograte_angular()/60
         if (joint == 2):
-            rate = rate / 10
+            rate = rate 
         if state:
             if fast:rate = rate * 2
             ACTION.JOG(joint, direction, rate, distance)
