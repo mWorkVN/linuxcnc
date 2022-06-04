@@ -55,6 +55,10 @@ def scarakinematicInver(pos):
         q0 = q0 - math.atan2(yt, xt)
         q0 = q0 * (180 / math.pi)
         q1 = q1 * (180 / math.pi)
+        if (q0 > 180):
+            q0 = q0-360
+        elif q0 < -180:
+            q0 = 360 + q0
         anglepos[0] = q0
         anglepos[1] = q1
         anglepos[2] = z
