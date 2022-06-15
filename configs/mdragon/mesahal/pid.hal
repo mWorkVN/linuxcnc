@@ -140,7 +140,7 @@ setp hm2_7i80.0.stepgen.04.position-scale  [JOINT_4]STEP_SCALE
 setp hm2_7i80.0.stepgen.04.maxvel          [JOINT_4]STEPGEN_MAX_VEL
 setp hm2_7i80.0.stepgen.04.maxaccel        [JOINT_4]STEPGEN_MAX_ACC
 setp hm2_7i80.0.stepgen.04.step_type       0
-setp hm2_7i80.0.stepgen.01.control-type     0
+setp hm2_7i80.0.stepgen.04.control-type     0
 net J4pos => joint.4.motor-pos-fb
 
 
