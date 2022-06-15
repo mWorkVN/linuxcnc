@@ -252,12 +252,12 @@ def g02_move_joint(self, **words):
         self.execute("M66 E0 L0")
         yield INTERP_EXECUTE_FINISH
         cmd = {'x':"",'y':"",'z':"",'c':"",'f':""}
-        typeGcode = "G0"
+        typeGcode = "G53 G0"
         gcodestr=""
         for name in cmd:
             if name == "f":
                 if name in words:
-                    typeGcode = "G1"
+                    typeGcode = "G53 G1"
                     gcodestr="{} F{}".format(gcodestr,words[name])
                     cmd[name] = "F{} ".format(words[name])     
             elif name in words:

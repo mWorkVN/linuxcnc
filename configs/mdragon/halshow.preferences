@@ -1,6 +1,6 @@
 # Halshow settings
 # This file is generated automatically.
-wm geometry . 954x1016+960+0
+wm geometry . 954x1016+960+86
 placeFrames 0.2883480825958702
 set ::ratio 0.2883480825958702
 set ::old_w_leftf 160
@@ -22,24 +22,19 @@ set ::watchlist {
     pin+pid.x.output
     pin+pid.x.error
     pin+hm2_7i80.0.stepgen.02.control-type
-    pin+hm2_7i80.0.stepgen.03.control-type
-    pin+hm2_7i80.0.stepgen.03.position-cmd
-    pin+hm2_7i80.0.stepgen.03.position-reset
-    pin+hm2_7i80.0.stepgen.03.position-fb
-    pin+hm2_7i80.0.stepgen.03.counts
-    pin+hm2_7i80.0.stepgen.03.dbg_err_at_match
-    pin+hm2_7i80.0.stepgen.03.dbg_ff_vel
-    pin+hm2_7i80.0.stepgen.03.dbg_pos_minus_prev_cmd
-    pin+hm2_7i80.0.stepgen.03.dbg_s_to_match
-    pin+hm2_7i80.0.stepgen.03.dbg_step_rate
-    pin+hm2_7i80.0.stepgen.03.dbg_vel_error
-    pin+hm2_7i80.0.stepgen.03.enable
-    pin+hm2_7i80.0.stepgen.03.velocity-cmd
-    pin+hm2_7i80.0.stepgen.03.velocity-fb
-    param+hm2_7i80.0.stepgen.03.position-scale
-    pin+hm2_7i80.0.stepgen.03.position-update
     pin+joint.3.pos-cmd
     pin+joint.3.pos-fb
+    pin+hm2_7i80.0.stepgen.05.control-type
+    pin+hm2_7i80.0.stepgen.05.counts
+    pin+hm2_7i80.0.stepgen.05.enable
+    pin+hm2_7i80.0.stepgen.05.position-cmd
+    pin+hm2_7i80.0.stepgen.05.position-fb
+    pin+hm2_7i80.0.stepgen.05.position-reset
+    pin+hm2_7i80.0.stepgen.05.position-update
+    pin+hm2_7i80.0.stepgen.05.velocity-cmd
+    pin+hm2_7i80.0.stepgen.05.velocity-fb
+    pin+axis.a.pos-cmd
+    pin+joint.4.motor-pos-cmd
 }
 set ::workmode watchhal
 set ::watchInterval 100
