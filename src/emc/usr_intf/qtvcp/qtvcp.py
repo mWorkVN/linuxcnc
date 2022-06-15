@@ -52,7 +52,7 @@ options = [ Option( '-c', dest='component', metavar='NAME'
 example: -g 200x400+0+100. Values are in pixel units, XOFFSET/YOFFSET is referenced from top left of screen
 use -g WIDTHxHEIGHT for just setting size or -g +XOFFSET+YOFFSET for just position.""")
           , Option( '-H', dest='halfile', metavar='FILE'
-                  , help="execute hal statements from FILE with halcmd after the component is set up and ready")
+                  , help="execute HAL statements from FILE with halcmd after the component is set up and ready")
           , Option( '-m', action='store_true', dest='maximum', help="Force panel window to maximize")
           , Option( '-f', action='store_true', dest='fullscreen', help="Force panel window to fullscreen")
           , Option( '-t', dest='theme', default="", help="Set QT style. Default is system theme")
@@ -160,7 +160,7 @@ class QTVCP:
         # Screen specific
         #################
         if INIPATH:
-            LOG.info('green<Building A Linuxcnc Main Screen with {}>'.format(ver))
+            LOG.info('green<Building A LinuxCNC Main Screen with: {}>'.format(ver))
             import linuxcnc
             # pull info from the INI file
             self.inifile = linuxcnc.ini(INIPATH)
@@ -168,7 +168,7 @@ class QTVCP:
 
             # if no handler file specified, use stock test one
             if not opts.usermod:
-                LOG.info('No handler file specified on command line')
+                LOG.info('No handler file specified on command line.')
                 target =  os.path.join(PATH.CONFIGPATH, '%s_handler.py' % PATH.BASENAME)
                 source =  os.path.join(PATH.SCREENDIR, 'tester/tester_handler.py')
                 if PATH.HANDLER is None:
@@ -193,28 +193,28 @@ Pressing cancel will close linuxcnc.""" % target)
                             sys.exit(0)
                         opts.usermod = PATH.HANDLER = target
                     else:
-                        LOG.critical('No handler file found or specified. User requested stopping')
+                        LOG.critical('No handler file found or specified. User requested stopping.')
                 else:
                     opts.usermod = PATH.HANDLER
 
             # specify the HAL component name if missing
             if opts.component is None:
-                LOG.info('No HAL component base name specified on command line using: {}'.format(PATH.BASENAME))
+                LOG.info('No HAL component base name specified on command line using: yellow<{}>'.format(PATH.BASENAME))
                 opts.component = PATH.BASENAME
 
         #################
         # VCP specific
         #################
         else:
-            LOG.info('green<Building A VCP Panel with {}>'.format(ver))
+            LOG.info('green<Building A VCP Panel with: {}>'.format(ver))
             # if no handler file specified, use stock test one
             if not opts.usermod:
-                LOG.info('No handler file specified - using {}'.format(PATH.HANDLER))
+                LOG.info('No handler file specified - using: yellow<{}>'.format(PATH.HANDLER))
                 opts.usermod = PATH.HANDLER
 
             # specify the HAL component name if missing
             if opts.component is None:
-                LOG.info('No HAL component base name specified - using: {}'.format(PATH.BASENAME))
+                LOG.info('No HAL component base name specified - using: yellow<{}>'.format(PATH.BASENAME))
                 opts.component = PATH.BASENAME
 
         ############################
@@ -267,7 +267,7 @@ Pressing cancel will close linuxcnc.""" % target)
 
         # load optional user handler file
         if opts.usermod:
-            LOG.debug('Loading the handler file')
+            LOG.debug('Loading the handler file.')
             window.load_extension(opts.usermod)
             try:
                 window.web_view = QWebView()
@@ -277,7 +277,7 @@ Pressing cancel will close linuxcnc.""" % target)
             if "class_patch__" in dir(window.handler_instance):
                 window.handler_instance.class_patch__()
             # add filter to catch keyboard events
-            LOG.debug('Adding the key events filter')
+            LOG.debug('Adding the key events filter.')
             myFilter = qt_makegui.MyEventFilter(window)
             self.app.installEventFilter(myFilter)
 
@@ -324,7 +324,7 @@ Pressing cancel will close linuxcnc.""" % target)
                 self.shutdown()
 
         # User components are set up so report that we are ready
-        LOG.debug('Set HAL ready')
+        LOG.debug('Set HAL ready.')
         self.halcomp.ready()
 
         # embed us into an X11 window (such as AXIS)
@@ -333,7 +333,7 @@ Pressing cancel will close linuxcnc.""" % target)
                 from qtvcp.lib import xembed
                 window = xembed.reparent_qt_to_x11(window, opts.parent)
                 forward = os.environ.get('AXIS_FORWARD_EVENTS_TO', None)
-                LOG.critical('Forwarding events to AXIS is not well tested yet')
+                LOG.critical('Forwarding events to AXIS is not well tested yet.')
                 if forward:
                     xembed.XEmbedForwarding(window, forward)
             except Exception as e:
@@ -381,7 +381,7 @@ Pressing cancel will close linuxcnc.""" % target)
         else:
             window.apply_styles()
 
-        LOG.debug('Show window')
+        LOG.debug('Show window.')
         # maximize
         if opts.maximum:
             window.showMaximized()
@@ -410,7 +410,7 @@ Pressing cancel will close linuxcnc.""" % target)
             LOG.debug('''Calling the handler file's before_loop__ function''')
             window.handler_instance.before_loop__()
 
-        LOG.info('Preference path: {}'.format(PATH.PREFS_FILENAME))
+        LOG.info('Preference path: yellow<{}>'.format(PATH.PREFS_FILENAME))
         # start loop
         self.app.exec_()
 
@@ -420,7 +420,7 @@ Pressing cancel will close linuxcnc.""" % target)
     # finds the postgui file name and INI file path
     def postgui(self):
         postgui_halfile = INFO.POSTGUI_HALFILE_PATH
-        LOG.info("postgui filename: yellow<{}>".format(postgui_halfile))
+        LOG.info("Postgui filename: yellow<{}>".format(postgui_halfile))
         if postgui_halfile is not None:
             for f in postgui_halfile:
                 f = os.path.expanduser(f)
@@ -432,7 +432,7 @@ Pressing cancel will close linuxcnc.""" % target)
 
     def postgui_cmd(self):
         postgui_commands = INFO.POSTGUI_HAL_COMMANDS
-        LOG.info("postgui commands: yellow<{}>".format(postgui_commands))
+        LOG.info("Postgui commands: yellow<{}>".format(postgui_commands))
         if postgui_commands is not None:
             for f in postgui_commands:
                 f = os.path.expanduser(f)
