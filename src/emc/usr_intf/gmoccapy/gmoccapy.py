@@ -441,8 +441,7 @@ class gmoccapy(object):
         self.widgets.chk_show_dtg.set_active(self.prefs.getpref("show_dtg", False, bool))
         self.widgets.chk_show_offsets.set_sensitive(self.widgets.chk_show_dro.get_active())
         self.widgets.chk_show_dtg.set_sensitive(self.widgets.chk_show_dro.get_active())
-        #TODO
-        #self.widgets.cmb_mouse_button_mode.set_active(self.prefs.getpref("mouse_btn_mode", 4, int))
+        self.widgets.cmb_mouse_button_mode.set_active(self.prefs.getpref("mouse_btn_mode", 4, int))
 
         self.widgets.tbtn_view_tool_path.set_active(self.prefs.getpref("view_tool_path", True, bool))
         self.widgets.tbtn_view_dimension.set_active(self.prefs.getpref("view_dimension", True, bool))
@@ -1912,10 +1911,25 @@ class gmoccapy(object):
                 self.widgets.box_custom_4.show()
 
             if "box_tool_and_code_info" in tab_locations:
-                widgetlist = ["frm_tool_info", "active_speed_label", "lbl_speed"]
+                widgetlist = ["frm_tool_info", "frm_gcode", "active_speed_label", "lbl_speed"]
                 for widget in widgetlist:
                     self.widgets[widget].hide()
                 self.widgets.btn_tool.set_sensitive( False )
+
+            if "box_code_info" in tab_locations:
+                widgetlist = ["frm_gcode"]
+                for widget in widgetlist:
+                    self.widgets[widget].hide()
+
+            if "box_tool_info" in tab_locations:
+                widgetlist = ["frm_tool_info"]
+                for widget in widgetlist:
+                    self.widgets[widget].hide()
+
+            if "hbox_jog" in tab_locations:
+                widgetlist = ["vbx_jog_button", "vbtb_jog_incr"]
+                for widget in widgetlist:
+                    self.widgets[widget].hide()
 
 # Dynamic tabs handling End
 # =============================================================
@@ -3729,16 +3743,19 @@ class gmoccapy(object):
     def on_tbtn_setup_toggled(self, widget, data=None):
         # first we set to manual mode, as we do not allow changing settings in other modes
         # otherwise external halui commands could start a program while we are in settings
-        self.command.mode(linuxcnc.MODE_MANUAL)
-        self.command.wait_complete()
-        self.widgets.rbt_manual.set_active(True)
         self.stat.poll()
-
         if widget.get_active():
+            self.command.mode(linuxcnc.MODE_MANUAL)
+            self.command.wait_complete()
+            self.widgets.rbt_manual.set_active(True)
+            # save the mode to restore when leaving the settings page
+            self.last_mode = self.stat.task_mode
+            self.user_tab_enabled = self.widgets.tbtn_user_tabs.get_sensitive()
             # deactivate the mode buttons, so changing modes is not possible while we are in settings mode
             self.widgets.rbt_manual.set_sensitive(False)
             self.widgets.rbt_mdi.set_sensitive(False)
             self.widgets.rbt_auto.set_sensitive(False)
+            self.widgets.tbtn_user_tabs.set_sensitive(False)
             code = False
             # here the user don"t want an unlock code
             if self.widgets.rbt_no_unlock.get_active():
@@ -3782,16 +3799,24 @@ class gmoccapy(object):
                 self.widgets.rbt_manual.set_sensitive(True)
                 self.widgets.rbt_mdi.set_sensitive(True)
                 self.widgets.rbt_auto.set_sensitive(True)
-            # this is needed here, because we do not
-            # change mode, so on_hal_status_manual will not be called
-            self.widgets.ntb_main.set_current_page(0)
-            self.widgets.ntb_button.set_current_page(_BB_MANUAL)
-            self.widgets.ntb_info.set_current_page(0)
-            self.widgets.ntb_jog.set_current_page(0)
 
-            # if we are in user tabs, we must reset the button
+            if self.user_tab_enabled:
+                self.widgets.tbtn_user_tabs.set_sensitive(True)
+            # if user tab was open before, switch back
             if self.widgets.tbtn_user_tabs.get_active():
-                self.widgets.tbtn_user_tabs.set_active(False)
+                self.widgets.ntb_main.set_current_page(2)
+            # if task_mode didn't change, enable tab "Manual Mode"
+            elif self.last_mode == self.stat.task_mode:
+                # this is needed here, because we do not
+                # change mode, so on_hal_status_manual will not be called
+                self.widgets.ntb_main.set_current_page(0)
+                self.widgets.ntb_button.set_current_page(_BB_MANUAL)
+                self.widgets.ntb_info.set_current_page(0)
+                self.widgets.ntb_jog.set_current_page(0)
+            else:
+                # restore mode
+                self.command.mode(self.last_mode)
+                self.command.wait_complete()
 
             widget.set_image(self.widgets.img_settings)
 
