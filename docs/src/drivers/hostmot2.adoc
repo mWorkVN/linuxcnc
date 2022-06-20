@@ -4,6 +4,12 @@
 [[cha:mesa-hostmot2-driver]]
 = Mesa HostMot2 Driver
 
+// Custom lang highlight
+// must come after the doc title, to work around a bug in asciidoc 8.6.6
+:ini: {basebackend@docbook:'':ini}
+:hal: {basebackend@docbook:'':hal}
+:ngc: {basebackend@docbook:'':ngc}
+
 == Introduction
 
 HostMot2 is an FPGA configuration developed by Mesa Electronics for
@@ -62,6 +68,7 @@ I/O boards. The low-level I/O drivers are 'hm2_7i43' and 'hm2_pci' (for
 all the PCI- and PC-104/Plus-based Anything I/O boards). The hostmot2 driver
 must be loaded first, using a HAL command like this:
 
+[source,{hal}]
 ----
 loadrt hostmot2
 ----
@@ -73,6 +80,7 @@ boards running the HostMot2 firmware. The low-level I/O drivers provide
 this access. The low-level I/O drivers are loaded with commands like
 this:
 
+[source,{hal}]
 ----
 loadrt hm2_pci config="firmware=hm2/5i20/SVST8_4.BIT
        num_encoders=3 num_pwmgens=3 num_stepgens=1"
@@ -174,6 +182,7 @@ your configuration.
 
 An example of a 5i20 configuration:
 
+[source,{ini}]
 ----
 [HOSTMOT2]
 DRIVER=hm2_pci

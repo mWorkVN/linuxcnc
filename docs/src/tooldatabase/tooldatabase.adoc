@@ -4,6 +4,12 @@
 [[cha:tooldatabase]]
 = Tool Database Interface
 
+// Custom lang highlight
+// must come after the doc title, to work around a bug in asciidoc 8.6.6
+:ini: {basebackend@docbook:'':ini}
+:hal: {basebackend@docbook:'':hal}
+:ngc: {basebackend@docbook:'':ngc}
+
 Tool data is conventionally described by a tool table file specified
 by an inifile setting: [EMCIO]TOOL_TABLE=tooltable_filename.  A tool
 table file consists of a text line for each available tool describing
@@ -22,6 +28,7 @@ tools.
 Ini file settings enable the (optional) operation of a user-provided
 tool database program:
 
+[source,{ini}]
 ----
 [EMCIO]
 DB_PROGRAM = db_program
@@ -126,6 +133,7 @@ A reload operation is also typically provided by a Graphical User
 Interface (GUI) so that on-demand reloads can be requested.  For
 example, a python GUI application can use:
 
+[source,python]
 ----
 #!/usr/bin/env python3
 from  linuxcnc import command
@@ -164,6 +172,7 @@ indicate tool data changes ('p', 'l', 'u').
 The *db_program* uses the 'tooldb' module by implementing the
 following python code:
 
+[source,python]
 ----
 user_tools = list(...)   # list of available tool numbers
 

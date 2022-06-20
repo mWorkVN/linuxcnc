@@ -4,6 +4,12 @@
 [[cha:hal-twopass]]
 = HAL TWOPASS
 
+// Custom lang highlight
+// must come after the doc title, to work around a bug in asciidoc 8.6.6
+:ini: {basebackend@docbook:'':ini}
+:hal: {basebackend@docbook:'':hal}
+:ngc: {basebackend@docbook:'':ngc}
+
 == TWOPASS
 
 LinuxCNC 2.5 supports TWOPASS processing of hal configuration files
@@ -17,6 +23,7 @@ instances of a component.  For example, if you use a two input AND
 gate component (and2) in three different places in your setup, you
 would need to have a single line somewhere to specify:
 
+[source,{hal}]
 ----
 loadrt and2 count=3
 ----
@@ -26,6 +33,7 @@ resulting in components and2.0, and2.1, and2.2.
 Configurations are more readable if you specify with the
 names=option for components where it is supported, e.g.,:
 
+[source,{hal}]
 ----
 loadrt and2 names=aa,ab,ac
 ----
@@ -40,6 +48,7 @@ the component.
 TWOPASS processing is enabled by including an ini file parameter in
 the [HAL] section:
 
+[source,{ini}]
 ----
 [HAL]
 
@@ -49,6 +58,7 @@ TWOPASS = anystring
 Where "anystring" can be any non-null string.
 With this setting, you can have multiple specifications like:
 
+[source,{hal}]
 ----
 loadrt and2 names=aa
 ...
@@ -65,9 +75,9 @@ debugging (verbose) and to prevent deletion of temporary files (nodelete).
 The options are separated with commas.
 
 .Example
+[source,{ini}]
 ----
 [HAL]
-
 TWOPASS = on,verbose,nodelete
 ----
 
@@ -105,6 +115,7 @@ ddt.1, ddt.2, etc.
 
 Alternatively, using the 'names=' option like:
 
+[source,{hal}]
 ----
 loadrt ddt names=xvel,yvel,zvel
 ...
@@ -128,6 +139,7 @@ Two-step processing occurs before the GUI is loaded. When using a
 loadrt declarations for the necessary components in a preloaded halfile.
 
 .Example of a HAL section when using a POSTGUI_HALFILE
+[source,{ini}]
 ----
 [HAL]
 
@@ -151,6 +163,7 @@ in a separate halfile that is processed before the GUI.  The addf commands can a
 be included in the file.
 
 .Example
+[source,{ini}]
 ----
 [HAL]
 TWOPASS = on

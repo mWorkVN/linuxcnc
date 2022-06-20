@@ -4,6 +4,12 @@
 [[cha:plasma-primer]]
 = Plasma Cutting Primer for LinuxCNC Users(((Plasma Cutting Primer)))
 
+// Custom lang highlight
+// must come after the doc title, to work around a bug in asciidoc 8.6.6
+:ini: {basebackend@docbook:'':ini}
+:hal: {basebackend@docbook:'':hal}
+:ngc: {basebackend@docbook:'':ngc}
+
 == What Is Plasma?
 
 Plasma is a fourth state of matter, an ionised gas which has been heated to an extremely high temperature and ionised so that it becomes electrically conductive. The plasma arc cutting and gouging processes use this plasma to transfer an electrical arc to the workpiece. The metal to be cut or removed is melted by the heat of the arc and then blown away. While the goal of plasma arc cutting is the separation of the material, plasma arc gouging is used to remove metals to a controlled depth and width.
@@ -138,6 +144,7 @@ We used a 15W Mean Well HDR-15 Ultra Slim DIN Rail Supply 24V DIN rail based iso
 
 The following HAL code can be pasted into your QtPlasmaC's custom.hal to enable Ohmic sensing on Encoder 2 of a 7i76e. Install the correct bit file and connect the THCAD to IDX+ and IDX-. Be sure to change the calibration settings to agree with your THCAD-5.
 
+[source,{hal}]
 ----
 # --- Load the Component ---
 loadrt ohmic names=ohmicsense
@@ -287,6 +294,7 @@ Most plasma controllers offer a method to change settings from G-Code. Linuxcnc 
 
 === Select Material Settings In QtPlasmaC And Use The Feedrate For That Material:
 
+[source,{ngc}]
 ----
 M190 Pn
 M66 P3 L3 Q1
@@ -298,6 +306,7 @@ NOTE: Users with a very large number of entries in the QtPlasmaC Materials Table
 
 === Enable/Disable THC Operation:
 
+[source,{ngc}]
 ----
 M62 P2 will disable THC (synchronised with motion)
 M63 P2 will enable THC(synchronised with motion)
@@ -307,6 +316,7 @@ M65 P2 will enable THC(immediately)
 
 === Reduce Cutting Speeds: (eg for hole cutting)
 
+[source,{ngc}]
 ----
 M67 E3 Q0 would set the velocity to 100% of requested~speed
 M67 E3 Q40 would set the velocity to 40% of requested~speed
@@ -316,6 +326,7 @@ M67 E3 Q100 would set the velocity to 100% of requested~speed
 
 === Cutter Compensation:
 
+[source,{ngc}]
 ----
 G41.1 D#<_hal[plasmac_run.kerf-width-f]> ; for left of programmed path
 G42.1 D#<_hal[plasmac_run.kerf-width-f]> for right of programmed path
@@ -333,6 +344,7 @@ External offsets are a very powerful method to make torch height adjustments to 
 Example:
 On a metric machine with a NEMA23 motor with a direct drive to a 5mm ball screw, 60 mm/second maximum velocity and 700 mm/sec/sec acceleration were determined to be safe values without loss of steps. For this machine, set the Z axis in the ini file as follows:
 
+[source,{ini}]
 ----
 [AXIS_Z]
 OFFSET_AV_RATIO = 0.5
@@ -342,6 +354,7 @@ MAX_ACCELERATION = 1400
 
 The joint associated with this axis would have the velocity and acceleration variables set as follows:
 
+[source,{ini}]
 ----
 [JOINT_n]
 MAX_VELOCITY = 60
@@ -396,6 +409,7 @@ Assuming it is connected to a 7i76e, connect the output to the spindle encoder i
 
 Make sure you have the following lines in your ini file (assuming a Mesa 7i76e):
 
+[source,{hal}]
 ----
 setp hm2_7i76e.0.encoder.00.scale -1
 setp hm2_7i76e.0.encoder.00.counter-mode 1

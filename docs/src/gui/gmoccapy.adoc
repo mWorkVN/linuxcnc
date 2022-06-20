@@ -6,6 +6,12 @@
 [[cha:gmoccapy]]
 = GMOCCAPY
 
+// Custom lang highlight
+// must come after the doc title, to work around a bug in asciidoc 8.6.6
+:ini: {basebackend@docbook:'':ini}
+:hal: {basebackend@docbook:'':hal}
+:ngc: {basebackend@docbook:'':ngc}
+
 == Introduction
 
 'GMOCCAPY' is a GUI for LinuxCNC, designed to be used with a touch screen,
@@ -113,6 +119,7 @@ to use gmoccapy on your machine: +
 [[gmoccapy:display-section]]
 === The DISPLAY Section
 
+[source,{ini}]
 ----
 [DISPLAY]
 DISPLAY = gmoccapy
@@ -127,6 +134,7 @@ PROGRAM_PREFIX = ../../nc_files/
 
 The most important part is to tell LinuxCNC to use gmoccapy, editing the [DISPLAY] section.
 
+[source,{ini}]
 ----
 [DISPLAY]
 DISPLAY = gmoccapy
@@ -151,6 +159,7 @@ settings will not be mixed if you use several configs. If you only want to use
 one file for several machines, you need to include PREFERENCE_FILE_PATH in your
 INI.
 
+[source,{ini}]
 ----
 MAX_FEED_OVERRIDE = 1.5
 ----
@@ -161,6 +170,7 @@ override the feed by 150%.
 [NOTE]
 If no value is given, it will be set to 1.0
 
+[source,{ini}]
 ----
 MAX_SPINDLE_OVERRIDE = 1.2
 MIN_SPINDLE_OVERRIDE = 0.5
@@ -171,6 +181,7 @@ Will allow you to change the spindle override within a limit from 50% to 120%.
 [NOTE]
 If no values are given, MAX will be set to 1.0 and MIN to 0.1
 
+[source,{ini}]
 ----
 LATHE = 1
 BACK_TOOL_LATHE = 1
@@ -202,6 +213,8 @@ If you never used a glade panel, I recommend to read the excellent documentation
 http://www.linuxcnc.org/docs/html/gui/gladevcp.html[Glade VCP]
 
 .Example
+
+[source,{ini}]
 ----
 EMBED_TAB_NAME = DRO
 EMBED_TAB_LOCATION = ntb_user_tabs
@@ -300,6 +313,7 @@ Here is how to set up 3 user pop up message dialogs the messages support pango
 markup language. Detailed information about the markup language can be found at
 https://developer.gnome.org/pango/stable/PangoMarkupFormat.html[Pango Markup]
 
+[source,{ini}]
 ----
 MESSAGE_TEXT    = The text to be displayed, may be pango markup formatted
 MESSAGE_TYPE    = "status" , "okdialog" , "yesnodialog"
@@ -338,6 +352,7 @@ The specific hal pin conventions for these can be found under the
 [[gmocappy:rs274ngc]]
 === The RS274NGC Section
 
+[source,{ini}]
 ----
 [RS274NGC]
 SUBROUTINE_PATH = macros
@@ -353,6 +368,7 @@ You can add macros to gmoccapy, similar to touchy's way. A macro is nothing
 else than a ngc-file. You are able to execute complete CNC programs in MDI
 mode, by just pushing one button. To do so, you have to add a section like so:
 
+[source,{ini}]
 ----
 [MACROS]
 MACRO = i_am_lost
@@ -439,6 +455,7 @@ image::images/gmoccapy_getting_macro_info.png[align="left"]
 [[gmoccapy:traj-section]]
 === The TRAJ Section
 
+[source,{ini}]
 ----
 DEFAULT_LINEAR_VELOCITY = 85.0
 MAX_VELOCITY = 230.000
@@ -852,6 +869,7 @@ All are HAL_BIT pin.
 To add user created message you need to add the message to the INI file in the
 [DISPLAY] section. Here are a couple of examples.
 
+[source,{ini}]
 ----
 MESSAGE_BOLDTEXT = LUBE SYSTEM FAULT
 MESSAGE_TEXT = LUBE FAULT
@@ -868,6 +886,7 @@ To 'connect' new pins to and input you need to do this in the postgui HAL file.
 Here are some example connections that have the signal connected to an input
 some place else in the HAL file.
 
+[source,{hal}]
 ----
 net gmoccapy-lube-fault gmoccapy.messages.lube-fault
 net gmoccapy-lube-fault-waiting gmoccapy.messages.lube-fault-waiting
@@ -916,6 +935,7 @@ image::images/manual_toolchange.png["Manual tool change",align="left"]
 
 Usually they are connected like this for a manual tool change:
 
+[source,{hal}]
 ----
 net tool-change gmoccapy.toolchange-change <= iocontrol.0.tool-change
 net tool-changed gmoccapy.toolchange-changed <= iocontrol.0.tool-changed
@@ -1010,6 +1030,7 @@ to be read from a G-code subroutine, so the code can react to different values.
 Modify your INI File to include the following:
 
 .The RS274NGC section
+[source,{ini}]
 ----
 [RS274NGC]
 # Enables the reading of INI and HAL values from G-code
@@ -1027,6 +1048,7 @@ The position of the tool sensor and the start position of the probing movement,
 all values are absolute coordinates, except MAXPROBE, what must be given in
 relative movement.
 
+[source,{ini}]
 ----
 [TOOLSENSOR]
 X = 10
@@ -1040,6 +1062,7 @@ This is not named TOOL_CHANGE_POSITION  on purpose - *canon uses that name and
 will interfere otherwise.* The position to move the machine before giving the
 change tool command. All values are in absolute coordinates.
 
+[source,{ini}]
 ----
 [CHANGE_POSITION]
 X = 10
@@ -1050,6 +1073,7 @@ Z = -2
 .The Python Section
 The Python plug ins serves interpreter and task.
 
+[source,{ini}]
 ----
 [PYTHON]
 # The path to start a search for user modules
@@ -1078,6 +1102,8 @@ copy 'change.ngc' to the directory specified as SUBROUTINE_PATH see
 Open 'change.ngc' with a editor and uncomment the following lines
 (49 and 50):
 
+
+[source,{ngc}]
 ----
 F #<_hal[gmoccapy.probevel]>
 G38.2 Z-4
@@ -1089,6 +1115,7 @@ You may want to modify this file to fit more your needs.
 
 Connect the tool probe in your hal file like so:
 
+[source,{hal}]
 ----
 net probe  motion.probe-input <= <your_input_pin>
 ----
