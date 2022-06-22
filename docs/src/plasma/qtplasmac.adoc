@@ -194,7 +194,7 @@ Refer to the <<qt_initial-setup,Heights Diagram>> diagram for a visual represent
   can be calculated using the following formula:
 
 ----
-o = 0.5 x a x (v ÷ a)^2
+o = 0.5 * a * (v / a)^2
 ----
 
 where: o = overrun, a = acceleration in units/sec2 and v = velocity in units/sec.
@@ -517,7 +517,7 @@ More information on contact switching load can be seen on page III of link:https
 
 [underline]*Calculations:*
 
-If using a Mesa card, the input resistance could be 5000Ω (7i96) or 10000Ω (7i76E), giving a contact current of 4.8mA or 2.4mA assuming a supply voltage of 24V (I = V/R).
+If using a Mesa card, the input resistance of a 7i96 is 4700Ω (always consult the product manual associated with the revision being used as these values sometimes vary between revisions), giving a contact current of 5.1mA assuming a supply voltage of 24V (I = V/R).
 
 As an example, the typical relay used in a Hypertherm Powermax 65 plasma cutter (link:https://www.te.com/commerce/DocumentDelivery/DDEController?Action=showdoc&DocId=Data+Sheet%7F1308242_T77%7F1011%7Fpdf%7FEnglish%7FENG_DS_1308242_T77_1011.pdf%7F1-1393194-0[TE T77S1D10-24]) requires a minimum contact load of 100mA @ 5VDC which will dissipate 0.5W (P = I * V). If using a 24VDC power supply this would then equate to a minimum current of 20.8mA. Because there is less current drawn by the Mesa input than is required by the relay there needs to be an increase in the current.
 
@@ -528,7 +528,7 @@ The resistance can be calculated using R = Vs / (Im - Ii) where:
 - Im = minimum current required
 - Ii = input current
 
-Using a 7i76E with an input current of 2.4mA gives a calculated value of 1304Ω. (24 / (.0208 - .0024)) This could then be rounded down to a commonly available 1200Ω resistor giving a small safety margin.
+Using a 7i96 with an input current of 5.1mA gives a calculated value of 1529Ω. (24 / (.0208 - .0051)). This could then be rounded down to a commonly available 1500Ω resistor giving a small safety margin.
 
 The power dissipation can by calculated using P = Vs^2^ / Rs where:
 
@@ -536,7 +536,7 @@ The power dissipation can by calculated using P = Vs^2^ / Rs where:
 - Vs = supply voltage
 - Rs = selected resistance
 
-This gives a value of 0.48W. This could then be rounded up to 1W, giving a good safety margin. The final selection would be a 1200Ω 1W resistor. Note that this resistor could be used on either the 7i96 or the 7i76E.
+This gives a value of 0.38W. This could then be rounded up to 1W, giving a good safety margin. The final selection would be a 1500Ω 1W resistor.
 
 === Desktop Launcher
 
@@ -544,7 +544,6 @@ If a link to the launch the configuration was not created when creating the conf
 
 After the launcher appears on the desktop, right click on it and then edit it with the user's editor of choice. Edit the file so it looks similar to:
 
-[source,{ini}]
 ----
 [Desktop Entry]
 Comment=
@@ -612,6 +611,7 @@ QtPlasmaC has some specific <machine_name>.ini file variables as follows:
 
 These variables are optional.
 
+[source,{ini}]
 ----
 MODE                = 0 (use external arc voltage in for Arc Voltage)
                         (use external arc voltage in for Arc OK)
@@ -691,6 +691,7 @@ SEE <<qt_path-tolerance,PATH TOLERANCE>> FOR RS274NGC_STARTUP_CODE INFORMATION R
 
 These variables are mandatory.
 
+[source,{ini}]
 ----
 HALFILE = HALUI   = halui (required)
 HALFILE = <machine_name>.hal (the machine HAL file)
@@ -708,6 +709,7 @@ The user could place custom HAL commands in the custom.hal file as this file is 
 
 This variable  is mandatory.
 
+[source,{ini}]
 ----
 DISPLAY = qtvcp qtplasmac      (use 16:9 resolution)
         = qtvcp qtplasmac_9x16 (use 9:16 resolution)
@@ -719,6 +721,7 @@ link:http://linuxcnc.org/docs/devel/html/gui/qtvcp.html#_ini_settings[QtVCP INI 
 
 For example the following would start a 16:9 resolution QtPlasmaC screen in full screen mode:
 
+[source,{ini}]
 ----
 DISPLAY = qtvcp -f qtplasmac
 ----
@@ -726,6 +729,8 @@ DISPLAY = qtvcp -f qtplasmac
 *[TRAJ]* Section
 
 This variable  is mandatory.
+
+[source,{ini}]
 ----
 SPINDLES = 3
 ----
@@ -734,6 +739,7 @@ SPINDLES = 3
 
 These variables are mandatory.
 
+[source,{ini}]
 ----
 MAX_VELOCITY     = double the value in the corresponding joint
 MAX_ACCELERATION = double the value in the corresponding joint
@@ -744,6 +750,7 @@ OFFSET_AV_RATIO  = 0.5
 
 These variables are mandatory.
 
+[source,{ini}]
 ----
 MAX_VELOCITY     = double the value in the corresponding joint
 MAX_ACCELERATION = double the value in the corresponding joint
@@ -754,6 +761,7 @@ OFFSET_AV_RATIO  = 0.5
 
 These variables are mandatory.
 
+[source,{ini}]
 ----
 MIN_LIMIT        = the top of the table's slats or just below
 MAX_VELOCITY     = double the value in the corresponding joint
@@ -1294,11 +1302,13 @@ For example: if a user had a metric machine and wished to run a G-Code file that
 The following stanzas are the minimum recommended codes to include in the preamble and postamble of any G-Code file to be run by QtPlasmaC:
 
 Metric:
+[source,{ngc}]
 ----
 G21 G40 G49 G64p0.1 G80 G90 G92.1 G94 G97
 ----
 
 Imperial:
+[source,{ngc}]
 ----
 G20 G40 G49 G64p0.004 G80 G90 G92.1 G94 G97
 ----
@@ -1522,6 +1532,7 @@ Optional parameters are:
 
 A complete example:
 
+[source,{ngc}]
 ----
 (o=1, nu=2, na=5mm Mild Steel 40A, ph=3.1, pd=0.1, ch=0.75, fr=3000, kw=0.5, th=1, ca=45, cv=110, pe=0.1, gp=5, cm=1, jh=0, jd=0)
 ----
@@ -1597,6 +1608,7 @@ To use this feature, the user must set the camera's offset from the torch center
 
 To add or modify the offsets manually, the user could add or edit the following line in the [QTPLASMAC] section:
 
+[source,{ini}]
 ----
 CAMERA_TOUCHOFF = Xoffset Yoffset
 ----
@@ -1636,6 +1648,7 @@ To use this feature, the user must set the laser's offset from the torch center 
 
 To add or modify the offsets manually, the user could add or edit the following line in the [QTPLASMAC] section:
 
+[source,{ini}]
 ----
 LASER_TOUCHOFF = Xoffset Yoffset
 ----
@@ -1644,6 +1657,7 @@ LASER_TOUCHOFF = Xoffset Yoffset
 
 Additionally, the laser can be tied to any available output to turn the laser on and off via a HAL pin with the following name:
 
+[source,{hal}]
 ----
 qtplasmac.laser_on
 ----
@@ -1683,11 +1697,13 @@ If an alignment laser has been set up then it is possible to use the laser durin
 The provided <<qt_rs274, RS274NGC_STARTUP_CODE>> files: metric_startup.ngc and imperial_startup.ngc set the motion blending path tolerance with a G64 command P value to 0.1mm and 0.004" respectively. The P value corresponds to the amount the actual cut path followed by the machine may deviated from the programmed cut path before reducing velocity. If LinuxCNC (QtPlasmaC) receives an E-stop signal at any stage, the path tolerance will be set to the default (no P value) which will maintain the best possible speed and round corners off as a result. To prevent this, it is recommended that the path tolerance is set by placing the appropriate G64 command and P value in the header of each G-Code file.
 
 For Metric:
+[source,{ngc}]
 ----
 G64 P0.1
 ----
 
 For Imperial:
+[source,{ngc}]
 ----
 G64 P0.004
 ----
@@ -1892,6 +1908,7 @@ To use this feature, the user must set the probes's offset from the torch center
 
 To add or modify the offsets manually, the user could add or edit the following line in the [QTPLASMAC] section:
 
+[source,{ini}]
 ----
 OFFSET_PROBING = Xn.n  Yn.n t.t
 ----
@@ -2276,6 +2293,7 @@ After the above directions are completed, the scribe may be tested manually by i
 
 To use the scribe from G-Code:
 
+[source,{ngc}]
 ----
 ...
 M52 P1 (paused motion on)
@@ -2688,6 +2706,7 @@ desktop_notify
 
 Additionally, it is possible for *ERROR SENT TO MACHINE LOG* to flash to get the user's attention by adding or editing the following line in the [QTPLASMAC] section of the <machine_name>.ini file:
 
+[source,{ini}]
 ----
 FLASH_ERROR = 1
 ----
@@ -2864,6 +2883,7 @@ For example the user may want the arc voltage display in red, a green Torch On L
 
 Custom stylesheets are enable by a setting in the [QTPLASMAC] section of the INI file with the filename of the stylesheet.
 
+[source,{ini}]
 ----
 CUSTOM_STYLE = the_cool_style.qss
 ----
@@ -2934,7 +2954,6 @@ The next time QtPlasmaC is loaded all custom styling will be removed and the def
 
 Below is an example of the section to be deleted from <machine_name>.prefs:
 
-[source,{ini}]
 ----
 [COLOR_OPTIONS]
 Foreground = #ffee06
@@ -2968,6 +2987,7 @@ All <machine_name>.ini file settings for the buttons are found in the [QTPLASMAC
 
 The text that appears on the button is set the following way:
 
+[source,{ini}]
 ----
 BUTTON_n_NAME = HAL Show
 ----
@@ -2976,12 +2996,14 @@ Where n is the button number and *HAL Show* is the text.
 
 For text on multiple lines, split the text with a \
 
+[source,{ini}]
 ----
 BUTTON_n_NAME = HAL\Show
 ----
 
 If an ampersand is required to be displayed as text then two consecutive ampersands are required:
 
+[source,{ini}]
 ----
 BUTTON_n_NAME = PIERCE\&&CUT
 ----
@@ -3012,6 +3034,7 @@ Buttons can run the following:
 
 To run an external command, the command is preceded by a % character.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = %halshow
 ----
@@ -3021,18 +3044,21 @@ BUTTON_n_CODE = %halshow
 
 To run G-Code, just enter the code to be run.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = G0 X100
 ----
 
 To run an existing subroutine.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = o<the_subroutine> call
 ----
 
 <machine_name>.ini file variables can be entered by using {} (a space must be placed after the })
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = G0 X{JOINT_0 HOME} Y1
 BUTTON_n_CODE = G53 G0 Z[{AXIS_Z MAX_LIMIT} - 1.001]
@@ -3040,12 +3066,14 @@ BUTTON_n_CODE = G53 G0 Z[{AXIS_Z MAX_LIMIT} - 1.001]
 
 Multiple codes can be run by separating the codes with a \ symbol. The exception is the special commands which are required to be a single command per button.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = G0 X0 Y0 \ G1 X5 \ G1 Y5
 ----
 
 External commands and G-Code may be mixed on the same button.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = %halshow \ g0x.5y.5 \ %halmeter
 ----
@@ -3055,6 +3083,7 @@ BUTTON_n_CODE = %halshow \ g0x.5y.5 \ %halmeter
 
 The following code will allow the user to use a button to invert the current state of a HAL bit pin:
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = toggle-halpin the-hal-pin-name
 ----
@@ -3069,6 +3098,7 @@ There are three <<qt_ext-hal-pin, External HAL Pins>> that are available to togg
 
 It is possible for the user to mark a toggle-halpin button's associated hal pin as being required to be turned "ON" before *CYCLE START* can be pressed by adding "runcritical" after the hal pin in the button code.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = toggle-halpin the-hal-pin-name runcritical
 ----
@@ -3078,6 +3108,7 @@ BUTTON_n_CODE = toggle-halpin the-hal-pin-name runcritical
 
 The following code will allow the user to use a button to invert the current state of the alignment laser HAL bit pin:
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = toggle-laser
 ----
@@ -3090,6 +3121,7 @@ After setting the code, upon clicking, the button will invert colors and the ali
 
 The following code would allow the user to use a button to invert the current state of the alignment laser HAL bit pin and then move the X and Y axes to the offset for the alignment laser as specified in the <machine_name>.ini file:
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = G0 {QTPLASMAC LASER_TOUCHOFF} \ toggle-laser
 ----
@@ -3101,6 +3133,7 @@ The position of the "toggle-laser" command is not important as it is always the 
 
 The following code will allow the user to use a button to pulse a HAL bit pin for a duration of 0.5 seconds:
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = pulse-halpin the-hal-pin-name 0.5
 ----
@@ -3124,6 +3157,7 @@ QtPlasmaC will begin a probe and when the material is detected, the Z axis will 
 
 QtPlasmaC will then wait in this state for the time specified (rounded to no decimal places) before returning the Z axis to the starting position. An example of a 6 second delay is below. If there is no time specified then the probe time will default to 10 seconds.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = probe-test 6
 ----
@@ -3136,6 +3170,7 @@ Enabling a user button as a Probe Test button will add an <<qt_ext-hal-pin, exte
 
 QtPlasmaC will enable the Ohmic Probe Enable output signal and if the Ohmic Probe input is sensed, the LED indicator in the SENSOR Panel will light. The main purpose of this is to allow a quick test for a shorted torch tip.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = ohmic-test
 ----
@@ -3148,6 +3183,7 @@ Enabling a user button as an Ohmic Test button will add an <<qt_ext-hal-pin, ext
 
 This button if selected will toggle between the two <<qt_cut-types, cut types>>, Pierce and Cut (default cutting mode) or Pierce Only.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = cut-type
 ----
@@ -3167,6 +3203,7 @@ There are three methods to return to the previous coordinates:
 . Press *CYCLE RESUME* - the torch to return to the original coordinates and the program will resume.
 . Press *CYCLE STOP* - the torch to return to the original coordinates and the program will abort.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = change-consumables X10 Y10 F1000
 ----
@@ -3179,12 +3216,14 @@ Enabling a user button as a Change Consumables button will add an <<qt_ext-hal-p
 
 Loading a G-Code program from the directory specified by the *PROGRAM_PREFIX* variable in the <machine_name>.ini file (usually ~/linuxcnc/nc_files) is possible by using the following format:
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = load G-Code.ngc
 ----
 
 If the user's G-Code file is located in a sub-directory of the *PROGRAM_PREFIX* directory, it would be accessed by adding the sub-directory name to the beginning of the G-Code file name. Example for a sub-directory named *plasma*:
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = load plasma/G-Code.ngc
 ----
@@ -3200,6 +3239,7 @@ Pressing the button again during the countdown will cause the torch to be turned
 
 If the button is released before the countdown is complete then the torch will turn off at countdown completion, holding the button on until after the countdown has completed will cause the torch to remain on until the button has been released.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = torch-pulse 0.5
 ----
@@ -3212,6 +3252,7 @@ Enabling a user button as a Torch Pulse button will add an <<qt_ext-hal-pin, ext
 
 Run a single unidirectional cut. This utilises the automatic <<qt_single-cut, Single Cut>> feature.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = single-cut
 ----
@@ -3237,24 +3278,28 @@ The following GUI buttons and Keyboard Shortcuts (if enabled in the <<qt_paramet
 [NOTE]
 IF THE FEED RATE IS CHANGED FOR THE FRAMING MOTION, IT WILL BE NECESSARY TO RETURN THE FEED SLIDER TO 100% BEFORE PRESSING CYCLE START AND CUTTING THE LOADED JOB.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = framing
 ----
 
 It is possible for the user to omit the initial default Z movement and run the framing sequence at the current Z height by adding "usecurrentzheight" after "framing".
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = framing usecurrentzheight
 ----
 
 To specify a feed rate:
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = framing F100
 ----
 
 or:
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = framing usecurrentzheight F100
 ----
@@ -3266,6 +3311,7 @@ Enabling a user button as a Framing button will add an <<qt_ext-hal-pin, externa
 
 Manual Cut functions identically to the *F9* button to begin or end a <<qt_manual-single-cut, manual cut>>.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = manual-cut
 ----
@@ -3275,6 +3321,7 @@ BUTTON_n_CODE = manual-cut
 
 This allows the showing/hiding of an offset viewing screen that displays all machine offsets. All relative offsets can be edited and the G54 ~ G59.3 work system coordinates are able to be given custom names.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = offsets-view
 ----
@@ -3284,6 +3331,7 @@ BUTTON_n_CODE = offsets-view
 
 this allows the loading of the last modified file in a directory. The directory name is optional and if omitted will default to the last directory a file was loaded from.
 
+[source,{ini}]
 ----
 BUTTON_n_CODE = latest-file /home/me/linuxcnc/nc_files/qtplasmac-test
 ----
