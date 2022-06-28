@@ -85,7 +85,9 @@ def convertJoinMode(self):
         return False   
 
 def m439remap(self, **words): #convert to joint mode
-    if convertJoinMode(self):return INTERP_OK
+    if convertJoinMode(self):
+        yield INTERP_EXECUTE_FINISH
+        return INTERP_OK
     return INTERP_ERROR
 
 def convertWorldMode(self):   
@@ -109,6 +111,8 @@ def convertWorldMode(self):
             self.execute("M128")
             self.execute("M68 E%d Q%d"%(SWITCHKINS_PIN,kinstype))
             self.execute("M66 E0 L0")
+
+            
         return True
     except Exception as e:
         print("REMAP - Error M428 Exception:{}".format(e.error_message))

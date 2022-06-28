@@ -12,8 +12,11 @@ addf ddt.7 servo-thread
 #addf ddt.8 servo-thread
 #addf ddt.9 servo-thread
 
-
-
+setp hm2_7i80.0.ssi.00.frequency-khz 125  
+setp hm2_7i80.0.ssi.00.timer-number 4
+#setp hm2_7i80.0.ssi.00.zencoder-scalemax 180
+#setp hm2_7i80.0.ssi.00.huencoder.counts-per-rev 180
+#setp hm2_7i80.0.ssi.00.huencoder.scale 180
 # # --- X ---
 
 #net J0pos hm2_[HOSTMOT2](BOARD).0.stepgen.00.velocity-cmd <= joint.0.motor-pos-cmd
@@ -50,11 +53,11 @@ net x-vel-cmd    <= joint.0.vel-cmd
 net x-output    <= hm2_[HOSTMOT2](BOARD).0.stepgen.00.velocity-cmd
 net x-amp-enable joint.0.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.00.enable
 
-setp hm2_7i80.0.ssi.00.frequency-khz 125  
-setp hm2_7i80.0.ssi.00.timer-number 2
-setp hm2_7i80.0.ssi.00.zencoder-scalemax 180
+setp hm2_7i80.0.ssi.02.frequency-khz 125  
+setp hm2_7i80.0.ssi.02.timer-number 2
+setp hm2_7i80.0.ssi.02.zencoder-scalemax 180
 
-net j0-pos-fbss  hm2_7i80.0.ssi.00.zencoder
+net j0-pos-fbss  hm2_7i80.0.ssi.02.zencoder
 #net x-pos-cmd   => joint.0.motor-pos-fb   # Need PID
 net j0-pos-fbss  => joint.0.motor-pos-fb  # Need PID
 
@@ -97,7 +100,7 @@ net y-vel-cmd    <= joint.1.vel-cmd
 net y-output     <= hm2_[HOSTMOT2](BOARD).0.stepgen.01.velocity-cmd
 net y-amp-enable joint.1.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.01.enable
 
-setp hm2_7i80.0.ssi.01.frequency-khz 125  
+setp hm2_7i80.0.ssi.01.frequency-khz 100  
 setp hm2_7i80.0.ssi.01.timer-number 2
 setp hm2_7i80.0.ssi.01.yencoder-scalemax 180
 net j1-pos-fbss  hm2_7i80.0.ssi.01.yencoder

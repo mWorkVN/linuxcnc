@@ -1,11 +1,10 @@
 # Halshow settings
 # This file is generated automatically.
-wm geometry . 954x1016+960+86
+wm geometry . 954x1016+1021+38
 placeFrames 0.2883480825958702
 set ::ratio 0.2883480825958702
 set ::old_w_leftf 160
 set ::watchlist {
-    pin+hm2_7i80.0.ssi.00.zencoder
     pin+hm2_7i80.0.stepgen.00.position-cmd
     pin+hm2_7i80.0.stepgen.00.position-fb
     pin+joint.1.pos-cmd
@@ -35,6 +34,20 @@ set ::watchlist {
     pin+hm2_7i80.0.stepgen.05.velocity-fb
     pin+axis.a.pos-cmd
     pin+joint.4.motor-pos-cmd
+    pin+hm2_7i80.0.ssi.00.data-invalid
+    param+hm2_7i80.0.ssi.00.clock.invert_output
+    param+hm2_7i80.0.ssi.00.clock.is_opendrain
+    param+hm2_7i80.0.ssi.00.frequency-khz
+    param+hm2_7i80.0.ssi.00.timer-number
+    pin+hm2_7i80.0.ssi.00.ENC_SIGN_Z
+    pin+hm2_7i80.0.ssi.00.ENC_SIGN_Z-not
+    pin+hm2_7i80.0.ssi.00.ENC_ZH.count
+    pin+hm2_7i80.0.ssi.00.ENC_ZH.index-enable
+    pin+hm2_7i80.0.ssi.00.ENC_ZH.position
+    pin+hm2_7i80.0.ssi.00.ENC_ZH.rawcounts
+    pin+hm2_7i80.0.ssi.00.ENC_ZH.reset
+    param+hm2_7i80.0.ssi.00.ENC_ZH.counts-per-rev
+    param+hm2_7i80.0.ssi.00.ENC_ZH.scale
 }
 set ::workmode watchhal
 set ::watchInterval 100

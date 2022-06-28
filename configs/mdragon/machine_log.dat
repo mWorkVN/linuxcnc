@@ -1,4 +1,6 @@
---- Qtvcp Screen Started on: Wed, Jun 15 2022 11:09:38 AM ---
-Wed15 11:09 Machine OFF
-Wed15 11:09 Hard limits tripped
-Wed15 11:09 Tool 0: No Tool
+--- Qtvcp Screen Started on: Tue, Jun 28 2022 04:15:53 PM ---
+Tue28 16:15 Machine OFF
+Tue28 16:15 Hard limits tripped
+Tue28 16:15 Tool 0: No Tool
+Tue28 16:51 hm2/hm2_7i80.0: error finishing read! iter=1069583
+

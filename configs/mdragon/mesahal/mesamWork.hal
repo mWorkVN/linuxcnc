@@ -1,7 +1,7 @@
 loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT   servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS  num_dio=20
 loadrt hostmot2
-loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=2 num_pwmgens=0 num_rcpwmgens=1 num_stepgens=6 sserial_port_0=20000000 ssi_chan_0=steps%2bzencoder%12s ssi_chan_1=steps%2byencoder%12s enable_raw"
+loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=0 num_pwmgens=0 num_rcpwmgens=1 num_stepgens=6 sserial_port_0=20000000 ssi_chan_0=ENC_ZH%23eENC_SIGN_Z%1b ssi_chan_2=zencoder%12s ssi_chan_1=yencoder%12s enable_raw"
 #loadrt stepgen step_type=0,0,0,0,0 ctrl_type=v,v,p,p,p
 loadrt pid names=pid.x,pid.y,pid.z,pid.a
 loadrt orient                       count=1                 #ORIENT
@@ -22,7 +22,7 @@ addf hm2_7i80.0.write         servo-thread  # Last write
 setp hm2_7i80.0.dpll.01.timer-us -50
 setp hm2_7i80.0.dpll.02.timer-us -200
 setp hm2_7i80.0.dpll.03.timer-us -150
-setp hm2_7i80.0.dpll.04.timer-us -200
+setp hm2_7i80.0.dpll.04.timer-us -300
 
 
 setp scarakins.D1 300.0
