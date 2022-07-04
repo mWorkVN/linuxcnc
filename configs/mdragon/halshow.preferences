@@ -1,8 +1,8 @@
 # Halshow settings
 # This file is generated automatically.
-wm geometry . 954x1016+1021+38
-placeFrames 0.2883480825958702
-set ::ratio 0.2883480825958702
+wm geometry . 954x1016+1229+25
+placeFrames 0.2781316348195329
+set ::ratio 0.2781316348195329
 set ::old_w_leftf 160
 set ::watchlist {
     pin+hm2_7i80.0.stepgen.00.position-cmd
@@ -10,7 +10,6 @@ set ::watchlist {
     pin+joint.1.pos-cmd
     pin+joint.1.motor-pos-fb
     pin+joint.1.motor-pos-cmd
-    pin+hm2_7i80.0.ssi.01.yencoder
     pin+hm2_7i80.0.stepgen.00.position-reset
     pin+hm2_7i80.0.stepgen.01.position-cmd
     pin+hm2_7i80.0.stepgen.01.position-fb
@@ -23,17 +22,6 @@ set ::watchlist {
     pin+hm2_7i80.0.stepgen.02.control-type
     pin+joint.3.pos-cmd
     pin+joint.3.pos-fb
-    pin+hm2_7i80.0.stepgen.05.control-type
-    pin+hm2_7i80.0.stepgen.05.counts
-    pin+hm2_7i80.0.stepgen.05.enable
-    pin+hm2_7i80.0.stepgen.05.position-cmd
-    pin+hm2_7i80.0.stepgen.05.position-fb
-    pin+hm2_7i80.0.stepgen.05.position-reset
-    pin+hm2_7i80.0.stepgen.05.position-update
-    pin+hm2_7i80.0.stepgen.05.velocity-cmd
-    pin+hm2_7i80.0.stepgen.05.velocity-fb
-    pin+axis.a.pos-cmd
-    pin+joint.4.motor-pos-cmd
     pin+hm2_7i80.0.ssi.00.data-invalid
     param+hm2_7i80.0.ssi.00.clock.invert_output
     param+hm2_7i80.0.ssi.00.clock.is_opendrain
@@ -43,10 +31,17 @@ set ::watchlist {
     pin+hm2_7i80.0.ssi.00.ENC_SIGN_Z-not
     pin+hm2_7i80.0.ssi.00.ENC_ZH.count
     pin+hm2_7i80.0.ssi.00.ENC_ZH.index-enable
+    pin+hm2_7i80.0.ssi.03.J3_ENC
+    pin+hm2_7i80.0.ssi.01.J1_ENC
     pin+hm2_7i80.0.ssi.00.ENC_ZH.position
-    pin+hm2_7i80.0.ssi.00.ENC_ZH.rawcounts
-    pin+hm2_7i80.0.ssi.00.ENC_ZH.reset
-    param+hm2_7i80.0.ssi.00.ENC_ZH.counts-per-rev
+    param+hm2_7i80.0.ssi.01.frequency-khz
+    param+hm2_7i80.0.ssi.03.frequency-khz
+    pin+hm2_7i80.0.ssi.05.J2_ENC
+    param+hm2_7i80.0.ssi.05.frequency-khz
+    param+hm2_7i80.0.ssi.05.J2_ENC-scalemax
+    param+hm2_7i80.0.ssi.05.clock.invert_output
+    param+hm2_7i80.0.ssi.05.clock.is_opendrain
+    param+hm2_7i80.0.ssi.05.timer-number
     param+hm2_7i80.0.ssi.00.ENC_ZH.scale
 }
 set ::workmode watchhal

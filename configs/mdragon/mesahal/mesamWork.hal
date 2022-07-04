@@ -1,9 +1,9 @@
 loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT   servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS  num_dio=20
 loadrt hostmot2
-loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=0 num_pwmgens=0 num_rcpwmgens=1 num_stepgens=6 sserial_port_0=20000000 ssi_chan_0=ENC_ZH%23eENC_SIGN_Z%1b ssi_chan_2=zencoder%12s ssi_chan_1=yencoder%12s enable_raw"
+loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=0 num_pwmgens=0 num_rcpwmgens=1 num_stepgens=6 sserial_port_0=20000000 ssi_chan_0=ENC_ZH%23eENC_SIGN_Z%1b ssi_chan_1=J1_ENC%12s ssi_chan_5=J2_ENC%12s ssi_chan_3=J3_ENC%12s enable_raw"
 #loadrt stepgen step_type=0,0,0,0,0 ctrl_type=v,v,p,p,p
-loadrt pid names=pid.x,pid.y,pid.z,pid.a
+loadrt pid names=pid.x,pid.y,pid.z,pid.c
 loadrt orient                       count=1                 #ORIENT
 setp   hm2_7i80.0.watchdog.timeout_ns 60000000
 setp hm2_7i80.0.stepgen.timer-number 1
@@ -12,15 +12,16 @@ setp hm2_7i80.0.packet-error-limit  500
 addf hm2_7i80.0.read          servo-thread  # read first
 addf pid.x.do-pid-calcs       servo-thread  # PID
 addf pid.y.do-pid-calcs       servo-thread
+
 addf pid.z.do-pid-calcs       servo-thread
-addf pid.a.do-pid-calcs       servo-thread
+addf pid.c.do-pid-calcs       servo-thread
 addf motion-command-handler   servo-thread
 addf motion-controller        servo-thread
 addf orient.0           	  servo-thread
 addf hm2_7i80.0.write         servo-thread  # Last write
 
 setp hm2_7i80.0.dpll.01.timer-us -50
-setp hm2_7i80.0.dpll.02.timer-us -200
+setp hm2_7i80.0.dpll.02.timer-us -100
 setp hm2_7i80.0.dpll.03.timer-us -150
 setp hm2_7i80.0.dpll.04.timer-us -300
 
@@ -110,10 +111,8 @@ setp hm2_[HOSTMOT2](BOARD).0.gpio.058.invert_output true
 
 net x-amp-enable => hm2_[HOSTMOT2](BOARD).0.gpio.051.out
 net y-amp-enable => hm2_[HOSTMOT2](BOARD).0.gpio.053.out
-net zena joint.2.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.02.enable
-net zena joint.2.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.055.out
-net aena joint.3.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.03.enable
-net aena joint.3.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.gpio.057.out
+net z-amp-enable => hm2_[HOSTMOT2](BOARD).0.gpio.055.out
+net c-amp-enable => hm2_[HOSTMOT2](BOARD).0.gpio.057.out
 net cena joint.4.amp-enable-out => hm2_[HOSTMOT2](BOARD).0.stepgen.04.enable
 
 # Cai home pin 

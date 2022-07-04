@@ -1,5 +1,5 @@
 [DIALOG_GEOMETRY]
-LncMessage-geometry = 634 369 286 120
+LncMessage-geometry = 634 369 194 100
 ToolChangeDialog-geometry = 634 369 99 29
 FileDialog-geometry = 375 176 617 415
 CalculatorDialog-geometry = 3 29 1920 1051
@@ -58,7 +58,7 @@ desktop_notify = False
 notify_max_msgs = 1
 shutdown_check = True
 sound_player_on = False
-mainwindow_geometry = 3 29 1360 760
+mainwindow_geometry = 557 169 1360 760
 overlay_play_sound = False
 overlay_sound_type = RING
 
@@ -196,7 +196,7 @@ Pnp_SpeedZD = 0
 Pnp_InputBad = 0
 
 [CHOOSE_ACTUATOR]
-Nhan Test = 568
+Nhan Test = 619
 Type Actuator = 0
 scum_close_ex2_type = 0
 scum_open_ex2_type = 0
