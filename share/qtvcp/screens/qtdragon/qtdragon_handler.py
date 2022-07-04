@@ -9,7 +9,7 @@ from qtvcp.widgets.file_manager import FileManager as FM
 from qtvcp.lib.writer import writer
 from qtvcp.lib.keybindings import Keylookup
 from qtvcp.lib.gcodes import GCodes
-from qtvcp.lib.qt_pdf import PDFViewer 
+from qtvcp.lib.qt_pdf import PDFViewer
 from qtvcp.core import Status, Action, Info, Path, Qhal
 from qtvcp import logger
 from shutil import copyfile
@@ -158,13 +158,12 @@ class HandlerClass:
             # web view widget for SETUP page
             if self.w.web_view:
                 self.toolBar = QtWidgets.QToolBar(self.w)
-                self.w.layout_HTML.addWidget(self.toolBar)
+                self.w.tabWidget_setup.setCornerWidget(self.toolBar)
 
                 self.backBtn = QtWidgets.QPushButton(self.w)
                 self.backBtn.setEnabled(True)
                 self.backBtn.setIconSize(QtCore.QSize(48, 38))
                 self.backBtn.setIcon(QtGui.QIcon(':/qt-project.org/styles/commonstyle/images/left-32.png'))
-
                 self.backBtn.clicked.connect(self.back)
                 self.toolBar.addWidget(self.backBtn)
 
@@ -305,7 +304,7 @@ class HandlerClass:
         self.w.PREFS_.putpref('Inhibit display mouse selection', self.w.chk_inhibit_selection.isChecked(), bool, 'CUSTOM_FORM_ENTRIES')
 
     def init_widgets(self):
-        self.w.main_tab_widget.setCurrentIndex(TAB_MAIN)
+        self.adjust_stacked_widgets(TAB_MAIN)
         self.w.chk_override_limits.setChecked(False)
         self.w.chk_override_limits.setEnabled(False)
         self.w.lbl_maxv_percent.setText("100 %")
@@ -849,9 +848,9 @@ class HandlerClass:
     # tab is selected
     def tab_utilities_changed(self, num):
         if num == 2:
-            self.w.stackedWidget.setCurrentIndex(4)
+            self.w.stackedWidget.setCurrentIndex(PAGE_NGCGUI)
         else:
-            self.w.stackedWidget.setCurrentIndex(0)
+            self.w.stackedWidget.setCurrentIndex(PAGE_GCODE)
 
     #####################
     # GENERAL FUNCTIONS #
@@ -871,7 +870,7 @@ class HandlerClass:
             self.w.cmb_gcode_history.setToolTip(fname)
             ACTION.OPEN_PROGRAM(fname)
             self.add_status("Loaded program file : {}".format(fname))
-            self.w.main_tab_widget.setCurrentIndex(TAB_MAIN)
+            self.adjust_stacked_widgets(TAB_MAIN)
             self.w.filemanager.recordBookKeeping()
 
             # adjust ending to check for related HTML setup files
@@ -887,9 +886,10 @@ class HandlerClass:
             fname = filename+'.pdf'
             if os.path.exists(fname):
                 self.PDFView.loadView(fname)
-                #url = QtCore.QUrl.fromLocalFile(fname)
-                #QtGui.QDesktopServices.openUrl(url)
                 self.add_status("Loaded PDF file : {}".format(fname))
+            else:
+                self.PDFView.loadSample('setup_tab')
+
             return
 
         # loading HTML/PDF directly
@@ -907,8 +907,6 @@ class HandlerClass:
         else:
             if os.path.exists(fname):
                 self.PDFView.loadView(fname)
-                #url = QtCore.QUrl.fromLocalFile(fname)
-                #QtGui.QDesktopServices.openUrl(url)
                 self.add_status("Loaded PDF file : {}".format(fname))
 
     def disable_spindle_pause(self):
@@ -970,7 +968,7 @@ class HandlerClass:
             if self.w.main_tab_widget.currentIndex() != TAB_PROBE:
                 self.w.jogging_frame.hide()
                 self.w.btn_main.setChecked(True)
-                self.w.main_tab_widget.setCurrentIndex(TAB_MAIN)
+                self.adjust_stacked_widgets(TAB_MAIN)
                 self.w.stackedWidget.setCurrentIndex(0)
                 self.w.stackedWidget_dro.setCurrentIndex(0)
 
@@ -1119,6 +1117,7 @@ class HandlerClass:
         # give a warning and reset the button check
         if main_index != requestedIndex and not main_index in(TAB_CAMERA,TAB_GCODES,TAB_SETUP):
             self.add_status("Cannot switch pages while in AUTO mode", WARNING)
+            self.w.main_tab_widget.setCurrentIndex(0)
             self.w.btn_main.setChecked(True)
 
     #####################

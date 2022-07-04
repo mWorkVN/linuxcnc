@@ -32,6 +32,12 @@
       <property name="focusOverlay_option" stdset="0">
        <bool>true</bool>
       </property>
+      <property name="focusEffect_option" stdset="0">
+       <bool>true</bool>
+      </property>
+      <property name="focusBlur_option" stdset="0">
+       <bool>true</bool>
+      </property>
       <property name="entryDialog_option" stdset="0">
        <bool>true</bool>
       </property>
@@ -987,7 +993,7 @@
                         <property name="maximumSize">
                          <size>
                           <width>50</width>
-                          <height>25</height>
+                          <height>40</height>
                          </size>
                         </property>
                         <property name="text">
@@ -1210,7 +1216,7 @@
                         <property name="maximumSize">
                          <size>
                           <width>50</width>
-                          <height>25</height>
+                          <height>40</height>
                          </size>
                         </property>
                         <property name="text">
@@ -1543,6 +1549,9 @@
                     </property>
                     <property name="textTemplate" stdset="0">
                      <string>%s</string>
+                    </property>
+                    <property name="feed_override_status" stdset="0">
+                     <bool>true</bool>
                     </property>
                    </widget>
                   </item>
