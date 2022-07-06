@@ -1,4 +1,4 @@
-VERSION = '1.227.212'
+VERSION = '1.227.214'
 
 '''
 qtplasmac_handler.py
@@ -595,13 +595,11 @@ class HandlerClass:
                 N.update(O.notify_hard_limits, title='Machine Error:', message=text, msgs=O.notify_max_msgs)
             elif 'jog-inhibit' in text:
                 if self.w.led_float_switch.hal_pin.get():
-                    trigger = _translate('HandlerClass', 'Float Switch')
+                    text = _translate('HandlerClass', 'Float Switch has disabled jogging')
                 elif self.w.led_ohmic_probe.hal_pin.get():
-                    trigger = _translate('HandlerClass', 'Ohmic Probe')
+                    text = _translate('HandlerClass', 'Ohmic Probe has disabled jogging')
                 elif self.w.led_breakaway_switch.hal_pin.get():
-                    trigger = _translate('HandlerClass', 'Breakaway Switch')
-                msg0 = _translate('HandlerClass', 'has disabled jogging')
-                text = '{} {}\n'.format(trigger, msg0)
+                    text = _translate('HandlerClass', 'Breakaway Switch has disabled jogging')
                 N.update(O.notify_critical, title='Operator Error:', message=text, msgs=O.notify_max_msgs)
             elif kind == linuxcnc.OPERATOR_ERROR:
                 N.update(O.notify_critical, title='Operator Error:', message=text, msgs=O.notify_max_msgs)
@@ -1608,6 +1606,7 @@ class HandlerClass:
                     txt0 = _translate('HandlerClass', 'RUN FROM LINE')
                     txt1 = _translate('HandlerClass', 'CYCLE START')
                     self.runText = '{}\n{}'.format(txt0, txt1)
+                    self.rflSelected = False
                 else:
                     self.startLine = 0
                     self.rflSelected = False
@@ -1728,7 +1727,10 @@ class HandlerClass:
                 userInput = self.dialog_run_from_line()
                 # rfl cancel clicked
                 if userInput['cancel']:
-                    self.clear_rfl()
+                    if 'rfl.ngc' in self.lastLoadedProgram:
+                        self.set_start_line(-1)
+                    else:
+                        self.clear_rfl()
                     self.set_run_button_state()
                 else:
                     # rfl load clicked
