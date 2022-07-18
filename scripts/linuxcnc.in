@@ -662,18 +662,18 @@ function Cleanup() {
 
     if [ "$1" = "other" ]; then
         echo -n "Waiting for other session to finish exiting..."
-	WAIT=$KILL_TIMEOUT
-	while [ $WAIT -gt 1 ]; do
-            if ! [ -f $LOCKFILE ]; then
-                echo " Ok"
-                return 0
-            fi
-            WAIT=$(($WAIT-1))
-            sleep .1
+        WAIT=$KILL_TIMEOUT
+        while [ $WAIT -gt 1 ]; do
+                if ! [ -f $LOCKFILE ]; then
+                    echo " Ok"
+                    return 0
+                fi
+                WAIT=$(($WAIT-1))
+                sleep .1
         done
         echo "lockfile still not removed"
     fi
-
+    echo "mwork - test still remove"
     SHUTDOWN=`$INIVAR -ini "$INIFILE" -var SHUTDOWN -sec HAL 2> /dev/null`
     if [ -n "$SHUTDOWN" ]; then
 	echo "Running HAL shutdown script"
@@ -707,7 +707,7 @@ function Cleanup() {
             BSHMEM) ipcrm -M $m 2>/dev/null;;
         esac
     done < $NMLFILE
-
+    echo "mwork - remove done"
 
     # remove lock file
     if [ -f $LOCKFILE ] ; then
@@ -747,7 +747,7 @@ if [ -f $LOCKFILE ]; then
     y|Y|yes)
       echo Cleaning up old LinuxCNC...
       Cleanup other
-      sleep 8
+      sleep 8 #wait to GUI turnOff
     ;;
     *)
       echo Not starting new LinuxCNC
