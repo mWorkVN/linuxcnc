@@ -744,6 +744,13 @@ LOCKFILE=/tmp/linuxcnc.lock
 MWORKLOCK=/tmp/mworklock.lock
 
 echo "mwork check"
+if [ -f $MWORKLOCK ] ; then
+    echo "mwork - mworklock file"
+else
+    echo "mwork - create mworklock file"
+    touch $MWORKLOCK
+    sleep 5
+fi
 # Check for lock file
 if [ -f $LOCKFILE ]; then
   if tty -s; then
@@ -794,13 +801,7 @@ cd "$INI_DIR"
 # Create the lock file
 touch $LOCKFILE
 
-if [ -f $MWORKLOCK ] ; then
-    echo "mwork - mworklock file"
-else
-    echo "mwork - create mworklock file"
-    touch $MWORKLOCK
-    sleep 5
-fi
+
 ################################################################################
 # 4.1. pop up intro graphic
 ################################################################################
