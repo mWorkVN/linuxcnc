@@ -727,7 +727,7 @@ function Cleanup() {
     fi    
     # remove lock file
     if [ -f $LOCKFILE ] ; then
-	    m $LOCKFILE
+	    rm $LOCKFILE
     fi
     return 1
 }

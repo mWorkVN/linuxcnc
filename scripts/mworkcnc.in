@@ -748,7 +748,6 @@ if [ -f $MWORKLOCK ] ; then
 else
     echo "mwork - create mworklock file"
     touch $MWORKLOCK
-    sleep 5
 fi
 # Check for lock file
 if [ -f $LOCKFILE ]; then
