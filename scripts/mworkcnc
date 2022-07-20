@@ -674,6 +674,12 @@ function Cleanup() {
             sleep .1
         done
         echo "lockfile still not removed"
+
+    else
+        if [ -f $MWORKLOCK ] ; then
+            echo "mwork - remove mwork lock when the machine can't start"
+            rm $MWORKLOCK
+        fi
     fi
 
     SHUTDOWN=`$INIVAR -ini "$INIFILE" -var SHUTDOWN -sec HAL 2> /dev/null`
@@ -749,13 +755,12 @@ if [ -f $MWORKLOCK ] ; then
 else
     echo "mwork - create mworklock file"
     touch $MWORKLOCK
-    sleep 5
 fi
 # Check for lock file
 if [ -f $LOCKFILE ]; then
   if tty -s; then
     input=y
-    echo -n "LinuxCNC is still running.  Restart it? [Y/n] "
+    echo -n "LinuxCNC is still running.  Restart it?"
     #read input; [ -z $input ] && input=y
   elif [ -z "$DISPLAY" ]; then
     echo "No display, no tty, trying to clean up other instance automatically"
