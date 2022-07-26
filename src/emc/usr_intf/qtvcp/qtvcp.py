@@ -291,11 +291,12 @@ Pressing cancel will close linuxcnc.""" % target)
         # actually build the widgets
         window.instance(filename=PATH.XML)
 
+        # add a default program icon - this might be overridden later
+        window.setWindowIcon(QtGui.QIcon(os.path.join(PATH.IMAGEDIR, 'linuxcncicon.png')))
+
         # title
         if INIPATH:
-            if (INITITLE == ""):
-                INITITLE='QTvcp-Screen-%s'% opts.component
-            title = INITITLE
+            title ='QTvcp-Screen-%s'% opts.component
         else:
             title = 'QTvcp-Panel-%s'% opts.component
         window.setWindowTitle(title)
@@ -402,17 +403,18 @@ Pressing cancel will close linuxcnc.""" % target)
         if INIPATH:
             self.postgui()
             self.postgui_cmd()
-            if (INIICON == ""):
-                window.setWindowIcon(QtGui.QIcon(os.path.join(PATH.IMAGEDIR, 'linuxcncicon.png')))
-            else:
+            # if there is a valid INI based icon path, override the default icon.
+            if INIICON !='' and os.path.exists(os.path.join(PATH.CONFIGPATH, INIICON)):
                 window.setWindowIcon(QtGui.QIcon(os.path.join(PATH.CONFIGPATH, INIICON)))
-        else:
-            window.setWindowIcon(QtGui.QIcon(os.path.join(PATH.IMAGEDIR, 'linuxcnc-wizard.gif')))
+            if (INITITLE !=''):
+                window.setWindowTitle(INITITLE)
 
         # catch control c and terminate signals
         signal.signal(signal.SIGTERM, self.shutdown)
         signal.signal(signal.SIGINT, self.shutdown)
 
+        # check for handler file and if it has 'before_loop' function
+        # last chance to change anything before event loop.
         if opts.usermod and "before_loop__" in dir(window.handler_instance):
             LOG.debug('''Calling the handler file's before_loop__ function''')
             window.handler_instance.before_loop__()

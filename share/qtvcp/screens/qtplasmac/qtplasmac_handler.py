@@ -1,4 +1,4 @@
-VERSION = '1.228.219'
+VERSION = '1.228.220'
 
 '''
 qtplasmac_handler.py
@@ -149,7 +149,6 @@ class HandlerClass:
         self.GCODES = GCodes(widgets)
         self.valid = QDoubleValidator(0.0, 999.999, 3)
         self.IMAGES = os.path.join(self.PATHS.IMAGEDIR, 'qtplasmac/images/')
-        self.w.setWindowIcon(QIcon(os.path.join(self.IMAGES, 'linuxcncicon.png')))
         self.landscape = True
         if os.path.basename(self.PATHS.XML) == 'qtplasmac_9x16.ui':
             self.landscape = False
@@ -364,7 +363,6 @@ class HandlerClass:
         STATUS.connect('tool-in-spindle-changed', self.tool_changed)
         STATUS.connect('periodic', lambda w: self.update_periodic())
         STATUS.connect('metric-mode-changed', self.metric_mode_changed)
-        self.w.setWindowTitle('{} - QtPlasmaC v{}, powered by QtVCP on LinuxCNC v{}'.format(self.machineName, VERSION, linuxcnc.version.split(':')[0]))
         self.startupTimer = QTimer()
         self.startupTimer.timeout.connect(self.startup_timeout)
         self.startupTimer.setSingleShot(True)
@@ -397,6 +395,10 @@ class HandlerClass:
         if self.firstRun is True:
             self.firstRun = False
         self.startupTimer.start(250)
+
+    def before_loop__(self):
+        self.w.setWindowTitle('{} - QtPlasmaC v{}, powered by QtVCP on LinuxCNC v{}'.format(self.machineName, VERSION, linuxcnc.version.split(':')[0]))
+        self.w.setWindowIcon(QIcon(os.path.join(self.IMAGES, 'Chips_Plasma.png')))
 
 
 #########################################################################################################################
@@ -2486,8 +2488,8 @@ class HandlerClass:
         self.yOffsetPin.value_changed.connect(lambda v:self.cutrec_offset_changed(self.xOffsetPin.get(), v))
         self.offsetsActivePin.value_changed.connect(lambda v:self.offsets_active_changed(v))
         self.consChangePin.value_changed.connect(lambda v:self.consumable_change_changed(v))
-        self.w.cam_mark.pressed.connect(self.cam_mark_pressed)
-        self.w.cam_goto.pressed.connect(self.cam_goto_pressed)
+        self.w.cam_mark.clicked.connect(self.cam_mark_clicked)
+        self.w.cam_goto.clicked.connect(self.cam_goto_clicked)
         self.w.cam_zoom_plus.pressed.connect(self.cam_zoom_plus_pressed)
         self.w.cam_zoom_minus.pressed.connect(self.cam_zoom_minus_pressed)
         self.w.cam_dia_plus.pressed.connect(self.cam_dia_plus_pressed)
@@ -4664,6 +4666,9 @@ class HandlerClass:
     def laser_clicked(self):
         if STATUS.is_interp_paused():
             return
+        if self.laserButtonState == 'reset':
+            self.laserButtonState = 'laser'
+            return
         xPos = STATUS.get_position()[0][0] - self.laserOffsetX
         yPos = STATUS.get_position()[0][1] - self.laserOffsetY
         if xPos < self.xMin or xPos > self.xMax or yPos < self.yMin or yPos > self.yMax:
@@ -4671,10 +4676,7 @@ class HandlerClass:
             msg0 = _translate('HandlerClass', 'Laser is outside the machine boundary')
             STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n'.format(head, msg0))
             return
-        if self.laserButtonState == 'reset':
-            self.laserButtonState = 'laser'
-            return
-        elif self.laserButtonState == 'laser':
+        if self.laserButtonState == 'laser':
             self.w.laser.setText(_translate('HandlerClass', 'MARK\nEDGE'))
             self.laserButtonState = 'markedge'
             self.laserOnPin.set(1)
@@ -4756,7 +4758,7 @@ class HandlerClass:
             ACTION.SET_MANUAL_MODE()
         return button_state
 
-    def cam_mark_pressed(self):
+    def cam_mark_clicked(self):
         xPos = STATUS.get_position()[0][0] - self.camOffsetX
         yPos = STATUS.get_position()[0][1] - self.camOffsetY
         if xPos < self.xMin or xPos > self.xMax or yPos < self.yMin or yPos > self.yMax:
@@ -4766,7 +4768,7 @@ class HandlerClass:
             return
         self.camButtonState = self.sheet_align(self.camButtonState, self.w.cam_mark, self.camOffsetX, self.camOffsetY)
 
-    def cam_goto_pressed(self):
+    def cam_goto_clicked(self):
         msgList, units, xMin, yMin, xMax, yMax = self.bounds_check('align', 0, 0)
         if not self.boundsError['align']:
             ACTION.CALL_MDI_WAIT('G0 X0 Y0')
