@@ -1,4 +1,4 @@
-VERSION = '1.229.223'
+VERSION = '1.229.224'
 
 '''
 qtplasmac_handler.py
@@ -3547,10 +3547,7 @@ class HandlerClass:
             else:
                 self.w.preview_stack.setCurrentIndex(4)
                 self.button_active(self.ovButton)
-                buttonList = []
-                for button in self.idleHomedList:
-                    if button != self.ovButton:
-                        buttonList.append(button)
+                buttonList = [button for button in self.idleHomedList if button != self.ovButton]
                 self.set_buttons_state([self.idleList, self.idleOnList, buttonList], False)
                 self.w.run.setEnabled(False)
         elif 'latest-file' in commands.lower():
@@ -3800,7 +3797,10 @@ class HandlerClass:
     def torch_pulse_states(self, state):
         self.set_tab_jog_states(state)
         if not STATUS.is_auto_paused():
-            self.set_buttons_state([self.idleList, self.idleOnList, self.idleHomedList], state)
+            if STATUS.is_on_and_idle() and STATUS.is_all_homed():
+                self.set_buttons_state([self.idleList, self.idleOnList, self.idleHomedList], state)
+            else:
+                self.set_buttons_state([self.idleList, self.idleOnList], state)
             if self.w.gcode_display.lines() > 1:
                 self.w.run.setEnabled(state)
         if state:
@@ -3815,14 +3815,14 @@ class HandlerClass:
 
     def ohmic_test(self, state):
         hal.set_p('plasmac.ohmic-test', '{}'.format(str(state)))
-        buttonList = []
-        for button in self.idleOnList:
-            if button != self.otButton:
-                buttonList.append(button)
+        buttonList = [button for button in self.idleOnList if button != self.otButton]
         if not STATUS.is_auto_paused():
+            if STATUS.is_on_and_idle() and STATUS.is_all_homed():
+                self.set_buttons_state([self.idleList, self.idleHomedList, buttonList], not state)
+            else:
+                self.set_buttons_state([self.idleList, buttonList], not state)
             if self.w.gcode_display.lines() > 1:
                 self.w.run.setEnabled(not state)
-            self.set_buttons_state([self.idleList, buttonList, self.idleHomedList], not state)
 
     def ext_frame_job(self, state):
         if self.frButton and self.w[self.frButton].isEnabled():

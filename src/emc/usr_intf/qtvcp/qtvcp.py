@@ -421,10 +421,7 @@ Pressing cancel will close linuxcnc.""" % target)
 
         LOG.info('Preference path: yellow<{}>'.format(PATH.PREFS_FILENAME))
         # start loop
-        APP.exec_()
-
-        # now shut it all down
-        self.shutdown()
+        APP.exec()
 
     # finds the postgui file name and INI file path
     def postgui(self):
@@ -453,6 +450,7 @@ Pressing cancel will close linuxcnc.""" % target)
     # call optional widget cleanup functions
     # shut down STATUS so no error is called
     # close out HAL pins
+    # there is similar code in screen_options
     def shutdown(self,signum=None,stack_frame=None):
         try:
             self.panel.window.shutdown()
@@ -468,7 +466,6 @@ Pressing cancel will close linuxcnc.""" % target)
             self.halcomp.exit()
         except:
             pass
-        sys.exit(0)
 
         # Throws up a dialog with debug info when an error is encountered
     def excepthook(self, exc_type, exc_obj, exc_tb):
@@ -513,4 +510,4 @@ Pressing cancel will close linuxcnc.""" % target)
 # starts Qtvcp
 if __name__ == "__main__":
         APP = QTVCP()
-
+        sys.exit(0)

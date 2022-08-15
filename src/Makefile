@@ -508,7 +508,8 @@ inclean:
 	$(RM) $(INFILES)
 headersclean:
 	$(RM) $(HEADERS)
-clean: docclean pythonclean cscopeclean inclean headersclean
+clean: docclean pythonclean cscopeclean headersclean
+distclean: clean inclean
 
 # This is the gateway into the crazy world of "kbuild", the linux 2.6 system
 # for building kernel modules.	Other kernel module build styles need to be
