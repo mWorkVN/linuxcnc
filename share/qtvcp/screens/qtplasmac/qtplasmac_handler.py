@@ -1,4 +1,4 @@
-VERSION = '1.229.224'
+VERSION = '1.230.232'
 
 '''
 qtplasmac_handler.py
@@ -135,19 +135,17 @@ class HandlerClass:
         if self.units == 'inch':
             self.units = 'in'
             self.unitsPerMm = 0.03937
-        # try to open prefs file so we can use it for updates
+        # open prefs file so we can use it for updates
         # it will not exist prior to V1.222.170 2022/03/08
-        self.PREFS = None
-        try:
+        if os.path.isfile(os.path.join(self.PATHS.CONFIGPATH, self.machineName + '.prefs')):
             self.PREFS = Access(os.path.join(self.PATHS.CONFIGPATH, self.machineName + '.prefs'))
-        except:
-            pass
+        else:
+            self.PREFS = None
         self.updateIni = []
         self.update_check()
         self.PREFS = Access(os.path.join(self.PATHS.CONFIGPATH, self.machineName + '.prefs'))
         self.STYLEEDITOR = SSE(widgets, paths)
         self.GCODES = GCodes(widgets)
-        self.valid = QDoubleValidator(0.0, 999.999, 3)
         self.IMAGES = os.path.join(self.PATHS.IMAGEDIR, 'qtplasmac/images/')
         self.landscape = True
         if os.path.basename(self.PATHS.XML) == 'qtplasmac_9x16.ui':
@@ -155,7 +153,6 @@ class HandlerClass:
         self.gui43 = False
         if os.path.basename(self.PATHS.XML) == 'qtplasmac_4x3.ui':
             self.gui43 = True
-        self.widgetsLoaded = 0
         KEYBIND.add_call('Key_F12','on_keycall_F12')
         KEYBIND.add_call('Key_F9','on_keycall_F9')
         KEYBIND.add_call('Key_Plus', 'on_keycall_PLUS')
@@ -219,8 +216,8 @@ class HandlerClass:
         self.yMax = float(self.iniFile.find('AXIS_Y', 'MAX_LIMIT'))
         self.zMin = float(self.iniFile.find('AXIS_Z', 'MIN_LIMIT'))
         self.zMax = float(self.iniFile.find('AXIS_Z', 'MAX_LIMIT'))
-        self.xLen = float(self.xMax - self.xMin)
-        self.yLen = float(self.yMax - self.yMin)
+        self.xLen = self.xMax - self.xMin
+        self.yLen = self.yMax - self.yMin
         self.thcFeedRate = float(self.iniFile.find('AXIS_Z', 'MAX_VELOCITY')) * \
                            float(self.iniFile.find('AXIS_Z', 'OFFSET_AV_RATIO')) * 60
         self.maxHeight = self.zMax - self.zMin
@@ -311,6 +308,7 @@ class HandlerClass:
         self.CUT_REC_OFF    = 26
         self.DEBUG          = 27
 
+# called by qtvcp.py
     def initialized__(self):
         # ensure we get all startup errors
         STATUS.connect('error', self.error_update)
@@ -319,8 +317,6 @@ class HandlerClass:
         self.init_preferences()
         self.hide_widgets()
         self.init_widgets()
-        # hijack the qtvcp shutdown to our own close event
-        self.w.screen_options.QTVCP_INSTANCE_.closeEvent = self.closeEvent
         self.w.button_frame.installEventFilter(self.w)
         self.link_hal_pins()
         self.statistics_init()
@@ -335,7 +331,6 @@ class HandlerClass:
         self.offset_peripherals()
         self.set_probe_offset_pins()
         self.wcs_rotation('get')
-        self.widgetsLoaded = 1
         STATUS.connect('state-estop', lambda w:self.estop_state(True))
         STATUS.connect('state-estop-reset', lambda w:self.estop_state(False))
         STATUS.connect('state-on', lambda w:self.power_state(True))
@@ -396,6 +391,7 @@ class HandlerClass:
             self.firstRun = False
         self.startupTimer.start(250)
 
+# called by qtvcp.py, can override qtvcp settings or qtvcp allowed user options (via ini)
     def before_loop__(self):
         self.w.setWindowTitle('{} - QtPlasmaC v{}, powered by QtVCP on LinuxCNC v{}'.format(self.machineName, VERSION, linuxcnc.version.split(':')[0]))
         self.w.setWindowIcon(QIcon(os.path.join(self.IMAGES, 'Chips_Plasma.png')))
@@ -404,6 +400,7 @@ class HandlerClass:
 #########################################################################################################################
 # CLASS PATCHING SECTION #
 #########################################################################################################################
+# called by qtvcp.py
     def class_patch__(self):
         self.gcode_editor_patch()
         self.camview_patch()
@@ -1059,6 +1056,7 @@ class HandlerClass:
             msg0 = _translate('HandlerClass', 'Invalid entry for probe offset')
             STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n'.format(head, msg0))
 
+# called by the modified closeEvent function in this handler
     def closing_cleanup__(self):
         # disconnect powermax
         self.w.pmx485_enable.setChecked(False)
@@ -1101,6 +1099,7 @@ class HandlerClass:
             with open(logName, 'w') as f:
                 f.write(text)
 
+# called by qt_makegui.py
     def processed_key_event__(self,receiver,event,is_pressed,key,code,shift,cntrl):
         # when typing in MDI, we don't want keybinding to call functions
         # so we catch and process the events directly.
@@ -1733,7 +1732,7 @@ class HandlerClass:
                     if result['error']:
                         msg0 = _translate('HandlerClass', 'Unable to calculate a leadin for this cut')
                         msg1 = _translate('HandlerClass', 'Program will run from selected line with no leadin applied')
-                        status.emit('error', operror, '{}:\n{}\n{}\n'.format(head, msg0, msg1))
+                        STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{}\n'.format(head, msg0, msg1))
                     # load rfl file
                     if ACTION.prefilter_path or self.lastLoadedProgram != 'None':
                         self.preRflFile = ACTION.prefilter_path or self.lastLoadedProgram
@@ -1806,7 +1805,7 @@ class HandlerClass:
             self.w.height_ovr_label.setText('{:.2f}'.format(self.heightOvr))
         self.old_ovr_counts = value
 
-    def height_ovr_scale_change (self,value):
+    def height_ovr_scale_change(self,value):
         if value:self.heightOvrScale = value
 
     def touch_xy_clicked(self):
@@ -2131,7 +2130,9 @@ class HandlerClass:
 #########################################################################################################################
 # GENERAL FUNCTIONS #
 #########################################################################################################################
+# called by ScreenOptions, this function overrides ScreenOption's closeEvent
     def closeEvent(self, event):
+        O = self.w.screen_options
         if self.w.chk_exit_warning.isChecked() or not STATUS.is_interp_idle():
             icon = QMessageBox.Question if STATUS.is_interp_idle() else QMessageBox.Critical
             head = _translate('HandlerClass', 'Shutdown')
@@ -2144,9 +2145,22 @@ class HandlerClass:
                 msg0 += '{}\n\n'.format(self.exitMessage)
             msg0 += _translate('HandlerClass', 'Do you want to shutdown QtPlasmaC')
             if self.dialog_show_yesno(icon, head, '\n{}?\n'.format(msg0)):
+                if O.PREFS_ and O.play_sounds and O.shutdown_play_sound:
+                    STATUS.emit('play-sound', O.shutdown_exit_sound_type)
+                O.QTVCP_INSTANCE_.settings.sync()
+                O.QTVCP_INSTANCE_.shutdown()
+                O.QTVCP_INSTANCE_.panel_.shutdown()
+                STATUS.shutdown()
                 event.accept()
             else:
                 event.ignore()
+        else:
+            if O.PREFS_ and O.play_sounds and O.shutdown_play_sound:
+                STATUS.emit('play-sound', O.shutdown_exit_sound_type)
+            O.QTVCP_INSTANCE_.settings.sync()
+            O.QTVCP_INSTANCE_.shutdown()
+            O.QTVCP_INSTANCE_.panel_.shutdown()
+            STATUS.shutdown()
 
     def update_check(self):
         # newest update must be added last in this function
@@ -2165,6 +2179,7 @@ class HandlerClass:
             old = os.path.join(self.PATHS.CONFIGPATH, 'qtplasmac.prefs')
             if os.path.isfile(old):
                 UPDATER.split_prefs_file(old, qtvcpPrefsFile, machinePrefsFile)
+            self.PREFS = Access(os.path.join(self.PATHS.CONFIGPATH, self.machineName + '.prefs'))
         # move conversational prefs from qtvcp.prefs to <machine_name>.prefs (pre V1.222.187 2022/05/03)
         if os.path.isfile(qtvcpPrefsFile) and os.path.isfile(machinePrefsFile):
             with open(qtvcpPrefsFile, 'r') as inFile:
@@ -3507,7 +3522,7 @@ class HandlerClass:
             for command in commands.split('\\'):
                 command = command.strip()
                 if command != 'toggle-laser':
-                    self.user_button_command(command)
+                    self.user_button_command(bNum, command)
         elif 'pulse-halpin' in commands.lower():
             head = _translate('HandlerClass', 'HAL Pin Error')
             msg1 = _translate('HandlerClass', 'Failed to pulse HAL pin')
@@ -3568,7 +3583,7 @@ class HandlerClass:
             self.reloadRequired = False
             for command in commands.split('\\'):
                 command = command.strip()
-                self.user_button_command(command)
+                self.user_button_command(bNum, command)
                 if command[0] == "%":
                     continue
                 while not STATUS.is_interp_idle():
@@ -3582,7 +3597,7 @@ class HandlerClass:
             ACTION.SET_MANUAL_MODE()
 
     # for G-code commands and external commands
-    def user_button_command(self, command):
+    def user_button_command(self, bNum, command):
         if command and command[0].lower() in 'xyzabgmfsto' and command.replace(' ','')[1] in '0123456789<':
             if '{' in command:
                 newCommand = subCommand = ''
@@ -3708,9 +3723,10 @@ class HandlerClass:
             self.consumable_change_setup()
             if self.ccFeed == 'None' or self.ccFeed < 1:
                 head = _translate('HandlerClass', 'User Button Error')
-                msg0 = _translate('HandlerClass', 'Invalid feed rate for consumable change')
-                msg1 = _translate('HandlerClass', 'check .prefs file settings')
-                STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{}\n{} Code\n'.format(head, msg0, msg1, str(button)))
+                msg0 = _translate('HandlerClass', 'Feed rate for consumable change missing or less than 1')
+                msg1 = _translate('HandlerClass', 'Check arguments for "change-consumables" button code in')
+                msg2 = _translate('HandlerClass', '.prefs file')
+                STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{}\n{}{}\n'.format(head, msg0, msg1, self.machineName, msg2))
                 return
             else:
                 hal.set_p('plasmac.xy-feed-rate', str(float(self.ccFeed)))
@@ -4262,38 +4278,40 @@ class HandlerClass:
     def material_temp_pin_changed(self, halpin):
         if halpin:
             t_name = 'Temporary {}'.format(halpin)
-            t_item = 0
+            k_width, p_height, p_delay, pj_height, pj_delay, c_height, \
+            c_speed, c_amps, c_volts, pause, g_press, c_mode, t_item = \
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
             with open(self.tmpMaterialFileGCode, 'r') as f_in:
                 for line in f_in:
-                    if line.startswith('name'):
+                    if line.startswith('NAME'):
                         t_name = line.split('=')[1].strip()
-                    if line.startswith('kerf_width'):
+                    if line.startswith('KERF_WIDTH'):
                         k_width = float(line.split('=')[1].strip())
-                    elif line.startswith('pierce_height'):
+                    elif line.startswith('PIERCE_HEIGHT'):
                         p_height = float(line.split('=')[1].strip())
-                    elif line.startswith('pierce_delay'):
+                    elif line.startswith('PIERCE_DELAY'):
                         p_delay = float(line.split('=')[1].strip())
-                    elif line.startswith('puddle_jump_height'):
+                    elif line.startswith('PUDDLE_JUMP_HEIGHT'):
                         pj_height = float(line.split('=')[1].strip())
-                    elif line.startswith('puddle_jump_delay'):
+                    elif line.startswith('PUDDLE_JUMP_DELAY'):
                         pj_delay = float(line.split('=')[1].strip())
-                    elif line.startswith('cut_height'):
+                    elif line.startswith('CUT_HEIGHT'):
                         c_height = float(line.split('=')[1].strip())
-                    elif line.startswith('cut_speed'):
+                    elif line.startswith('CUT_SPEED'):
                         c_speed = float(line.split('=')[1].strip())
-                    elif line.startswith('cut_amps'):
+                    elif line.startswith('CUT_AMPS'):
                         c_amps = float(line.split('=')[1].strip())
-                    elif line.startswith('cut_volts'):
+                    elif line.startswith('CUT_VOLTS'):
                         c_volts = float(line.split('=')[1].strip())
-                    elif line.startswith('pause_at_end'):
+                    elif line.startswith('PAUSE_AT_END'):
                         pause = float(line.split('=')[1].strip())
-                    elif line.startswith('gas_pressure'):
+                    elif line.startswith('GAS_PRESSURE'):
                         g_press = float(line.split('=')[1].strip())
-                    elif line.startswith('cut_mode'):
+                    elif line.startswith('CUT_MODE'):
                         c_mode = float(line.split('=')[1].strip())
             self.write_materials(halpin, t_name, k_width, p_height, \
                                  p_delay, pj_height, pj_delay, c_height, c_speed, \
-                                 c_amps, c_volts, pause, g_press, c_mode, 0)
+                                 c_amps, c_volts, pause, g_press, c_mode, t_item)
             self.display_materials()
             self.change_material(0)
             self.w.materials_box.setCurrentIndex(0)
@@ -4462,10 +4480,10 @@ class HandlerClass:
                             t_item += 1
                             received = []
                         else:
-                            msg0 = _translate('HandlerClass', 'Material number')
+                            msg0 = _translate('HandlerClass', 'Line')
                             msg1 = _translate('HandlerClass', 'is invalid')
                             msg2 = _translate('HandlerClass', 'Material numbers need to be less than 1000000')
-                            STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{} #{} {}{}\n'.format(head, msg0, msg1, matnum, msg2))
+                            STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{} "{}" {}\n{}\n'.format(head, msg0, line.strip(), msg1, msg2))
                             continue
                     elif line.startswith('NAME'):
                         if line.split('=')[1].strip():
@@ -4523,10 +4541,10 @@ class HandlerClass:
                         if line.split('=')[1].strip():
                             c_mode = float(line.split('=')[1].strip())
                 except:
-                    msg0 = _translate('Material file processing was aborted')
-                    msg1 = _translate('The following line in the material file')
-                    msg2 = _translate('contains an erroneous character')
-                    msg3 = _translate('Fix the line and reload the material file')
+                    msg0 = _translate('HandlerClass', 'Material file processing was aborted')
+                    msg1 = _translate('HandlerClass', 'The following line in the material file')
+                    msg2 = _translate('HandlerClass', 'contains an erroneous character')
+                    msg3 = _translate('HandlerClass', 'Fix the line and reload the material file')
                     STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{}\n{}:\n{}{}\n'.format(head, msg0, msg1, msg2, line, msg3))
                     material_error = True
                     break

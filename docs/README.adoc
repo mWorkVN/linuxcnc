@@ -160,7 +160,7 @@ https://po4a.alioth.debian.org/man/man7/po4a.7.php[po4a(7)] manpage.
 As the po4a support for asciidoc has been rapidly improving since
 LinuxCNC started using it, based on bug reports from the LinuxCNC
 community, a very recent version of po4a is needed.  At the moment, at
-least version 0.66 is needed, available in Debian Bookworm.
+least version 0.67 is needed, available in Debian Bookworm.
 
 === When the master document (english) changes
 
@@ -183,7 +183,7 @@ the translation level raise to a sensible level (for example not 0%),
 build rules need to be added to use the generated translations to
 build HTML and PDF editions of the translation.
 
-Add the new language code to the proper place in docs/po4a.conf.
+Add the new language code to the proper place in docs/po4a.cfg.
 Update build rules for the new language in `docs/src/Submakefile`.
 
 Edit debian/control.in to add the new linuxcnc-doc-$NEWLANG package.

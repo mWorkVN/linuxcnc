@@ -1,15 +1,29 @@
-# buster gcc (Debian 8.3.0-6) emits many warnings
-# use at your own risk
-ifeq ($(origin SUPPRESS_WARNINGS), undefined)
-else
-  QUIETFLAGS    ?=
-  QUIETFLAGS    += -Wno-unused-label
-  QUIETFLAGS    += -Wno-format-overflow
-  QUIETFLAGS    += -Wno-format-truncation
-  QUIETFLAGS    += -Wno-stringop-truncation
-  CXXQUIETFLAGS := $(QUIETFLAGS)
-  CXXQUIETFLAGS += -Wno-catch-value
-endif
+# Some useful targets:
+#
+#     default (if no make target is specified): Build the software and
+#         the docs (if enabled via configure).
+#
+#     build-software: Build all the realtime and non-realtime software
+#         libraries & executables.
+#
+#     docs: Build all the documentation that's enabled through configure.
+#
+#
+#     install: Install everything (realtime software, non-realtime
+#         software, and docs).
+#
+#     install-software: Install all architecture-specific things (realtime
+#         and non-realtime libraries and executables).
+#
+#     install-docs: Install all enabled documentation into $(DESTDIR).
+#
+
+
+default: build-software
+
+install: install-software install-docs
+
+install-software: install-kernel-dep install-kernel-indep install-menu
 
 ifeq ($(origin KERNELRELEASE), undefined)
 MAKEFLAGS += --warn-undefined-variables
@@ -32,7 +46,7 @@ endif
 
 # Delete the default suffix rules
 .SUFFIXES:
-.PHONY: default userspace modules clean modclean depclean install python pythonclean cscope cscopeclean
+.PHONY: default build-software userspace modules clean modclean depclean install install-software install-docs python pythonclean cscope cscopeclean
 
 # A "trivial build" is one which should not include dependency information
 # either because it should be usable before dependency information can be
@@ -113,7 +127,7 @@ cxx-option = $(shell if $(CXX) $(CXXFLAGS) $(1) -S -o /dev/null -xc++ /dev/null 
 ifeq ($(origin KERNELRELEASE),undefined)
 # When KERNELRELEASE is not defined, this is the userspace build.
 # The "modules" target is the gateway to the kernel module build.
-default: userspace modules
+build-software: userspace modules
 ifeq ($(RUN_IN_PLACE),yes)
 ifneq ($(BUILD_SYS),uspace)
 	@if [ -f ../bin/linuxcnc_module_helper ]; then if ! [ `id -u` = 0 -a -O ../bin/linuxcnc_module_helper -a -u ../bin/linuxcnc_module_helper ]; then $(VECHO) "You now need to run 'sudo make setuid' in order to run in place."; fi; fi
@@ -230,11 +244,17 @@ INCLUDE += $(LIBTIRPC_CFLAGS)
 # Compilation options.	Perhaps some of these should come from Makefile.inc? (CXXFLAGS now does)
 INTEGER_OVERFLOW_FLAGS := -fwrapv
 OPT := -Os $(INTEGER_OVERFLOW_FLAGS)
-DEBUG := $(DEBUG) -g -Wall
+DEBUG := $(DEBUG) -g -Wall -Wno-stringop-truncation
 CFLAGS := $(INCLUDE) $(OPT) $(DEBUG) $(EXTRA_DEBUG) -DULAPI -std=gnu99 -fgnu89-inline -Werror=implicit-function-declaration $(CFLAGS) $(CPPFLAGS)
 CXXFLAGS := $(INCLUDE) $(EXTRA_DEBUG) -DULAPI $(DEBUG) $(OPT) -Woverloaded-virtual $(CXXFLAGS) $(CPPFLAGS)
 CXXFLAGS += $(call cxx-option, -Wno-psabi)
 CXXFLAGS += $(call cxx-option, -std=gnu++11, -std=gnu++0x)
+# In Debian 11, any inclusion of <boost/python.hpp> leads to several
+# diagnostics from included headers about deprecated features. LinuxCNC does
+# not directly use these deprecated features, but it does use boost::python.
+# Silence the warnings just when they occur in files using boost/python.hpp by
+# adding SILENCE_BOOST_INTERNAL_DIAGNOSTICS_FLAGS to the object's EXTRAFLAGS
+SILENCE_BOOST_INTERNAL_DIAGNOSTICS_FLAGS = -DBOOST_ALLOW_DEPRECATED_HEADERS=1 -DBOOST_BIND_GLOBAL_PLACEHOLDERS=1
 
 CFLAGS   += $(TOOL_NML_FLAG)
 CXXFLAGS += $(TOOL_NML_FLAG)
@@ -304,6 +324,8 @@ INFILES = \
 	../share/applications/linuxcnc.desktop \
 	../share/applications/linuxcnc-latency.desktop \
 	../share/applications/linuxcnc-latency-histogram.desktop \
+	../share/applications/linuxcnc-pncconf.desktop \
+	../share/applications/linuxcnc-stepconf.desktop \
 	../scripts/linuxcnc_var \
 	../scripts/halcmd_twopass \
 	../scripts/runtests \
@@ -311,7 +333,7 @@ INFILES = \
 $(INFILES): %: %.in config.status
 	@./config.status --file=$@
 
-default: $(INFILES)
+build-software: $(INFILES)
 
 # For each file to be copied to ../include, its location in the source tree
 # is listed here.  Note that due to $(INCLUDE), defined above, the include
@@ -536,7 +558,8 @@ modclean:
 depclean:
 	-rm -rf depends
 
-clean: depclean modclean
+clean: genclean depclean modclean
+genclean:
 	find . -name '*.o' |xargs rm -f
 	-rm -rf objects
 	-rm -f $(TARGETS)
@@ -601,6 +624,8 @@ XDGDESKTOP = \
     ../share/applications/linuxcnc.desktop \
     ../share/applications/linuxcnc-latency.desktop \
     ../share/applications/linuxcnc-latency-histogram.desktop \
+    ../share/applications/linuxcnc-pncconf.desktop \
+    ../share/applications/linuxcnc-stepconf.desktop \
 
 ifeq ($(RUN_IN_PLACE),yes)
 define ERROR_MESSAGE
@@ -608,12 +633,12 @@ You configured run-in-place, but are trying to install.
 For an installable version, run configure without --enable-run-in-place
 and rebuild
 endef
-install:
+install install-software install-docs:
 	$(error $(ERROR_MESSAGE))
 
 MENUS = ../share/menus/CNC.menu \
     ../share/desktop-directories/cnc.directory
-install-menus install-menu: $(MENUS) $(XDGDESKTOP)
+rip-install-menus rip-install-menu: $(MENUS) $(XDGDESKTOP)
 	mkdir -p $(HOME)/.config/menus/applications-merged
 	cp $< $(HOME)/.config/menus/applications-merged
 else
@@ -626,13 +651,6 @@ DOCS_HELP=$(call GLOB,../docs/help/*.adoc)
 NC_FILES=$(filter-out %/butterfly.ngc,$(call GLOB,../nc_files/*))
 TCL=$(call GLOB,../tcl/*.tcl)
 TCL_BIN=$(call GLOB,../tcl/bin/*.tcl) ../tcl/bin/popimage
-
-install:
-	$(MAKE) install-docs || echo "Ignored."
-	$(MAKE) install-kernel-dep || echo "Ignored."
-	$(MAKE) install-kernel-indep || echo "Ignored."
-	$(MAKE) install-menu
-	$(ECHO) "Installed in DESTDIR='$(DESTDIR)' with prefix $(prefix)"
 
 install-docs:
 	$(DIR) $(DESTDIR)$(docsdir)
