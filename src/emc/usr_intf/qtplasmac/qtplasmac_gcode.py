@@ -26,8 +26,7 @@ import math
 import shutil
 import time
 from subprocess import run as RUN
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QDialog, QScrollArea, QWidget, QVBoxLayout, QLabel, QPushButton, QStyle, QFrame
 
@@ -314,7 +313,7 @@ def get_hole_diameter(I, J, isHole):
 
 # turn torch off and move 4mm (0.157) past hole end
 def overburn(I, J, radius):
-    global lineNum, lineNumOrg, errorLines, lastX, lastY, torchEnable, ocLength, warnCompTorch, arcDistMode, oBurnX, oBurnY
+    global lineNum, lineNumOrg, errorLines, lastX, lastY, torchEnable, ocLength, warnCompTorch, arcDistMode, oBurnX, oBurnY, codeWarn
     centerX = lastX + I
     centerY = lastY + J
     cosA = math.cos(ocLength / radius)
@@ -473,7 +472,7 @@ def do_material_change():
         c = line.split(';', 1)[0]
     else:
         c = line
-    a, b = c.split('p', 1)
+    b = c.split('p', 1)[1]
     m = ''
     # get the material number
     for mNum in b.strip():
@@ -578,7 +577,7 @@ def check_material_edit():
 
 # write temporary materials file
 def write_temporary_material(data):
-    global lineNum, lineNumOrg, errorLines, errorTempMat, warnMatLoad, material, codeError
+    global lineNum, lineNumOrg, errorLines, errorTempMat, warnMatLoad, material, codeError, codeWarn
     try:
         with open(tmpMaterialFile, 'w') as fWrite:
             if gui == 'plasmac':
@@ -621,7 +620,7 @@ def write_temporary_material(data):
 
 # rewrite the material file
 def rewrite_material_file(newMaterial):
-    global lineNum, warnMatLoad, errorLines
+    global lineNum, warnMatLoad, errorLines, codeWarn
     copyFile = '{}.bkp'.format(materialFile)
     shutil.copy(materialFile, copyFile)
     inFile = open(copyFile, 'r')

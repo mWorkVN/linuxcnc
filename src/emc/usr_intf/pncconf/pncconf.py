@@ -41,7 +41,6 @@ import pickle
 import shutil
 import math
 from optparse import Option, OptionParser
-import textwrap
 import locale
 import copy
 import fnmatch
@@ -1808,6 +1807,9 @@ PNCconf will use internal firmware data"%self._p.FIRMDIR),True)
                 self.widgets[key].set_active(True)
                 self.widgets[key+"button"].set_color(gdk.color_parse(data))
         self.widgets.touchyforcemax.set_active(bool(prefs.getpref('window_force_max')))
+
+    def set_touchy_preference(self, value, default, type):
+        prefs.getpref(value, default, type)
 
     def get_installed_themes(self):
             data1 = self.d.gladevcptheme
