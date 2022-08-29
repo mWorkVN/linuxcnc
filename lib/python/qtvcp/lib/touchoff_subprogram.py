@@ -17,7 +17,6 @@
 # It enables the probe routines to run without blocking the main GUI.
 
 import sys
-import os
 import json
 
 from PyQt5.QtCore import QObject
@@ -59,7 +58,7 @@ class TouchOffSubprog(QObject):
                           'pos_x2',
                           'pos_y2',
                           'pos_z2']
-                          
+
         self.process()
 
     def process(self):
@@ -100,7 +99,7 @@ class TouchOffSubprog(QObject):
             parms = json.loads(cmd[1])
             self.update_data(parms)
             error = self.probe_z()
-            return error                
+            return error
         else:
             return 0
 
@@ -119,9 +118,9 @@ class TouchOffSubprog(QObject):
 
     def probe_z(self):
         # rapid jog to first probe position
-        ACTION.CALL_MDI_WAIT("G0 Z{}".format(self.z_safe_travel), 30)
-        ACTION.CALL_MDI_WAIT("G0 X{} Y{}".format(self.pos_x1, self.pos_y1), 30)
-        ACTION.CALL_MDI_WAIT("G0 Z{}".format(self.pos_z1), 30)
+        if ACTION.CALL_MDI_WAIT("G0 Z{}".format(self.z_safe_travel), 30) == -1: return 0
+        if ACTION.CALL_MDI_WAIT("G0 X{} Y{}".format(self.pos_x1, self.pos_y1), 30) == -1: return 0
+        if ACTION.CALL_MDI_WAIT("G0 Z{}".format(self.pos_z1), 30) == -1: return 0
         error = self.probe_down()
         print('probeDown:{}\n'.format(error))
         ACTION.CALL_MDI("G90")
@@ -129,9 +128,9 @@ class TouchOffSubprog(QObject):
         pos = STATUS.get_probed_position_with_offsets()
         self.status_z1 = float(pos[2])
         # rapid jog to second probe position
-        ACTION.CALL_MDI_WAIT("G0 Z{}".format(self.z_safe_travel), 30)
-        ACTION.CALL_MDI_WAIT("G0 X{} Y{}".format(self.pos_x2, self.pos_y2), 30)
-        ACTION.CALL_MDI_WAIT("G0 Z{}".format(self.pos_z2), 30)
+        if ACTION.CALL_MDI_WAIT("G0 Z{}".format(self.z_safe_travel), 30) == -1: return 0
+        if ACTION.CALL_MDI_WAIT("G0 X{} Y{}".format(self.pos_x2, self.pos_y2), 30) == -1: return 0
+        if ACTION.CALL_MDI_WAIT("G0 Z{}".format(self.pos_z2), 30) == -1: return 0
         error = self.probe_down()
         ACTION.CALL_MDI("G90")
         if error == 0: return 0
@@ -139,7 +138,7 @@ class TouchOffSubprog(QObject):
         self.status_z2 = float(pos[2])
         if ACTION.CALL_MDI_WAIT("G0 Z{}".format(self.z_safe_travel), 10) == -1: return 0
         return 1
-        
+
     def probe_down(self):
         ACTION.CALL_MDI("G91")
         cmd = "G38.2 Z-{} F{}".format(self.max_probe, self.search_vel)
