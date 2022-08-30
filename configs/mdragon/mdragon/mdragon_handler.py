@@ -326,7 +326,7 @@ class HandlerClass:
         self.w.slider_jog_angular.setValue(INFO.DEFAULT_ANGULAR_JOG_VEL)
         self.w.slider_maxv_ovr.setValue(INFO.MAX_LINEAR_JOG_VEL)
         #self.w.slider_jog_linear.setValue(500)
-        self.w.slider_maxv_ovr.setValue(5000)
+        #self.w.slider_maxv_ovr.setValue(5000)
         #info= "Check 3001 - "
         #info=info + "{} , INFO.MAX_LINEAR_JOG_VEL {}".format(INFO.DEFAULT_LINEAR_JOG_VEL,INFO.MAX_LINEAR_JOG_VEL)
         #mess = {'NAME':'MESSAGE', 'ID':'_unhome_', 'MESSAGE':'UNHOME ALL', 'MORE':info, 'TYPE':'OKCANCEL'}
