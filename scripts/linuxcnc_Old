@@ -660,28 +660,21 @@ function Cleanup() {
 	    axis-remote --ping && axis-remote --quit
 	fi
     fi
-    #remove mwork lock
 
     if [ "$1" = "other" ]; then
         echo -n "Waiting for other session to finish exiting..."
         WAIT=$KILL_TIMEOUT
         while [ $WAIT -gt 1 ]; do
-            if ! [ -f $LOCKFILE ]; then
-                echo " Ok"
-                return 0
-            fi
-            WAIT=$(($WAIT-1))
-            sleep .1
+                if ! [ -f $LOCKFILE ]; then
+                    echo " Ok"
+                    return 0
+                fi
+                WAIT=$(($WAIT-1))
+                sleep .1
         done
         echo "lockfile still not removed"
-
-    else
-        if [ -f $MWORKLOCK ] ; then
-            echo "mwork - remove mwork lock when the machine can't start"
-            rm $MWORKLOCK
-        fi
     fi
-
+    echo "mwork - test still remove"
     SHUTDOWN=`$INIVAR -ini "$INIFILE" -var SHUTDOWN -sec HAL 2> /dev/null`
     if [ -n "$SHUTDOWN" ]; then
 	echo "Running HAL shutdown script"
@@ -694,10 +687,9 @@ function Cleanup() {
 	    KillTaskWithTimeout
 	fi
     done
-    echo "mwork - Stopping realtime threads"
+
     echo "Stopping realtime threads" >> $DEBUG_FILE
     $HALCMD stop
-    echo "mwork - Unloading hal components"
     echo "Unloading hal components" >> $DEBUG_FILE
     $HALCMD unload all
 
@@ -706,12 +698,11 @@ function Cleanup() {
         if [ `$HALCMD list comp | wc -w` = 1 ]; then break; fi
         sleep .2
     done
-    echo "mwork - Removing HAL_LIB, RTAPI, and Real Time OS modules"
+
     echo "Removing HAL_LIB, RTAPI, and Real Time OS modules" >>$PRINT_FILE
     $REALTIME stop
-    
-    echo "Removing NML shared memory segments" >> $PRINT_FILE
 
+    echo "Removing NML shared memory segments" >> $PRINT_FILE
     while read b x t x x x x x x m x; do
         case $b$t in
             BSHMEM) ipcrm -M $m 2>/dev/null;;
@@ -719,23 +710,10 @@ function Cleanup() {
     done < $NMLFILE
     echo "mwork - remove done"
 
-    echo "lockfile still not removed over time wssssssss"
-    if [ "$1" = "other" ]; then
-        WAIT=200
-        while [ $WAIT -gt 1 ]; do
-                if ! [ -f $LOCKFILE ]; then
-                    echo " Ok"
-                    return 0
-                fi
-                WAIT=$(($WAIT-1))
-                sleep .1
-        done
-    fi    
     # remove lock file
     if [ -f $LOCKFILE ] ; then
-	    rm $LOCKFILE
+	rm $LOCKFILE
     fi
-    return 1
 }
 
 
@@ -747,20 +725,12 @@ function Cleanup() {
 # Name of lock file to check for that signifies that LinuxCNC is up,
 # to prevent multiple copies of controller
 LOCKFILE=/tmp/linuxcnc.lock
-MWORKLOCK=/tmp/mworklock.lock
-
-echo "mwork check"
-if [ -f $MWORKLOCK ] ; then
-    echo "mwork - mworklock file"
-else
-    echo "mwork - create mworklock file"
-    touch $MWORKLOCK
-fi
+echo "sssssssssss"
 # Check for lock file
 if [ -f $LOCKFILE ]; then
   if tty -s; then
     input=y
-    echo -n "LinuxCNC is still running.  Restart it?"
+    echo -n "LinuxCNC is still running.  Restart it? [Y/n] "
     #read input; [ -z $input ] && input=y
   elif [ -z "$DISPLAY" ]; then
     echo "No display, no tty, trying to clean up other instance automatically"
@@ -776,16 +746,9 @@ if [ -f $LOCKFILE ]; then
   fi
   case $input in
     y|Y|yes)
-        echo Cleaning up old LinuxCNC...
-        statusn=1
-        Cleanup other
-        statusn=$?
-        if [ $statusn -eq 1 ]; then
-            echo "mwork - need wait close "
-            sleep 8
-        else
-            echo "mwork - don't need wait"
-        fi
+      echo Cleaning up old LinuxCNC...
+      Cleanup other
+      sleep 8 #wait to GUI turnOff
     ;;
     *)
       echo Not starting new LinuxCNC
@@ -805,7 +768,6 @@ cd "$INI_DIR"
 
 # Create the lock file
 touch $LOCKFILE
-
 
 ################################################################################
 # 4.1. pop up intro graphic
@@ -843,8 +805,6 @@ if ! program_available $EMCSERVER; then
     Cleanup
     exit 1
 fi
-
-
 export INI_FILE_NAME="$INIFILE"
 $EMCSERVER -ini "$INIFILE"
 
@@ -997,11 +957,7 @@ done
 
 # 4.3.9. start the realtime stuff ticking
 $HALCMD start
-#remove mwork lock
-if [ -f $MWORKLOCK ] ; then
-    echo "mwork - remove mwork lock"
-    rm $MWORKLOCK
-fi
+
 # 4.3.10. run other applications
 run_applications
 
