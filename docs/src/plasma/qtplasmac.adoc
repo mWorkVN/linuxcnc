@@ -224,7 +224,7 @@ If using a parallel port, use the <<cha:stepconf-wizard,StepConf wizard>> (enter
 stepconf
 ----
 
-If using a Mesa Electronics board, use the <<cha:pncconf-wizard, PnCConf wizard>> (enter the following command into a terminal window):
+If using a Mesa Electronics board, use the <<cha:pncconf-wizard, PnCconf wizard>> (enter the following command into a terminal window):
 
 ----
 pncconf
@@ -239,7 +239,7 @@ There are Linuxcnc forum sections available for these wizards:
 
 https://forum.linuxcnc.org/16-stepconf-wizard()[StepConf Wizard]
 
-https://forum.linuxcnc.org/39-pncconf[PnCConf Wizard]
+https://forum.linuxcnc.org/39-pncconf[PnCconf Wizard]
 
 Fill in the required entries to suit the machine wiring/breakout board configuration.
 
@@ -249,11 +249,11 @@ QtPlasmaC specific parameters, the two pages are QtPlasmaC options and
 QtPlasmaC page to suit the machine that is being configured and the user
 button requirements.
 
-Note that PnCConf options allow user selection of Feed Override, Linear
+Note that PnCconf options allow user selection of Feed Override, Linear
 Velocity, and Jog Increments whereas in StepConf these are automatically
 calculated and set.
 
-*PnCConf QtPlasmaC Options:*
+*PnCconf QtPlasmaC Options:*
 
 image::images/qtplasmac_pncconf_screen.png[width=600,align="center"]
 
@@ -1426,7 +1426,7 @@ For automatic material handling, the user would add commands to their G-code fil
 
 The following codes may be used to allow QtPlasmaC to automatically change materials:
 
-* *M190 Pn* - Changes the currently displayed material to material number n.
+* *M190 P__n__* - Changes the currently displayed material to material number n.
 * *M66 P3 L3 Q1* - Adds a small delay (1 second in this example) to wait for QtPlasmaC to confirm that it successfully changed materials.
 * *F#<_hal[plasmac.cut-feed-rate]>* - Sets the cut feed rate to the feed rate shown in the MATERIAL section of the <<qt_parameters-tab,PARAMETERS Tab>>.
 
@@ -1683,7 +1683,7 @@ The default LinuxCNC path tolerance is set for maximum speed which will severely
 
 It is recommended that the path tolerance is set by placing the appropriate G64 command and P value in the header of each G-code file.
 
-The provided G-code filter program will test for the existence of a G64 Pn command prior to the first motion command. If no G64 command is found it will insert a G64 P0.1 command which sets the path tolerance to 0.1mm. For a imperial config the command will be G64 P0.004.
+The provided G-code filter program will test for the existence of a G64 P__n__ command prior to the first motion command. If no G64 command is found it will insert a G64 P0.1 command which sets the path tolerance to 0.1 mm. For a imperial config the command will be G64 P0.004.
 
 For Metric:
 [source,{ngc}]
@@ -1838,8 +1838,8 @@ LinuxCNC (QtPlasmaC) has the ability to automatically adjust the cut path of the
 
 To use cutter compensation the user will need to use G41.1, G42.1 and G40 with the kerf width HAL pin:
 
-* *G41.1 D#<_hal[plasmac_run.kerf-width-f]>* : offsets torch to the left of the programmed path
-* *G42.1 D#<_hal[plasmac_run.kerf-width-f]>* : offsets torch to the right of the programmed path
+* *G41.1 D#<_hal[plasmac.kerf-width]>* : offsets torch to the left of the programmed path
+* *G42.1 D#<_hal[plasmac.kerf-width]>* : offsets torch to the right of the programmed path
 * *G40* turns the cutter compensation off
 
 IMPORTANT: IF *CUTTER COMPENSATION* IS IN EFFECT *G-CODE THC*, *VELOCITY BASED THC* AND *OVER CUT* ARE NOT ABLE TO BE USED; AN ERROR MESSAGE WILL BE DISPLAYED.
@@ -2446,44 +2446,18 @@ In order to utilize them, *KB Shortcuts* must be enabled in the *GUI SETTINGS* s
 |F2|Toggles the GUI power button.
 |F9|Toggles the "Cutting" command, used to begin or end a manual cut.
 |F12|Show stylesheet editor.
-|ALT + RETURN|Places QtPlasmaC into Manual Data Input (MDI) mode. +
+|ALT+RETURN|Places QtPlasmaC into Manual Data Input (MDI) mode. +
     Note that ALT + ENTER will achieve the same result. +
     In addition, pressing RETURN (or ENTER) with no entry in the MDI will close the MDI window.
-|1|Changes jog speed to 10% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
-|2|Changes jog speed to 20% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
-|3|Changes jog speed to 30% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
-|4|Changes jog speed to 40% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
-|5|Changes jog speed to 50% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
-|6|Changes jog speed to 60% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
-|7|Changes jog speed to 70% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
-|8|Changes jog speed to 80% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
-|9|Changes jog speed to 90% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
-|0|Changes jog speed to 100% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
-|SHIFT+1|Changes rapid speed to 10%.
-|SHIFT+2|Changes rapid speed to 20%.
-|SHIFT+3|Changes rapid speed to 30%.
-|SHIFT+4|Changes rapid speed to 40%.
-|SHIFT+5|Changes rapid speed to 50%.
-|SHIFT+6|Changes rapid speed to 60%.
-|SHIFT+7|Changes rapid speed to 70%.
-|SHIFT+8|Changes rapid speed to 80%.
-|SHIFT+9|Changes rapid speed to 90%.
-|SHIFT+0|Changes rapid speed to 100%.
-|CTRL+1|Changes feed rate to 10%.
-|CTRL+2|Changes feed rate to 20%.
-|CTRL+3|Changes feed rate to 30%.
-|CTRL+4|Changes feed rate to 40%.
-|CTRL+5|Changes feed rate to 50%.
-|CTRL+6|Changes feed rate to 60%.
-|CTRL+7|Changes feed rate to 70%.
-|CTRL+8|Changes feed rate to 80%.
-|CTRL+9|Changes feed rate to 90%.
-|CTRL+0|Changes feed rate to 100%.
-|CTRL+H or HOME|Homes all axes if they are not yet homed and have a homing sequence set in the <machine_name>.ini file. If they are already homed, they will no longer be homed.
+|`,1-9,0|Changes jog speed to 0%, 10%-90%, 100% of the value present in the DEFAULT_LINEAR_VELOCITY variable in the [DISPLAY] section of the <machine_name>.ini file.
+|SHIFT+`,1-9,0|Changes rapid speed to 0%, 10%-90%, 100%.
+|CTRL+1-9,0|Changes feed rate to 10%-90%, 100%.
+|CTRL+HOME|Homes all axes if they are not yet homed and have a homing sequence set in the <machine_name>.ini file. If they are already homed, they will no longer be homed.
 |CTRL+R|Cycle Start if the program is not already running. Cycle Resume if the program is paused.
 |END|Touches off X and Y to 0.
 |DEL|Allows the user to use a laser to set an origin with or without rotation. See the <<qt_laser,LASER section>> for detailed instructions.
-|SPACE BAR|Pause motion.
+|SPACE BAR|Pauses motion.
+|CTRL+SPACE BAR|Clears notifications.
 |O|Opens a new program.
 |L|Loads the previously opened program if no program is loaded. Reloads the current program if there is a program loaded.
 |→|Jogs the X axis positive.
@@ -2497,8 +2471,8 @@ In order to utilize them, *KB Shortcuts* must be enabled in the *GUI SETTINGS* s
 |.|Jogs the B axis positive.
 |,|Jogs the B axis negative.
 |SHIFT (+ Jog Key)|The shift key is used with any jog key to invoke a rapid jog.
-|+ (+ Jog Key)|The plus key can be used with any jog key to invoke a rapid jog (behaves the same as SHIFT).
-|- (+ Jog Key)|The minus key can be used with any jog key to invoke a slow jog (10% of the displayed jog speed) +
+|+ (+Jog Key)|The plus key can be used with any jog key to invoke a rapid jog (behaves the same as SHIFT).
+|- (+Jog Key)|The minus key can be used with any jog key to invoke a slow jog (10% of the displayed jog speed) +
                If SLOW jogging is already active, the axis will jog at the displayed jog speed.
 |===
 
@@ -2911,7 +2885,7 @@ There are two ways to modify an existing QtPlasmaC configuration:
 . Running the appropriate <<configuring,configuration wizard>> and loading the conf file saved by the wizard.
 . Manually edit the .ini and/or the .hal file of the configuration.
 
-IMPORTANT: Any manual modification to the <machine_name>.ini and <machine_name>.hal files will not be registered in PnCConf or StepConf.
+IMPORTANT: Any manual modification to the <machine_name>.ini and <machine_name>.hal files will not be registered in PnCconf or StepConf.
 
 [NOTE]
 If unsure of the HAL pin's full name, the user may start LinuxCNC and run *HalShow* for a full listing of all HAL pins.
@@ -3066,9 +3040,9 @@ The text that appears on the button is set the following way:
 n Name = HAL Show
 ----
 
-Where n is the button number and *HAL Show* is the text.
+Where _n_ is the button number and *HAL Show* is the text.
 
-For text on multiple lines, split the text with a \
+For text on multiple lines, split the text with a \ (backslash):
 
 [source,{ini}]
 ----
@@ -3138,7 +3112,8 @@ n Code = G0 X{JOINT_0 HOME} Y1
 n Code = G53 G0 Z[{AXIS_Z MAX_LIMIT} - 1.001]
 ----
 
-Multiple codes can be run by separating the codes with a \ symbol. The exception is the special commands which are required to be a single command per button.
+Multiple codes can be run by separating the codes with a \ symbol.
+The exception is the special commands which are required to be a single command per button.
 
 [source,{ini}]
 ----
@@ -3166,7 +3141,8 @@ This code is required to be used as a single command and may only control one HA
 
 The button colors will follow the state of the HAL pin.
 
-After setting the code, upon clicking, the button will invert colors and the HAL pin will invert pin state. The button will stay "latched" until the button is clicked again, which will return the button to the original colors and the HAL pin to the original pin state.
+After setting the code, upon clicking, the button will invert colors and the HAL pin will invert pin state.
+The button will stay "latched" until the button is clicked again, which will return the button to the original colors and the HAL pin to the original pin state.
 
 There are three <<qt_ext-hal-pin,External HAL Pins>> that are available to toggle as an output, the pin names are qtplasmac.ext_out_0, qtplasmac.ext_out_1, and qtplasmac.ext_out_2. HAL connections to these HAL pins need to be specified in a postgui HAL file as the HAL pins are not available until the QtPlasmac GUI has loaded.
 
@@ -3222,14 +3198,17 @@ After setting the code, upon clicking the button, the button will invert colors,
 
 An active pulse can be canceled by clicking the button again.
 
-There are three <<qt_ext-hal-pin,External HAL Pins>> that are available to pulse as an output, the pin names are qtplasmac.ext_out_0, qtplasmac.ext_out_1, and qtplasmac.ext_out_2. HAL connections to these HAL pins need to be specified in a postgui HAL file as the HAL pins are not available until the QtPlasmac GUI has loaded.
+There are three <<qt_ext-hal-pin,External HAL Pins>> that are available to pulse as an output, the pin names are qtplasmac.ext_out_0, qtplasmac.ext_out_1, and qtplasmac.ext_out_2.
+HAL connections to these HAL pins need to be specified in a postgui HAL file as the HAL pins are not available until the QtPlasmac GUI has loaded.
 
 [[qt_button-probe]]
 [underline]*Probe Test*
 
-QtPlasmaC will begin a probe and when the material is detected, the Z axis will rise to the Pierce Height currently displayed in the MATERIAL section of the <<qt_parameters-tab,PARAMETERS Tab>>. If the user has "View Material" selected in the GUI SETTINGS section of the <<qt_parameters-tab, PARAMETERS Tab>>, this value will be displayed in the top left corner of the PREVIEW Window next to *PH:*.
+QtPlasmaC will begin a probe and when the material is detected, the Z axis will rise to the Pierce Height currently displayed in the MATERIAL section of the <<qt_parameters-tab,PARAMETERS Tab>>.
+If the user has "View Material" selected in the GUI SETTINGS section of the <<qt_parameters-tab, PARAMETERS Tab>>, this value will be displayed in the top left corner of the PREVIEW Window next to *PH:*.
 
-QtPlasmaC will then wait in this state for the time specified (rounded to no decimal places) before returning the Z axis to the starting position. An example of a 6 second delay is below. If there is no time specified then the probe time will default to 10 seconds.
+QtPlasmaC will then wait in this state for the time specified (rounded to no decimal places) before returning the Z axis to the starting position.
+An example of a 6 second delay is below. If there is no time specified then the probe time will default to 10 seconds.
 
 [source,{ini}]
 ----
@@ -3237,7 +3216,8 @@ n Code = probe-test 6
 ----
 
 [NOTE]
-Enabling a user button as a Probe Test button will add an <<qt_ext-hal-pin,external HAL pin>> that may be connected from a pendant etc. HAL connections to this HAL pin needs to be specified in a postgui HAL file as the HAL pin is not available until the QtPlasmac GUI has loaded.
+Enabling a user button as a Probe Test button will add an <<qt_ext-hal-pin,external HAL pin>> that may be connected from a pendant etc.
+HAL connections to this HAL pin needs to be specified in a postgui HAL file as the HAL pin is not available until the QtPlasmac GUI has loaded.
 
 [[qt_button-ohmic]]
 [underline]*Ohmic Test*
@@ -3899,7 +3879,7 @@ There are some sample G-code files in the ~/linuxcnc/nc_files/examples/plasmac d
 |Begin <<qt_spotting,center spot>> |M3 $2 S1
 |End <<qt_spotting,center spot>> |M5 $2
 |End all the above |M5 $-1
-|Select a <<qt_material-handling,material>> |M190 Pn +
+|Select a <<qt_material-handling,material>> |M190 P__n__ +
     n denotes the material number
 |Wait for <<qt_material-handling,material>> change confirmation |M66 P3 L3 Qn +
     n is delay time (in seconds) +
@@ -3924,8 +3904,8 @@ There are some sample G-code files in the ~/linuxcnc/nc_files/examples/plasmac d
     10 is the minimum, below this will be set to 100% +
     100 is the maximum, above this will be set to 100% +
     *It is recommended to have M68 E3 Q0 in both the preamble and postamble*
-|Cutter <<qt_cutter-compensation,compensation>> - left of path |G41.1 D#<_hal[plasmac_run.kerf-width-f]>
-|Cutter <<qt_cutter-compensation,compensation>> - right of path |G42.1 D#<_hal[plasmac_run.kerf-width-f]>
+|Cutter <<qt_cutter-compensation,compensation>> - left of path |G41.1 D#<_hal[plasmac.kerf-width]>
+|Cutter <<qt_cutter-compensation,compensation>> - right of path |G42.1 D#<_hal[plasmac.kerf-width]>
 |Cutter <<qt_cutter-compensation,compensation>> off |G40 +
     *Note that M62 through M68 are invalid while cutter compensation is on*
 |Cut <<qt_hole-cutting,holes>> at 60% feed rate |#<holes> = 1 +
