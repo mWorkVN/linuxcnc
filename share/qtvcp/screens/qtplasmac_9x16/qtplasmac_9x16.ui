@@ -537,7 +537,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="PushButton" name="button_8">
+                    <widget class="QPushButton" name="button_8">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                        <horstretch>0</horstretch>
@@ -556,7 +556,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="PushButton" name="button_7">
+                    <widget class="QPushButton" name="button_7">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                        <horstretch>0</horstretch>
@@ -5736,7 +5736,7 @@ MOVE</string>
                                      <number>0</number>
                                     </property>
                                     <property name="rightMargin">
-                                     <number>4</number>
+                                     <number>30</number>
                                     </property>
                                     <property name="bottomMargin">
                                      <number>0</number>

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-11 20:43+0200\n"
-"PO-Revision-Date: 2022-09-10 23:35+0000\n"
+"POT-Creation-Date: 2022-09-18 08:05+0200\n"
+"PO-Revision-Date: 2022-09-13 06:15+0000\n"
 "Last-Translator: Ulices <dev.n47os@aleeas.com>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/linuxcnc/"
 "linuxcnc/es/>\n"
@@ -1586,7 +1586,7 @@ msgstr "Dos códigos g utilizados del mismo grupo modal"
 
 #: src/emc/rs274ngc/rs274ngc_return.hh:151
 msgid "Two m codes used from same modal group"
-msgstr "Dos códigos m usados ​​del mismo grupo modal"
+msgstr "Dos códigos m usados del mismo grupo modal"
 
 #: src/emc/rs274ngc/rs274ngc_return.hh:152
 #, c-format
@@ -4856,7 +4856,7 @@ msgstr "Editar"
 msgid "Cut"
 msgstr "Cortar"
 
-#: tcl/bin/genedit.tcl:94 tcl/bin/halshow.tcl:934 tcl/bin/halshow.tcl:952
+#: tcl/bin/genedit.tcl:94 tcl/bin/halshow.tcl:957 tcl/bin/halshow.tcl:975
 msgid "Copy"
 msgstr "Copiar"
 
@@ -5283,88 +5283,88 @@ msgstr "Ajustes guardados en:"
 msgid "already in list"
 msgstr "ya está en la lista"
 
-#: tcl/bin/halshow.tcl:936
+#: tcl/bin/halshow.tcl:959
 msgid "Set to .."
 msgstr "Establecer en .."
 
-#: tcl/bin/halshow.tcl:939
+#: tcl/bin/halshow.tcl:962
 msgid "Unlink pin"
 msgstr "Desenlazar pin"
 
-#: tcl/bin/halshow.tcl:941
+#: tcl/bin/halshow.tcl:964
 msgid "Show in Tree"
 msgstr "Mostrar en Árbol"
 
-#: tcl/bin/halshow.tcl:942
+#: tcl/bin/halshow.tcl:965
 msgid "Remove"
 msgstr "Eliminar"
 
-#: tcl/bin/halshow.tcl:953
+#: tcl/bin/halshow.tcl:976
 msgid "Add as Pin(s)"
 msgstr "Agregar como Pin(es)"
 
-#: tcl/bin/halshow.tcl:954
+#: tcl/bin/halshow.tcl:977
 msgid "Add as Signal(s)"
 msgstr "Agregar como señal(es)"
 
-#: tcl/bin/halshow.tcl:955
+#: tcl/bin/halshow.tcl:978
 msgid "Add as Param(s)"
 msgstr "Agregar como Parámetro(s)"
 
-#: tcl/bin/halshow.tcl:966
+#: tcl/bin/halshow.tcl:989
 msgid "Add all sub-items to watch"
 msgstr "Agregue todos los sub-elementos para ver"
 
-#: tcl/bin/halshow.tcl:998 tcl/bin/halshow.tcl:1066
+#: tcl/bin/halshow.tcl:1025 tcl/bin/halshow.tcl:1033 tcl/bin/halshow.tcl:1101
 msgid "Set"
 msgstr "Juego"
 
-#: tcl/bin/halshow.tcl:1018
+#: tcl/bin/halshow.tcl:1053
 msgid "User input"
 msgstr "Entrada de usuario"
 
-#: tcl/bin/halshow.tcl:1067
+#: tcl/bin/halshow.tcl:1102
 msgid "Update interval for this session (ms)"
 msgstr "Intervalo de actualización para esta sesión (ms)"
 
-#: tcl/bin/halshow.tcl:1069
+#: tcl/bin/halshow.tcl:1104
 msgid "Value out of range"
 msgstr "Valor fuera de rango"
 
-#: tcl/bin/halshow.tcl:1137
+#: tcl/bin/halshow.tcl:1172
 msgid "removed from list"
 msgstr "Removido de la lista"
 
-#: tcl/bin/halshow.tcl:1167
+#: tcl/bin/halshow.tcl:1202
 msgid "Load a watch list"
 msgstr "Cargar una lista de vigilancia"
 
-#: tcl/bin/halshow.tcl:1194
+#: tcl/bin/halshow.tcl:1229
 msgid "loaded"
 msgstr "cargado"
 
-#: tcl/bin/halshow.tcl:1194
+#: tcl/bin/halshow.tcl:1229
 #, fuzzy
 msgid "saved backup for old watchlist in"
 msgstr "Guardar lista de vigilancia actual"
 
-#: tcl/bin/halshow.tcl:1205
+#: tcl/bin/halshow.tcl:1240
 msgid "Save current watch list"
 msgstr "Guardar lista de vigilancia actual"
 
-#: tcl/bin/halshow.tcl:1241
+#: tcl/bin/halshow.tcl:1276
 msgid "Commands may be tested here but they will NOT be saved"
 msgstr "Los comandos pueden probarse aquí pero NO se guardarán"
 
-#: tcl/bin/halshow.tcl:1270
+#: tcl/bin/halshow.tcl:1305
 msgid "Integer (disabled by \"--iformat\" argument)"
 msgstr "Entero (deshabilitado por el argumento \"--iformat\")"
 
-#: tcl/bin/halshow.tcl:1277
+#: tcl/bin/halshow.tcl:1312
 msgid "Float (disabled by \"--fformat\" argument)"
 msgstr "Flotante (deshabilitado por el argumento \"--fformat\")"
 
-#: tcl/bin/halshow.tcl:1284
+#: tcl/bin/halshow.tcl:1319
 msgid "\"--noprefs\" option set. Settings will not be saved!"
 msgstr ""
 
@@ -12028,9 +12028,9 @@ msgid "Address is required for ethernet card"
 msgstr "La dirección es necesaria para la tarjeta Ethernet"
 
 #: src/emc/usr_intf/pncconf/pncconf.py:1316
-#, fuzzy, python-format
+#, python-format
 msgid "%s board was not found"
-msgstr "No se encontró ninguna placa\n"
+msgstr "No se encontró la placa %s"
 
 #: src/emc/usr_intf/pncconf/pncconf.py:1318
 msgid "Is the address correct?"
@@ -12494,9 +12494,9 @@ msgid "#  ---mpg signals---"
 msgstr "# --- señales mpg ---"
 
 #: src/emc/usr_intf/pncconf/build_HAL.py:540
-#, fuzzy, python-format
+#, python-format
 msgid "#       for axis %s MPG"
-msgstr "Voltaje para RPM máx .:"
+msgstr "#       para el eje %s MPG"
 
 #: src/emc/usr_intf/pncconf/build_HAL.py:553
 #, python-format
@@ -14021,7 +14021,6 @@ msgstr "Control S BLDC"
 
 #: src/emc/usr_intf/pncconf/private_data.py:475
 #: src/emc/usr_intf/pncconf/private_data.py:537
-#, fuzzy
 msgid "Plasma"
 msgstr "Plasma"
 
@@ -18362,7 +18361,7 @@ msgstr "Dientes de polea (codificador: tornillo prisionero):"
 
 #: src/emc/usr_intf/pncconf/dialogs.glade:2650
 msgid "                    "
-msgstr ""
+msgstr "                    "
 
 #: src/emc/usr_intf/pncconf/dialogs.glade:2691
 msgid "encoder pulses per unit:"
@@ -18431,20 +18430,20 @@ msgstr "Actual"
 
 #: src/emc/usr_intf/pncconf/dialogs.glade:3921
 msgid "P:"
-msgstr ""
+msgstr "P:"
 
 #: src/emc/usr_intf/pncconf/dialogs.glade:3932
 msgid "I:"
-msgstr ""
+msgstr "I:"
 
 #: src/emc/usr_intf/pncconf/dialogs.glade:3943
 msgid "D:"
-msgstr ""
+msgstr "D:"
 
 #: src/emc/usr_intf/pncconf/dialogs.glade:3997
 #: src/emc/usr_intf/pncconf/dialogs.glade:4741
 msgid "Original"
-msgstr ""
+msgstr "Original"
 
 #: src/emc/usr_intf/pncconf/dialogs.glade:4205
 msgid "DeadBand"
@@ -18966,7 +18965,6 @@ msgid "Ready to Restart program from line %d"
 msgstr "Listo para reiniciar el programa desde la línea %d"
 
 #: src/emc/usr_intf/gscreen/gscreen.py:3862
-#, fuzzy
 msgid "Invalid embedded tab configuration"
 msgstr "Configuración de pestaña embebida no válida"
 
@@ -19136,12 +19134,10 @@ msgid "V"
 msgstr "V"
 
 #: src/emc/usr_intf/gscreen/gscreen.glade:1321
-#, fuzzy
 msgid "G-code"
 msgstr "Código G"
 
 #: src/emc/usr_intf/gscreen/gscreen.glade:1415
-#, fuzzy
 msgid "<b>G-Codes Active</b>"
 msgstr "<b>Códigos G activos</b>"
 
@@ -19150,17 +19146,14 @@ msgid "MV:100%"
 msgstr "MV: 100%"
 
 #: src/emc/usr_intf/gscreen/gscreen.glade:1504
-#, fuzzy
 msgid "Flood "
-msgstr "Inundación"
+msgstr "Inundación "
 
 #: src/emc/usr_intf/gscreen/gscreen.glade:1556
-#, fuzzy
 msgid "At Speed "
-msgstr "A velocidad"
+msgstr "A velocidad "
 
 #: src/emc/usr_intf/gscreen/gscreen.glade:1569
-#, fuzzy
 msgid "Jog mode"
 msgstr "Modo Jog"
 
@@ -19177,29 +19170,28 @@ msgid "<b>Status</b>"
 msgstr "<b>Estado</b>"
 
 #: src/emc/usr_intf/gscreen/gscreen.glade:1738
-#, fuzzy
 msgid ""
 "Search\n"
 "Text:"
 msgstr ""
 "Buscar\n"
-"  Texto:"
+"Texto:"
 
 #: src/emc/usr_intf/gscreen/gscreen.glade:1767
-#, fuzzy
 msgid ""
 "Replace\n"
 "Text:"
 msgstr ""
 "Reemplazar\n"
-"  Texto:"
+"Texto:"
 
 #: src/emc/usr_intf/gscreen/gscreen.glade:1787
-#, fuzzy
 msgid ""
 "Replace\n"
 "All"
-msgstr "Reemplazar todo"
+msgstr ""
+"Reemplazar\n"
+"todo"
 
 #: src/emc/usr_intf/gscreen/gscreen.glade:1801
 #, fuzzy
@@ -19415,7 +19407,7 @@ msgstr ""
 #: src/emc/usr_intf/gscreen/gscreen.glade:2823
 #: src/emc/usr_intf/gscreen/gscreen.glade:3241
 msgid "\n"
-msgstr ""
+msgstr "\n"
 
 #: src/emc/usr_intf/gscreen/gscreen.glade:2834
 #, fuzzy
@@ -19796,9 +19788,8 @@ msgid "Close without returning a file path"
 msgstr "Cerrar sin devolver una ruta de archivo"
 
 #: lib/python/gladevcp/hal_mdihistory.py:89
-#, fuzzy
 msgid "Command"
-msgstr "Comando:"
+msgstr "Comando"
 
 #: lib/python/gladevcp/hal_mdihistory.py:271
 msgid "ERROR loading halshow"
@@ -19861,9 +19852,8 @@ msgid "checkbutton"
 msgstr "Botón de rueda"
 
 #: lib/python/gladevcp/gladevcp-test.glade:183
-#, fuzzy
 msgid "button"
-msgstr "sin botón aquí"
+msgstr "botón"
 
 #: lib/python/gladevcp/gladevcp-test.glade:194
 #, fuzzy
@@ -19872,9 +19862,8 @@ msgstr "Conmutar envío automático"
 
 #: lib/python/gladevcp/offsetpage.glade:40
 #: lib/python/gladevcp/offsetpage.glade:54
-#, fuzzy
 msgid "Tool"
-msgstr "Herramienta:"
+msgstr "Herramienta"
 
 #: lib/python/gladevcp/offsetpage.glade:74
 msgid "Rot"
@@ -19920,9 +19909,8 @@ msgstr "Selección"
 #: lib/python/gladevcp/tooledit_gtk.glade:93
 #: lib/python/gladevcp/tooledit_gtk.glade:402
 #: lib/python/gladevcp/tooledit_gtk.glade:624
-#, fuzzy
 msgid "Tool#"
-msgstr "Herramienta:"
+msgstr "Herramienta#"
 
 #: lib/python/gladevcp/tooledit_gtk.glade:109
 #: lib/python/gladevcp/tooledit_gtk.glade:413

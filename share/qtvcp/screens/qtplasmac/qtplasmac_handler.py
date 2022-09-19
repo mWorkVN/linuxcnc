@@ -1,4 +1,4 @@
-VERSION = '1.232.241'
+VERSION = '1.232.245'
 
 '''
 qtplasmac_handler.py
@@ -941,6 +941,8 @@ class HandlerClass:
         self.w.gcode_display.setBraceMatching(False)
         self.w.gcode_display.setCaretWidth(0)
         self.w.gcode_display.setCornerWidget(QLabel())
+        self.w.gcode_editor.topBox.setContentsMargins(4,4,4,4)
+        self.w.gcode_editor.bottomBox.setContentsMargins(4,4,4,4)
         self.w.gcode_editor.set_margin_width(3)
         self.w.gcode_editor.editor.setBraceMatching(False)
         self.w.gcode_editor.editor.setCaretWidth(4)
@@ -1943,11 +1945,12 @@ class HandlerClass:
             clearFile = '{}qtplasmac_program_clear.ngc'.format(self.tmpPath)
             with open(clearFile, 'w') as outFile:
                 outFile.write('m2')
-            if 'single_cut' in ACTION.prefilter_path:
-                self.preClearFile = self.oldFile
-            else:
-                if ACTION.prefilter_path or self.lastLoadedProgram != 'None':
-                    self.preClearFile = ACTION.prefilter_path or self.lastLoadedProgram
+            if ACTION.prefilter_path:
+                if 'single_cut' in ACTION.prefilter_path:
+                    self.preClearFile = self.oldFile
+                else:
+                    if self.lastLoadedProgram != 'None':
+                        self.preClearFile = ACTION.prefilter_path or self.lastLoadedProgram
             ACTION.OPEN_PROGRAM(clearFile)
             ACTION.prefilter_path = self.preClearFile
             self.w.material_selector.setCurrentIndex(0)
@@ -2150,7 +2153,10 @@ class HandlerClass:
             else:
                 msg0 = ''
             if self.exitMessage:
-                msg0 += '{}\n\n'.format(self.exitMessage)
+                exitLines = self.exitMessage.split('\\')
+                for line in exitLines:
+                    msg0 += '{}\n'.format(line)
+                msg0 += '\n'
             msg0 += _translate('HandlerClass', 'Do you want to shutdown QtPlasmaC')
             if self.dialog_show_yesno(icon, head, '\n{}?\n'.format(msg0)):
                 if O.PREFS_ and O.play_sounds and O.shutdown_play_sound:
