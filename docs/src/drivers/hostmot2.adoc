@@ -110,13 +110,13 @@ at load-time.
 If the firmware includes a watchdog, the following HAL objects will be
 exported:
 
-=== Pins:
+=== Pins
 
 * 'has_bit' - (bit i/o) True if the watchdog has bit, False if the
   watchdog has not bit. If the watchdog has bit and the has_bit bit is
   True, the user can reset it to False to resume operation.
 
-=== Parameters:
+=== Parameters
 
 * 'timeout_ns' - (u32 read/write) Watchdog timeout, in nanoseconds.
   This is initialized to 5,000,000 (5 milliseconds) at module load time.
@@ -288,29 +288,29 @@ check there too.
 So far, all firmware is available in all gate sizes.)
 
 [width="90%",options="header"]
-|====================================================================
-|Firmware         | Encoder | PWMGen | StepGen | GPIO
-|SV24             | 24      | 24     | 0       | 0
-|SVST16_24        | 16      | 16     | 24      | 0
-|====================================================================
+|===
+|Firmware   | Encoder | PWMGen | StepGen | GPIO
+|SV24       | 24      | 24     | 0       | 0
+|SVST16_24  | 16      | 16     | 24      | 0
+|===
 
 5i22 (4-port PCI) Default Configurations (The 5i22 comes in 1M and 1.5M
 gate versions.
 So far, all firmware is available in all gate sizes.)
 
 [width="90%",options="header"]
-|====================================================================
-|Firmware         | Encoder | PWM | StepGen | GPIO
-|SV16             | 16      | 16  | 0       | 0
-|SVST2_4_7I47     | 4       | 2   | 4       | 72
-|SVST8_8          | 8       | 8   | 8       | 0
-|SVST8_24         | 8       | 8   | 24      | 0
-|====================================================================
+|===
+|Firmware     | Encoder | PWM | StepGen | GPIO
+|SV16         | 16      | 16  | 0       | 0
+|SVST2_4_7I47 | 4       | 2   | 4       | 72
+|SVST8_8      | 8       | 8   | 8       | 0
+|SVST8_24     | 8       | 8   | 24      | 0
+|===
 
 5i23 (3-port PCI) Default Configurations (The 5i23 has 400k gates.)
 
 [width="90%",options="header"]
-|====================================================================
+|===
 |Firmware         | Encoder  | PWM        | StepGen  | GPIO
 |SV12             | 12       | 12         | 0        | 0
 |SVST2_8          | 2        | 2          | 8 (tbl5) | 12
@@ -322,12 +322,12 @@ So far, all firmware is available in all gate sizes.)
 |SVST8_4IM2       | 8 (+IM)  | 8          | 4        | 8
 |SVST8_8IM2       | 8 (+IM)  | 8          | 8        | 0
 |SVTP6_7I39       | 6        | 0 (6 BLDC) | 0        | 0
-|====================================================================
+|===
 
 5i20 (3-port PCI) Default Configurations (The 5i20 has 200k gates.)
 
 [width="90%",options="header"]
-|====================================================================
+|===
 |Firmware         | Encoder  | PWM        | StepGen  | GPIO
 |SV12             | 12       | 12         | 0        | 0
 |SVST2_8          | 2        | 2          | 8 (tbl5) | 12
@@ -336,54 +336,54 @@ So far, all firmware is available in all gate sizes.)
 |SV12IM_2X7I48_72 | 12 (+IM) | 12         | 0        | 12
 |SVST8_4          | 8        | 8          | 4 (tbl5) | 0
 |SVST8_4IM2       | 8 (+IM)  | 8          | 4        | 8
-|====================================================================
+|===
 
 4i68 (3-port PC/104) Default Configurations (The 4i68 has 400k gates.)
 
 [width="90%",options="header"]
-|====================================================================
-|Firmware         | Encoder  | PWM        | StepGen  | GPIO
-|SV12             | 12       | 12         | 0        | 0
-|SVST2_4_7I47     | 4        | 2          | 4        | 48
-|SVST4_8          | 4        | 4          | 8        | 0
-|SVST8_4          | 8        | 8          | 4        | 0
-|SVST8_4IM2       | 8 (+IM)  | 8          | 4        | 8
-|SVST8_8IM2       | 8 (+IM)  | 8          | 8        | 0
-|====================================================================
+|===
+|Firmware     | Encoder  | PWM        | StepGen  | GPIO
+|SV12         | 12       | 12         | 0        | 0
+|SVST2_4_7I47 | 4        | 2          | 4        | 48
+|SVST4_8      | 4        | 4          | 8        | 0
+|SVST8_4      | 8        | 8          | 4        | 0
+|SVST8_4IM2   | 8 (+IM)  | 8          | 4        | 8
+|SVST8_8IM2   | 8 (+IM)  | 8          | 8        | 0
+|===
 
 
 4i65 (3-port PC/104) Default Configurations (The 4i65 has 200k gates.)
 
 [width="90%",options="header"]
-|====================================================================
-|Firmware         | Encoder  | PWM        | StepGen  | GPIO
-|SV12             | 12       | 12         | 0        | 0
-|SVST8_4          | 8        | 8          | 4        | 0
-|SVST8_4IM2       | 8 (+IM)  | 8          | 4        | 8
-|====================================================================
+|===
+|Firmware   | Encoder  | PWM        | StepGen  | GPIO
+|SV12       | 12       | 12         | 0        | 0
+|SVST8_4    | 8        | 8          | 4        | 0
+|SVST8_4IM2 | 8 (+IM)  | 8          | 4        | 8
+|===
 
 7i43 (2-port parallel) 400k gate versions, Default Configurations
 
 [width="90%",options="header"]
-|====================================================================
-|Firmware         | Encoder  | PWM        | StepGen  | GPIO
-|SV8              | 8        | 8          | 0        | 0
-|SVST4_4          | 4        | 4          | 4 (tbl5) | 0
-|SVST4_6          | 4        | 4          | 6 (tbl3) | 0
-|SVST4_12         | 4        | 4          | 12       | 0
-|SVST2_4_7I47     | 4        | 2          | 4        | 24
-|====================================================================
+|===
+|Firmware     | Encoder  | PWM        | StepGen  | GPIO
+|SV8          | 8        | 8          | 0        | 0
+|SVST4_4      | 4        | 4          | 4 (tbl5) | 0
+|SVST4_6      | 4        | 4          | 6 (tbl3) | 0
+|SVST4_12     | 4        | 4          | 12       | 0
+|SVST2_4_7I47 | 4        | 2          | 4        | 24
+|===
 
 7i43 (2-port parallel) 200k gate versions, Default Configurations
 
 [width="90%",options="header"]
-|====================================================================
-|Firmware         | Encoder  | PWM        | StepGen  | GPIO
-|SV8              | 8        | 8          | 0        | 0
-|SVST4_4          | 4        | 4          | 4 (tbl5) | 0
-|SVST4_6          | 4        | 4          | 6 (tbl3) | 0
-|SVST2_4_7I47     | 4        | 2          | 4        | 24
-|====================================================================
+|===
+|Firmware     | Encoder  | PWM        | StepGen  | GPIO
+|SV8          | 8        | 8          | 0        | 0
+|SVST4_4      | 4        | 4          | 4 (tbl5) | 0
+|SVST4_6      | 4        | 4          | 6 (tbl3) | 0
+|SVST2_4_7I47 | 4        | 2          | 4        | 24
+|===
 
 Even though several cards may have the same named .BIT file you cannot use
 a .BIT file that is not for that card. Different cards have different
@@ -407,7 +407,7 @@ by an active module instance are constrained by the requirements of the
 owning module, and have a restricted HAL interface.
 
 GPIOs have names like 'hm2_<BoardType>.<BoardNum>.gpio.<IONum>.'
-IONum. is a three-digit number. The mapping from IONum to connector and
+IONum is a three-digit number. The mapping from IONum to connector and
 pin-on-that-connector is written to the syslog when the driver loads,
 and it's documented in Mesa's manual for the Anything I/O boards.
 
@@ -612,13 +612,13 @@ component. Each pwmgen instance has the following pins and parameters:
   a space.
   Each pulse (and space) in the PDM pulse train has a duration of
   1/pdm_frequency seconds.
-  For example, setting the pdm_frequency to 2e6 (2 MHz) and the duty
-  cycle to 50% results in a 1 MHz square wave, identical to a 1 MHz
+  For example, setting the pdm_frequency to 2*10^6^ (2&thinsp;MHz) and the duty
+  cycle to 50% results in a 1&thinsp;MHz square wave, identical to a 1&thinsp;MHz
   PWM signal with 50% duty cycle. The effective range of this parameter
-  is from about 1525 Hz up to just under 100 MHz. Note that the max
+  is from about 1525&thinsp;Hz up to just under 100&thinsp;MHz. Note that the max
   frequency is determined by the ClockHigh frequency of the Anything I/O
-  board; the 5i20 and 7i43 both have a 100 MHz clock, resulting in a
-  100 MHz max PDM frequency. Other boards may have different clocks,
+  board; the 5i20 and 7i43 both have a 100&thinsp;MHz clock, resulting in a
+  100&thinsp;MHz max PDM frequency. Other boards may have different clocks,
   resulting in different max PDM frequencies. If the user attempts to
   set the frequency too high, it will be clipped to the max supported
   frequency of the board.
@@ -627,13 +627,13 @@ component. Each pwmgen instance has the following pins and parameters:
   of all the pwmgen instances running in the PWM modes (modes 1 and 2).
   This is the
   frequency of the variable-duty-cycle wave. Its effective range is from
-  1 Hz up to 193 kHz. Note that the max frequency is determined by the
+  1&thinsp;Hz up to 193&thinsp;kHz. Note that the max frequency is determined by the
   ClockHigh frequency of the Anything I/O board; the 5i20 and 7i43 both
-  have a 100 MHz clock, resulting in a 193 kHz max PWM frequency. Other
+  have a 100&thinsp;MHz clock, resulting in a 193&thinsp;kHz max PWM frequency. Other
   boards may have different clocks, resulting in different max PWM
   frequencies. If the user attempts to set the frequency too high, it
   will be clipped to the max supported frequency of the board.
-  Frequencies below about 5 Hz are not terribly accurate, but above 5 Hz
+  Frequencies below about 5&thinsp;Hz are not terribly accurate, but above 5&thinsp;Hz
   they're pretty close.
 
 === Output Parameters
@@ -712,8 +712,8 @@ following pins and parameters:
   counter needs 15 clocks to register a change on any of the three input
   lines (any pulse shorter than this is rejected as noise).
   If set to False, the quadrature counter needs only 3 clocks to register
-  a change. The encoder sample clock runs at 33 MHz on the PCI Anything
-  I/O cards and 50 MHz on the 7i43.
+  a change. The encoder sample clock runs at 33&thinsp;MHz on the PCI Anything
+  I/O cards and 50&thinsp;MHz on the 7i43.
 
 * 'index-invert' - (Bit, RW) If set to True, the rising edge of the
   Index input pin triggers the Index event (if index-enable is True). If
@@ -748,7 +748,7 @@ following pins and parameters:
 === Firmware
 
 The 5i25 firmware comes preloaded for the daughter card it is purchased with.
-So the 'firmware=xxx.BIT' is not part of the hm2_pci configuration string when
+So the `firmware=xxx.BIT` is not part of the hm2_pci configuration string when
 using a 5i25.
 
 === Configuration
@@ -760,6 +760,7 @@ If you like to roll your own configuration the following examples show how
 to load the drivers in the HAL file.
 
 .5i25 + 7i76 Card
+[source,{hal}]
 ----
 # load the generic driver
 loadrt hostmot2
@@ -769,6 +770,7 @@ loadrt hm2_pci config="num_encoders=1 num_stepgens=5 sserial_port_0=0XXX"
 ----
 
 .5i25 + 7i77 Card
+[source,{hal}]
 ----
 # load the generic driver
 loadrt hostmot2
@@ -779,9 +781,11 @@ loadrt hm2_pci config="num_encoders=6 num_pwmgens=6 sserial_port_0=0XXX"
 
 === SSERIAL Configuration
 
-The 'sserial_port_0=0XXX' configuration string sets some options for the smart
+The `sserial_port_0=0XXX` configuration string sets some options for the smart
 serial daughter card. These options are specific for each daughter card. See
-the Mesa manual for more information on the exact usage. 
+the Mesa manual for more information on the exact usage (typically in the section
+called SOFTWARE PROCESS DATA MODES) or see the manual page of
+link:../man/man9/sserial.9.html[SSERIAL(9)].
 
 === 7i77 Limits
 
@@ -791,25 +795,25 @@ out value) fullscalemax is the scale factor.
 These are by default set to the analog in or analog range (most likely in
 volts).
 
-So for example on the 7I77 +-10V analog outputs, the default values are:
+So for example on the 7i77 +-10V analog outputs, the default values are:
 
-minlimit -10
-maxlimit +10
-maxfullscale 10
+minlimit: -10 +
+maxlimit: +10 +
+maxfullscale: 10 +
 
 If you wanted to say scale the analog out of a channel to IPS for a velocity
 mode servo (say 24 IPS max) you could set the limits like this:
 
-minlimit -24
-maxlimit +24
-maxfullscale 24
+minlimit: -24 +
+maxlimit: +24 +
+maxfullscale: 24 +
 
 If you wanted to scale the analog out of a channel to RPM for a 0 to 6000 RPM
 spindle with 0-10V control you could set the limits like this:
 
-minlimit 0
-maxlimit 6000
-maxfullscale 6000
+minlimit: 0 +
+maxlimit: 6000 +
+maxfullscale: 6000 +
 (this would prevent unwanted negative output voltages from being set)
 
 == Example Configurations

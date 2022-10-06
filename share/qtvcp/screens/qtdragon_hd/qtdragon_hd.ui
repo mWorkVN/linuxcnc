@@ -6155,6 +6155,62 @@ TO FILE</string>
                       </spacer>
                      </item>
                      <item>
+                      <widget class="PushButton" name="pushbutton_2">
+                       <property name="minimumSize">
+                        <size>
+                         <width>96</width>
+                         <height>50</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>96</width>
+                         <height>50</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>TEST BUTTON</string>
+                       </property>
+                       <property name="python_command_option" stdset="0">
+                        <bool>true</bool>
+                       </property>
+                       <property name="true_python_cmd_string" stdset="0">
+                        <string>PROGRAM_LOADER.load_test_button()</string>
+                       </property>
+                       <property name="false_python_cmd_string" stdset="0">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="PushButton" name="pushbutton">
+                       <property name="minimumSize">
+                        <size>
+                         <width>96</width>
+                         <height>50</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>96</width>
+                         <height>50</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>TEST LED</string>
+                       </property>
+                       <property name="python_command_option" stdset="0">
+                        <bool>true</bool>
+                       </property>
+                       <property name="true_python_cmd_string" stdset="0">
+                        <string>PROGRAM_LOADER.load_test_led()</string>
+                       </property>
+                       <property name="false_python_cmd_string" stdset="0">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
                       <widget class="ActionButton" name="actionbutton_lcnc_status_3">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -7314,10 +7370,10 @@ OFF</string>
                    </size>
                   </property>
                   <property name="pin_name" stdset="0">
-                   <string>led-spindle-at-speed</string>
+                   <string/>
                   </property>
                   <property name="halpin_option" stdset="0">
-                   <bool>false</bool>
+                   <bool>true</bool>
                   </property>
                   <property name="color">
                    <color>
@@ -7335,6 +7391,9 @@ OFF</string>
                   </property>
                   <property name="is_spindle_at_speed_status" stdset="0">
                    <bool>true</bool>
+                  </property>
+                  <property name="halpin_name" stdset="0">
+                   <string>spindle-is-at-speed</string>
                   </property>
                  </widget>
                 </item>
@@ -15048,7 +15107,7 @@ ANGULAR</string>
                <number>2</number>
               </property>
               <property name="text">
-               <string>06:50:09 PM</string>
+               <string>08:56:24 PM</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
