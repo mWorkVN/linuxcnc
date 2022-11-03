@@ -244,18 +244,16 @@ INCLUDE += $(LIBTIRPC_CFLAGS)
 # Compilation options.	Perhaps some of these should come from Makefile.inc? (CXXFLAGS now does)
 INTEGER_OVERFLOW_FLAGS := -fwrapv
 OPT := -Os $(INTEGER_OVERFLOW_FLAGS)
-DEBUG := $(DEBUG) -g -Wall -Wno-stringop-truncation
-CFLAGS := $(INCLUDE) $(OPT) $(DEBUG) $(EXTRA_DEBUG) -DULAPI -std=gnu99 -fgnu89-inline -Werror=implicit-function-declaration $(CFLAGS) $(CPPFLAGS)
-CXXFLAGS := $(INCLUDE) $(EXTRA_DEBUG) -DULAPI $(DEBUG) $(OPT) -Woverloaded-virtual $(CXXFLAGS) $(CPPFLAGS)
-CXXFLAGS += $(call cxx-option, -Wno-psabi)
-CXXFLAGS += $(call cxx-option, -std=gnu++11, -std=gnu++0x)
+DEBUG := $(DEBUG) -g -Wall -Wno-stringop-truncation -D_FORTIFY_SOURCE=2
+CFLAGS := $(INCLUDE) $(OPT) $(DEBUG) $(EXTRA_DEBUG) -DULAPI -std=gnu11 -Werror=implicit-function-declaration $(CFLAGS) $(CPPFLAGS)
+CXXFLAGS := $(INCLUDE) $(EXTRA_DEBUG) -DULAPI $(DEBUG) $(OPT) -Werror=overloaded-virtual $(CXXFLAGS) $(CPPFLAGS)
+CXXFLAGS += -std=gnu++17
 # In Debian 11, any inclusion of <boost/python.hpp> leads to several
 # diagnostics from included headers about deprecated features. LinuxCNC does
 # not directly use these deprecated features, but it does use boost::python.
 # Silence the warnings just when they occur in files using boost/python.hpp by
 # adding SILENCE_BOOST_INTERNAL_DIAGNOSTICS_FLAGS to the object's EXTRAFLAGS
 SILENCE_BOOST_INTERNAL_DIAGNOSTICS_FLAGS = -DBOOST_ALLOW_DEPRECATED_HEADERS=1 -DBOOST_BIND_GLOBAL_PLACEHOLDERS=1
-
 CFLAGS   += $(TOOL_NML_FLAG)
 CXXFLAGS += $(TOOL_NML_FLAG)
 
@@ -540,7 +538,7 @@ ifeq ($(BUILD_SYS),kbuild)
 
 modules:
 	MAKEFLAGS="$(filter-out --warn-undefined-variables,$(MAKEFLAGS))" \
-	$(PYTHON) modsilent.py $(MAKE) KBUILD_EXTRA_SYMBOLS=$(moduledir)/Module.symvers -C $(KERNELDIR) SUBDIRS=`pwd` CC=$(CC) V=$(BUILD_VERBOSE) modules
+	$(PYTHON) modsilent.py $(MAKE) KBUILD_EXTRA_SYMBOLS=$(moduledir)/Module.symvers -C $(KERNELDIR) M=$(PWD) CC=$(CC) V=$(BUILD_VERBOSE) modules
 	-cp Module.symvers *$(MODULE_EXT) ../rtlib/
 endif
 
@@ -679,7 +677,7 @@ install-dirs:
 		$(DESTDIR)$(datadir)/qtvcp/screens \
 		$(DESTDIR)$(datadir)/qtvcp/panels \
 		$(DESTDIR)$(datadir)/qtvcp/widgets_ui \
-		$(DESTDIR)$(datadir)/gmoccapy/images \
+		$(DESTDIR)$(datadir)/gmoccapy/icons \
 		$(DESTDIR)$(datadir)/glade3/catalogs \
 		$(DESTDIR)$(datadir)/glade3/pixmaps \
 		$(DESTDIR)$(datadir)/gtksourceview-2.0/language-specs \
@@ -835,7 +833,7 @@ install-python: install-dirs
 	$(TREE) ../share/qtvcp/screens/* $(DESTDIR)$(datadir)/qtvcp/screens
 	$(TREE) ../share/qtvcp/panels/* $(DESTDIR)$(datadir)/qtvcp/panels
 	$(TREE) ../share/qtvcp/widgets_ui/* $(DESTDIR)$(datadir)/qtvcp/widgets_ui
-	$(FILE) ../share/gmoccapy/images/*.png ../share/gmoccapy/images/*.gif ../share/gmoccapy/images/*.svg $(DESTDIR)$(datadir)/gmoccapy/images
+	$(TREE) ../share/gmoccapy/icons/* $(DESTDIR)$(datadir)/gmoccapy/icons
 
 install-kernel-dep:
 	$(DIR)	$(DESTDIR)$(moduledir)/linuxcnc \
@@ -880,7 +878,7 @@ EXTRA_CFLAGS := $(filter-out -ffast-math,$(RTFLAGS)) -D__MODULE__ -I$(BASEPWD)/.
 	-I$(BASEPWD)/emc/nml_intf -I$(BASEPWD)/emc/kinematics -I$(BASEPWD)/emc/tp -I$(BASEPWD)/emc/motion \
 	-DSEQUENTIAL_SUPPORT -DHAL_SUPPORT -DDYNAMIC_PLCSIZE -DRT_SUPPORT -DOLD_TIMERS_MONOS_SUPPORT -DMODBUS_IO_MASTER \
 	-fno-fast-math $(call cc-option,-mieee-fp) -fno-unsafe-math-optimizations \
-	-Wframe-larger-than=2560 -Wno-declaration-after-statement \
+	-Werror=frame-larger-than=2560 -Wno-declaration-after-statement \
 	$(INTEGER_OVERFLOW_FLAGS)
 ifneq ($(KERNELRELEASE),)
 ifeq ($(RTARCH):$(RTAI):$(filter $(RTFLAGS),-msse),x86_64:3:)
@@ -1011,6 +1009,7 @@ hostmot2-objs :=			  \
     hal/drivers/mesa-hostmot2/pins.o	  \
     hal/drivers/mesa-hostmot2/pktuart.o   \
     hal/drivers/mesa-hostmot2/pwmgen.o	  \
+    hal/drivers/mesa-hostmot2/oneshot.o	  \
     hal/drivers/mesa-hostmot2/raw.o	  \
     hal/drivers/mesa-hostmot2/rcpwmgen.o  \
     hal/drivers/mesa-hostmot2/resolver.o  \
