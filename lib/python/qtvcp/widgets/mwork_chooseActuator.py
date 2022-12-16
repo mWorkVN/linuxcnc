@@ -9,7 +9,7 @@ import time, select
 #from PyQt5.QtCore import pyqtSlot, QFile, QRegExp, Qt, QTextStream, QEvent
 #from PyQt5.QtWidgets import (QApplication, QDialog, QFileDialog, QMessageBox,
 #        QStyleFactory, QWidget, QColorDialog)
-from PyQt5 import QtGui, QtCore, QtWidgets, uic , QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets, uic 
 from PyQt5.QtCore import QProcess, QByteArray
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
