@@ -538,7 +538,7 @@ More information on contact switching load can be seen on page III of link:https
 
 [underline]*Calculations:*
 
-If using a Mesa card, the input resistance of a 7I96 is 47006#8239;Ω
+If using a Mesa card, the input resistance of a 7I96 is 47006&#8239;Ω
 (always consult the product manual associated with the revision being used as these values sometimes vary between revisions),
 giving a contact current of 5.1&#8239;mA assuming a supply voltage of 24&#8239;V (I = V/R).
 
@@ -3257,7 +3257,7 @@ The button will stay "latched" until the button is clicked again, which will ret
 
 There are three <<qt_ext-hal-pin,External HAL Pins>> that are available to toggle as an output, the pin names are `qtplasmac.ext_out_0`, `qtplasmac.ext_out_1`, and `qtplasmac.ext_out_2`. HAL connections to these HAL pins need to be specified in a postgui HAL file as the HAL pins are not available until the QtPlasmac GUI has loaded.
 
-It is possible for the user to mark a toggle-halpin button's associated HAL pin as being required to be turned "ON" before *CYCLE START* can be pressed by adding "runcritical" after the HAL pin in the button code.
+For toggle-halpin buttons, it is possible for the user to mark the associated HAL pin as being required to be turned "ON" before starting a cut cycle by adding "runcritical" after the HAL pin in the button code. If *TORCH ENABLE* is checked and *CYCLE START* is pressed while the "runcritical" button is not "ON" then the user will receive a dialog warning them as such and asking to CONTINUE or CANCEL.
 
 [source,{ini}]
 ----
@@ -3980,7 +3980,7 @@ QtPlasmaC will be translated to the language of the current locale on the next s
 
 There are example configuration files which use the QtPlasmaC GUI to simulate plasma cutting machines.
 
-They can be found in the LinuxCNC chooser under: Sample Configurations -> by_machine -> qtplasmac
+They can be found in the LinuxCNC chooser under: Sample Configurations -> sim -> qtplasmac
 
 Three versions are available in both metric and imperial units:
 

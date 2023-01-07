@@ -1,4 +1,4 @@
-VERSION = '1.233.254'
+VERSION = '1.234.260'
 
 '''
 qtplasmac_handler.py
@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc
 '''
 
 import os
+import sys
 from shutil import copy as COPY
 from shutil import move as MOVE
 from subprocess import Popen, PIPE
@@ -121,9 +122,9 @@ class HandlerClass:
         # ensure M190 exists in config directory
         if not os.path.isfile(os.path.join(self.PATHS.CONFIGPATH, 'M190')):
             if '/usr' in self.PATHS.BASEDIR:
-                m190Path = os.path.join(self.PATHS.BASEDIR, 'share/doc/linuxcnc/examples/sample-configs/by_machine/qtplasmac')
+                m190Path = os.path.join(self.PATHS.BASEDIR, 'share/doc/linuxcnc/examples/sample-configs/sim/qtplasmac')
             else:
-                m190Path = os.path.join(self.PATHS.BASEDIR, 'configs/by_machine/qtplasmac')
+                m190Path = os.path.join(self.PATHS.BASEDIR, 'configs/sim/qtplasmac')
             # M190 already exists for RIP sims
             if os.path.realpath(m190Path) != os.path.realpath(self.PATHS.CONFIGPATH):
                 COPY(os.path.join(m190Path, 'M190'), os.path.join(self.PATHS.CONFIGPATH, 'M190'))
@@ -367,13 +368,19 @@ class HandlerClass:
         self.laserTimer = QTimer()
         self.laserTimer.timeout.connect(self.laser_timeout)
         self.laserTimer.setSingleShot(True)
+        self.ohmicLedTimer = QTimer()
+        self.ohmicLedTimer.timeout.connect(self.ohmic_led_timeout)
+        self.ohmicLedTimer.setSingleShot(True)
         self.set_color_styles()
         self.autorepeat_keys(False)
         # set hal pins only after initialized__ has begun
         # some locales won't set pins before this phase
         self.thcFeedRatePin.set(self.thcFeedRate)
+        self.pmPort = None
         if self.PREFS.getpref('Port', '', str, 'POWERMAX'):
-            self.pmx485_startup(self.PREFS.getpref('Port', '', str, 'POWERMAX'))
+            self.pmPort = self.PREFS.getpref('Port', '', str, 'POWERMAX')
+        if self.pmPort and self.pmx485_check(self.pmPort):
+            self.pmx485_startup(self.pmPort)
         else:
             self.w.gas_pressure.hide()
             self.w.gas_pressure_label.hide()
@@ -393,7 +400,10 @@ class HandlerClass:
 # called by qtvcp.py, can override qtvcp settings or qtvcp allowed user options (via INI)
     def before_loop__(self):
         self.w.setWindowTitle('{} - QtPlasmaC v{}, powered by QtVCP on LinuxCNC v{}'.format(self.machineName, VERSION, linuxcnc.version.split(':')[0]))
-        self.w.setWindowIcon(QIcon(os.path.join(self.IMAGES, 'Chips_Plasma.png')))
+        self.iconPath = 'share/icons/hicolor/scalable/apps/linuxcnc_alt/linuxcncicon_plasma.svg'
+        appPath = os.path.realpath(os.path.dirname(sys.argv[0]))
+        self.iconBase = '/usr' if appPath == '/usr/bin' else appPath.replace('/bin', '/debian/extras/usr')
+        self.w.setWindowIcon(QIcon(os.path.join(self.iconBase, self.iconPath)))
 
 
 #########################################################################################################################
@@ -597,25 +607,23 @@ class HandlerClass:
     def new_process_error(self, w, kind, text):
         O = self.w.screen_options
         N = O.QTVCP_INSTANCE_._NOTICE
+        if 'jog-inhibit' in text:
+            if self.w.led_float_switch.hal_pin.get():
+                text = _translate('HandlerClass', 'Float Switch has disabled jogging')
+            elif self.ohmicLedInPin.get():
+                text = _translate('HandlerClass', 'Ohmic Probe has disabled jogging')
+            elif self.w.led_breakaway_switch.hal_pin.get():
+                text = _translate('HandlerClass', 'Breakaway Switch has disabled jogging')
+        elif 'jog-stop' in text or 'jog-stop-immediate' in text:
+            if self.w.led_float_switch.hal_pin.get():
+                text = _translate('HandlerClass', 'Float Switch has aborted active jogging')
+            elif self.ohmicLedInPin.get():
+                text = _translate('HandlerClass', 'Ohmic Probe has aborted active jogging')
+            elif self.w.led_breakaway_switch.hal_pin.get():
+                text = _translate('HandlerClass', 'Breakaway Switch has aborted active jogging')
         if O.desktop_notify:
             if 'on limit switch error' in text:
                 N.update(O.notify_hard_limits, title='Machine Error:', message=text, msgs=O.notify_max_msgs)
-            elif 'jog-inhibit' in text:
-                if self.w.led_float_switch.hal_pin.get():
-                    text = _translate('HandlerClass', 'Float Switch has disabled jogging')
-                elif self.w.led_ohmic_probe.hal_pin.get():
-                    text = _translate('HandlerClass', 'Ohmic Probe has disabled jogging')
-                elif self.w.led_breakaway_switch.hal_pin.get():
-                    text = _translate('HandlerClass', 'Breakaway Switch has disabled jogging')
-                N.update(O.notify_critical, title='Operator Error:', message=text, msgs=O.notify_max_msgs)
-            elif 'jog-stop' in text or 'jog-stop-immediate' in text:
-                if self.w.led_float_switch.hal_pin.get():
-                    text = _translate('HandlerClass', 'Float Switch has aborted active jogging')
-                elif self.w.led_ohmic_probe.hal_pin.get():
-                    text = _translate('HandlerClass', 'Ohmic Probe has aborted active jogging')
-                elif self.w.led_breakaway_switch.hal_pin.get():
-                    text = _translate('HandlerClass', 'Breakaway Switch has aborted active jogging')
-                N.update(O.notify_critical, title='Operator Error:', message=text, msgs=O.notify_max_msgs)
             elif kind == linuxcnc.OPERATOR_ERROR:
                 N.update(O.notify_critical, title='Operator Error:', message=text, msgs=O.notify_max_msgs)
             elif kind == linuxcnc.OPERATOR_TEXT:
@@ -707,6 +715,7 @@ class HandlerClass:
         self.materialTempPin = self.h.newpin('material_temp', hal.HAL_S32, hal.HAL_IN)
         self.motionTypePin = self.h.newpin('motion_type', hal.HAL_S32, hal.HAL_IN)
         self.offsetsActivePin = self.h.newpin('offsets_active', hal.HAL_BIT, hal.HAL_IN)
+        self.ohmicLedInPin = self.h.newpin('ohmic_led_in', hal.HAL_BIT, hal.HAL_IN)
         self.paramTabDisable = self.h.newpin('param_disable', hal.HAL_BIT, hal.HAL_IN)
         self.settingsTabDisable = self.h.newpin('settings_disable', hal.HAL_BIT, hal.HAL_IN)
         self.plasmacStatePin = self.h.newpin('plasmac_state', hal.HAL_S32, hal.HAL_IN)
@@ -790,7 +799,7 @@ class HandlerClass:
         CALL(['halcmd', 'net', 'plasmac:voidlock-is-locked', 'plasmac.voidlock-is-locked', 'qtplasmac.led_void_lock'])
         CALL(['halcmd', 'net', 'plasmac:led-up', 'plasmac.led-up', 'qtplasmac.led_thc_up'])
         CALL(['halcmd', 'net', 'plasmac:led-down', 'plasmac.led-down', 'qtplasmac.led_thc_down'])
-        CALL(['halcmd', 'net', 'plasmac:ohmic-probe-out', 'qtplasmac.led_ohmic_probe'])
+        CALL(['halcmd', 'net', 'plasmac:ohmic-probe-out', 'qtplasmac.ohmic_led_in'])
         CALL(['halcmd', 'net', 'plasmac:thc-active', 'plasmac.thc-active', 'qtplasmac.led_thc_active'])
         CALL(['halcmd', 'net', 'plasmac:thc-enabled', 'plasmac.thc-enabled', 'qtplasmac.led_thc_enabled'])
         CALL(['halcmd', 'net', 'plasmac:torch-on', 'qtplasmac.led_torch_on'])
@@ -1563,7 +1572,7 @@ class HandlerClass:
             self.w.chk_override_jog.setEnabled(state)
             self.w.releaseKeyboard()
         else:
-           if not self.w.led_float_switch.hal_pin.get() and not self.w.led_ohmic_probe.hal_pin.get() and \
+           if not self.w.led_float_switch.hal_pin.get() and not self.ohmicLedInPin.get() and \
                                                             not self.w.led_breakaway_switch.hal_pin.get():
                 self.w.chk_override_jog.setChecked(False)
                 hal.set_p('plasmac.override-jog', '0')
@@ -2784,6 +2793,7 @@ class HandlerClass:
         self.sensorActive.value_changed.connect(lambda v:self.sensor_active_changed(v))
         self.zOffsetPin.value_changed.connect(lambda v:self.z_offset_changed(v))
         self.laserRecStatePin.value_changed.connect(lambda v:self.laser_recovery_state_changed(v))
+        self.ohmicLedInPin.value_changed.connect(lambda v:self.ohmic_sensed(v))
 
     def conv_call(self, operation):
         if self.developmentPin.get():
@@ -3123,7 +3133,7 @@ class HandlerClass:
         for halpin in self.halTogglePins:
             if self.halTogglePins[halpin][1] and not hal.get_value(halpin):
                 rcButtonList.append(self.halTogglePins[halpin][2].replace('\n', ' '))
-        if rcButtonList:
+        if rcButtonList and self.w.torch_enable.isChecked():
             head = _translate('HandlerClass', 'Run Critical Toggle')
             btn1 = _translate('HandlerClass', 'CONTINUE')
             btn2 = _translate('HandlerClass', 'CANCEL')
@@ -3230,6 +3240,10 @@ class HandlerClass:
         self.preRflFile = ''
         self.w.gcodegraphics.clear_highlight()
 
+    def ohmic_sensed(self, state):
+        if state:
+            hal.set_p('qtplasmac.led_ohmic_probe', '1')
+            self.ohmicLedTimer.start(150)
 
 #########################################################################################################################
 # TIMER FUNCTIONS #
@@ -3264,6 +3278,15 @@ class HandlerClass:
             self.flasher = self.flashRate
             self.flashState = not self.flashState
             self.flasher_timeout()
+        if not self.firstRun and self.pmPort and not hal.component_exists('pmx485'):
+            if self.pmx485_check(self.pmPort, True):
+                self.w.gas_pressure.show()
+                self.w.gas_pressure_label.show()
+                self.w.cut_mode.show()
+                self.w.cut_mode_label.show()
+                self.w.pmx485_frame.show()
+                self.w.pmx_stats_frame.show()
+                self.pmx485_startup(self.pmPort)
         if not self.firstRun and os.path.isfile(self.upFile):
             exec(open(self.upFile).read())
 
@@ -3397,6 +3420,11 @@ class HandlerClass:
             self.laserButtonState = 'reset'
             self.w.laser.setText(_translate('HandlerClass', 'LASER'))
 
+    def ohmic_led_timeout(self):
+        if not self.ohmicLedInPin.get():
+            hal.set_p('qtplasmac.led_ohmic_probe', '0')
+        else:
+            self.ohmicLedTimer.start(50)
 
 #########################################################################################################################
 # USER BUTTON FUNCTIONS #
@@ -5120,6 +5148,37 @@ class HandlerClass:
 #########################################################################################################################
 # POWERMAX COMMUNICATIONS FUNCTIONS #
 #########################################################################################################################
+    def pmx485_check(self, port, periodic=False):
+        try:
+            import serial
+            import serial.tools.list_ports as PORTS
+            head = _translate('HandlerClass', 'Port Error')
+            msg1 = _translate('HandlerClass', 'Powermax communications are disabled')
+            ports = []
+            for p in PORTS.comports():
+                ports.append(p[0])
+            if port in ports:
+                try:
+                    sPort = serial.Serial(port, 19200)
+                    sPort.close()
+                except Exception as err:
+                    if not periodic:
+                        STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{}'.format(head, err, msg1))
+                    return False
+            else:
+                if not periodic:
+                    msg0 = _('cannot be found')
+                    STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{} {}\n{}'.format(head, port, msg0, msg1))
+                return False
+        except:
+            if not periodic:
+                head = _translate('HandlerClass', 'Module Error')
+                msg0 = _translate('HandlerClass', 'python3-serial cannot be found')
+                msg1 = _translate('HandlerClass', 'Install python3-serial or linuxcnc-dev')
+            STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{}\n{}'.format(head, msg0, msg1))
+            return False
+        return True
+
     def pmx485_startup(self, port):
         self.pmx485CommsError = False
         self.w.pmx485Status = False
