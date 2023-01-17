@@ -54,11 +54,17 @@ class HandlerClass:
         self.h = halcomp
         self.w = widgets
         self.gcodes = GCodes(widgets)
-        self.valid = QtGui.QDoubleValidator(-999.999, 999.999, 3)
+        # This validator precludes using comma as a decimal
+        self.valid = QtGui.QRegExpValidator(QtCore.QRegExp('-?[0-9]{0,6}[.][0-9]{0,3}'))
         KEYBIND.add_call('Key_F11','on_keycall_F11')
         KEYBIND.add_call('Key_F12','on_keycall_F12')
         KEYBIND.add_call('Key_Pause', 'on_keycall_pause')
         KEYBIND.add_call('Key_Any', 'on_keycall_pause')
+
+        KEYBIND.add_call('Key_Period','on_keycall_jograte',1)
+        KEYBIND.add_call('Key_Comma','on_keycall_jograte',0)
+        KEYBIND.add_call('Key_Greater','on_keycall_angular_jograte',1)
+        KEYBIND.add_call('Key_Less','on_keycall_angular_jograte',0)
 
         # some global variables
         self.probe = None
@@ -111,6 +117,7 @@ class HandlerClass:
         STATUS.connect('command-stopped', lambda w: self.stop_timer())
         STATUS.connect('progress', lambda w,p,t: self.updateProgress(p,t))
         STATUS.connect('override-limits-changed', lambda w, state, data: self._check_override_limits(state, data))
+        STATUS.connect('graphics-gcode-properties', lambda w, d: self.update_gcode_properties(d))
 
         self.html = """<html>
 <head>
@@ -120,12 +127,13 @@ class HandlerClass:
 <h1>Setup Tab</h1>
 <p>If you select a file with .html as a file ending, it will be shown here..</p>
 <li><a href="http://linuxcnc.org/docs/devel/html/">Documents online</a></li>
-<li><a href="file://">Local files</a></li>
+<li><a href="file://%s">Local files</a></li>
 <img src="file://%s" alt="lcnc_swoop" />
 <hr />
 </body>
 </html>
-""" %(os.path.join(paths.IMAGEDIR,'lcnc_swoop.png'))
+""" %(  os.path.expanduser('~/linuxcnc'),
+        os.path.join(paths.IMAGEDIR,'lcnc_swoop.png'))
 
 
     def class_patch__(self):
@@ -915,6 +923,41 @@ class HandlerClass:
                 self.PDFView.loadView(fname)
                 self.add_status("Loaded PDF file : {}".format(fname))
 
+    def update_gcode_properties(self, props ):
+        # substitute nice looking text:
+        property_names = {
+            'name': "Name:", 'size': "Size:",
+    '       tools': "Tool order:", 'g0': "Rapid distance:",
+            'g1': "Feed distance:", 'g': "Total distance:",
+            'run': "Run time:",'machine_unit_sys':"Machine Unit System:",
+            'x': "X bounds:",'x_zero_rxy':'X @ Zero Rotation:',
+            'y': "Y bounds:",'y_zero_rxy':'Y @ Zero Rotation:',
+            'z': "Z bounds:",'z_zero_rxy':'Z @ Zero Rotation:',
+            'a': "A bounds:", 'b': "B bounds:",
+            'c': "C bounds:",'toollist':'Tool Change List:',
+            'gcode_units':"Gcode Units:"
+        }
+
+        smallmess = mess = ''
+        if props:
+            for i in props:
+                smallmess += '<b>%s</b>: %s<br>' % (property_names.get(i), props[i])
+                mess += '<span style=" font-size:18pt; font-weight:600; color:black;">%s </span>\
+<span style=" font-size:18pt; font-weight:600; color:#aa0000;">%s</span>\
+<br>'% (property_names.get(i), props[i])
+
+        # put the details into the properties page
+        self.w.textedit_properties.setText(mess)
+        return
+        # pop a dialog of the properties
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setText(smallmess)
+        msg.setWindowTitle("Gcode Properties")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msg.show()
+        retval = msg.exec_()
+
     def disable_spindle_pause(self):
         self.h['eoffset-count'] = 0
         self.h['spindle-inhibit'] = False
@@ -941,6 +984,7 @@ class HandlerClass:
             self.add_status("Touchoff routine is already running", CRITICAL)
 
     def kb_jog(self, state, joint, direction, fast = False, linear = True):
+        ACTION.SET_MANUAL_MODE()
         if not STATUS.is_man_mode() or not STATUS.machine_is_on():
             self.add_status('Machine must be ON and in Manual mode to jog', CRITICAL)
             return
@@ -950,6 +994,7 @@ class HandlerClass:
         else:
             distance = STATUS.get_jog_increment_angular()
             rate = STATUS.get_jograte_angular()/60
+        print(rate)
         if state:
             if fast:
                 rate = rate * 2
@@ -1168,6 +1213,20 @@ class HandlerClass:
     def on_keycall_pause(self,event,state,shift,cntrl):
         if state and STATUS.is_auto_mode() and self.use_keyboard():
             ACTION.PAUSE()
+
+    def on_keycall_jograte(self,event,state,shift,cntrl,value):
+        if state and self.use_keyboard():
+            if value == 1:
+                ACTION.SET_JOG_RATE_FASTER()
+            else:
+                ACTION.SET_JOG_RATE_SLOWER()
+
+    def on_keycall_angular_jograte(self,event,state,shift,cntrl,value):
+        if state and self.use_keyboard():
+            if value == 1:
+                ACTION.SET_JOG_RATE_ANGULAR_FASTER()
+            else:
+                ACTION.SET_JOG_RATE_ANGULAR_SLOWER()
 
     def on_keycall_XPOS(self,event,state,shift,cntrl):
         if self.use_keyboard():
