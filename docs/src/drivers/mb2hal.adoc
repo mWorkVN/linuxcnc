@@ -28,7 +28,8 @@ Consider using MB2HAL if:
   MB2HAL have debug levels to facilitate the low level protocol debug.
 * You have more than one device to connect. MB2HAL is very efficiently managing multiple devices, transactions and links.
   Currently I am monitoring two axis drivers using a Rs232 port, a VFD driver using another Rs232 port, and a remote I/O using TCP/IP.
-* You want a protocol to connect your Arduino to HAL. Look the included sample configuration file, sketch and library for Arduino Modbus. 
+* You want a protocol to connect your Arduino to HAL.
+  Look the included sample configuration file, sketch and library for Arduino Modbus. 
 
 == Usage
 
@@ -162,7 +163,7 @@ include::mb2hal_HOWTO.ini[]
 To use these new features you have to set `VERSION = 1.1`.
 
 _m_ = Value of `HAL_TX_NAME` if set or transaction number +
-_n_ = element number (`NELEMENTS`) or name from `PIN_NAMES`
+_n_ = Element number (`NELEMENTS`) or name from `PIN_NAMES`
 
 Example:
 
