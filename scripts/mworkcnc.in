@@ -1,10 +1,10 @@
 #!/bin/bash
 ################################################################################
-# usage: linuxcnc [options] [<ini-file>]
+# usage: linuxcnc [options] [<INI file>]
 #
 # options: see usage() function below
 #
-# this version calls pickconfig.tcl to pick an ini file if one
+# this version calls pickconfig.tcl to pick an INI file if one
 # is not specified on the command line
 #
 ################################################################################
@@ -26,7 +26,7 @@ fi
 # if we're running on Wayland where it would normally use EGL.
 if [[ ! -v LINUXCNC_OPENGL_PLATFORM || "${LINUXCNC_OPENGL_PLATFORM}" == "glx" ]]; then
     export PYOPENGL_PLATFORM="x11"
-fi															  
+fi
 ################################################################################
 # 0. Values that come from configure
 ################################################################################
@@ -120,7 +120,7 @@ Options:
     -k: Continue in the presence of errors in HAL files
     -t "tpmodulename [parameters]"
             specify custom trajectory_planning_module
-            overrides optional ini setting [TRAJ]TPMOD
+            overrides optional INI setting [TRAJ]TPMOD
     -m "homemodulename [parameters]"
             specify custom homing_module
             overrides optional INI setting [EMCMOT]HOMEMOD
