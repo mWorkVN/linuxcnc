@@ -1,4 +1,4 @@
-VERSION = '1.235.268'
+VERSION = '1.235.271'
 
 '''
 qtplasmac_handler.py
@@ -956,6 +956,13 @@ class HandlerClass:
         self.w.filemanager.loadButton.hide()
         # for copy/paste control if required
         self.w.filemanager.copy_control.hide()
+        # add vertical and horizontal scroll bars to the materials QComboBoxs 
+        self.w.material_selector.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.w.material_selector.view().setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.w.conv_material.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.w.conv_material.view().setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.w.materials_box.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.w.materials_box.view().setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.w.gcode_display.set_margin_width(3)
         self.w.gcode_display.setBraceMatching(False)
         self.w.gcode_display.setCaretWidth(0)
@@ -1553,8 +1560,6 @@ class HandlerClass:
             ACTION.CALL_MDI_WAIT('T0 M6')
             ACTION.SET_MANUAL_MODE()
             self.firstHoming = True
-        if not self.fileOpened:
-            self.set_blank_gcodeprops()
         self.w.gcodegraphics.updateGL()
         self.w.conv_preview.updateGL()
         log = _translate('HandlerClass', 'Machine homed')
@@ -1671,10 +1676,7 @@ class HandlerClass:
 
     def update_gcode_properties(self, props):
         if props:
-            if 'qtplasmac_program_clear.ngc' in props['name']:
-                self.set_blank_gcodeprops()
-            else:
-                self.gcodeProps = props
+            self.gcodeProps = props
             if props['gcode_units'] == 'in':
                 STATUS.emit('metric-mode-changed', False)
             else:
@@ -1972,9 +1974,9 @@ class HandlerClass:
         mid, size = GlCanonDraw.extents_info(self.w.gcodegraphics)
         if self.gcodeProps:
             mult = 1
-            if self.units == 'in' and self.gcodeProps['machine_unit_sys'] == 'Metric':
+            if self.units == 'in' and self.gcodeProps['gcode_units'] == 'mm':
                 mult = 0.03937
-            elif self.units == 'mm' and self.gcodeProps['machine_unit_sys'] == 'Imperial':
+            elif self.units == 'mm' and self.gcodeProps['gcode_units'] == 'in':
                 mult = 25.4
             x = (round(float(self.gcodeProps['x'].split()[0]) * mult, 4))
             y = (round(float(self.gcodeProps['y'].split()[0]) * mult, 4))
@@ -2385,27 +2387,6 @@ class HandlerClass:
         if value == 0 and STATUS.is_mdi_mode():
             ACTION.SET_MANUAL_MODE()
 
-    def set_blank_gcodeprops(self):
-        # a workaround for the extreme values in gcodeprops for a blank file
-        self.gcodeProps = {}
-        self.gcodeProps['name'] = 'generated from qtplasmac_program_clear.ngc'
-        self.gcodeProps['size'] = '35 bytes\n2 gcode lines'
-        self.gcodeProps['g0'] = '0.0 {}'.format(self.units)
-        self.gcodeProps['g1'] = '0.0 {}'.format(self.units)
-        self.gcodeProps['run'] = '0 Seconds'
-        self.gcodeProps['x'] = '0.0 to 0.0 = 0.0 {}'.format(self.units)
-        self.gcodeProps['y'] = '0.0 to 0.0 = 0.0 {}'.format(self.units)
-        self.gcodeProps['z'] = '0.0 to 0.0 = 0.0 {}'.format(self.units)
-        self.gcodeProps['x_zero_rxy'] = '0.0 to 0.0 = 0.0 {}'.format(self.units)
-        self.gcodeProps['y_zero_rxy'] = '0.0 to 0.0 = 0.0 {}'.format(self.units)
-        self.gcodeProps['z_zero_rxy'] = '0.0 to 0.0 = 0.0 {}'.format(self.units)
-        if self.units:
-            mach = 'Metric'
-        else:
-            mach = 'Imperial'
-        self.gcodeProps['machine_unit_sys'] = '{}'.format(mach)
-        self.gcodeProps['gcode_units'] = '{}'.format(self.units)
-
     def wcs_rotation(self, wcs):
         if wcs == 'get':
             self.currentRotation = STATUS.stat.rotation_xy
@@ -2458,9 +2439,9 @@ class HandlerClass:
         self.boundsError[boundsType] = False
         msgList = []
         boundsMultiplier = 1
-        if self.units == 'in' and self.gcodeProps['machine_unit_sys'] == 'Metric':
+        if self.units == 'in' and self.gcodeProps['gcode_units'] == 'mm':
             boundsMultiplier = 0.03937
-        elif self.units == 'mm' and self.gcodeProps['machine_unit_sys'] == 'Imperial':
+        elif self.units == 'mm' and self.gcodeProps['gcode_units'] == 'in':
             boundsMultiplier = 25.4
         if framing:
             xStart = STATUS.stat.g5x_offset[0] + xOffset
