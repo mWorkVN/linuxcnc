@@ -765,7 +765,7 @@ install-kernel-indep: install-dirs
 	$(FILE) ../src/emc/usr_intf/pncconf/pncconf-help/*.png $(DESTDIR)$(prefix)/share/linuxcnc/pncconf/pncconf-help
 
 	$(FILE) ../lib/python/gladevcp/hal_python.xml $(DESTDIR)$(datadir)/glade/catalogs/
-	$(FILE) ../lib/python/gladevcp/glade-icons/widget*.png  $(DESTDIR)$(datadir)/glade/pixmaps/hicolor/22x22/actions/
+	$(FILE) ../share/glade/pixmaps/hicolor/22x22/actions/widget*.png  $(DESTDIR)$(datadir)/glade/pixmaps/hicolor/22x22/actions/
 
 	$(FILE) ../share/gtksourceview-2.0/language-specs/*.lang  $(DESTDIR)$(datadir)/gtksourceview-2.0/language-specs/
 
@@ -925,6 +925,8 @@ obj-$(CONFIG_DEBOUNCE) += debounce.o
 debounce-objs := hal/components/debounce.o $(MATHSTUB)
 obj-$(CONFIG_ENCODER) += encoder.o
 encoder-objs := hal/components/encoder.o $(MATHSTUB)
+obj-$(CONFIG_ENUM) += enum.o
+enum-objs := hal/components/enum.o $(MATHSTUB)
 obj-$(CONFIG_COUNTER) += counter.o
 counter-objs := hal/components/counter.o $(MATHSTUB)
 obj-$(CONFIG_ENCODER_RATIO) += encoder_ratio.o
@@ -1270,6 +1272,7 @@ endif
 ../rtlib/boss_plc$(MODULE_EXT): $(addprefix objects/rt,$(boss_plc-objs))
 ../rtlib/debounce$(MODULE_EXT): $(addprefix objects/rt,$(debounce-objs))
 ../rtlib/encoder$(MODULE_EXT): $(addprefix objects/rt,$(encoder-objs))
+../rtlib/enum$(MODULE_EXT): $(addprefix objects/rt,$(enum-objs))
 ../rtlib/counter$(MODULE_EXT): $(addprefix objects/rt,$(counter-objs))
 ../rtlib/encoder_ratio$(MODULE_EXT): $(addprefix objects/rt,$(encoder_ratio-objs))
 ../rtlib/stepgen$(MODULE_EXT): $(addprefix objects/rt,$(stepgen-objs))

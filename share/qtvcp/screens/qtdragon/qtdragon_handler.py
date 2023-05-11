@@ -97,6 +97,7 @@ class HandlerClass:
                             "btn_home_z", "action_home_a", "btn_reload_file", "macrobutton0", "macrobutton1",
                             "macrobutton2", "macrobutton3", "macrobutton4", "macrobutton5", "macrobutton6",
                             "macrobutton7", "macrobutton8", "macrobutton9"]
+        self.statusbar_reset_time = 10000 # ten seconds
 
         STATUS.connect('general', self.dialog_return)
         STATUS.connect('state-on', lambda w: self.enable_onoff(True))
@@ -253,6 +254,8 @@ class HandlerClass:
         pin.value_changed.connect(self.spindle_fault_changed)
         pin = QHAL.newpin("spindle-modbus-errors", QHAL.HAL_U32, QHAL.HAL_IN)
         pin.value_changed.connect(self.mb_errors_changed)
+        pin = QHAL.newpin("spindle-modbus-connection", QHAL.HAL_BIT, QHAL.HAL_IN)
+        pin.value_changed.connect(self.mb_connection_changed)
         QHAL.newpin("spindle-inhibit", QHAL.HAL_BIT, QHAL.HAL_OUT)
         # external offset control pins
         QHAL.newpin("eoffset-enable", QHAL.HAL_BIT, QHAL.HAL_OUT)
@@ -469,6 +472,12 @@ class HandlerClass:
     def mb_errors_changed(self, data):
         errors = self.h['spindle-modbus-errors']
         self.w.lbl_mb_errors.setText(str(errors))
+
+    def mb_connection_changed(self, data):
+        if data:
+            self.w.lbl_mb_errors.setStyleSheet('')
+        else:
+            self.w.lbl_mb_errors.setStyleSheet('''background-color:rgb(202, 0, 0);''')
 
     def dialog_return(self, w, message):
         rtn = message.get('RETURN')
@@ -1131,13 +1140,20 @@ class HandlerClass:
     def writer(self):
         WRITER.show()
 
+    def endcolor(self):
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.set_style_default)
+        self.timer.start(self.statusbar_reset_time)
+
     # change Status bar text color
     def set_style_default(self):
         self.w.lineEdit_statusbar.setStyleSheet("background-color: rgb(252, 252, 252);color: rgb(0,0,0)")  #default white
     def set_style_warning(self):
-        self.w.lineEdit_statusbar.setStyleSheet("background-color: rgb(242, 246, 103);color: rgb(0,0,0)")  #yelow
+        self.w.lineEdit_statusbar.setStyleSheet("background-color: rgb(242, 246, 103);color: rgb(0,0,0)")  #yellow
+        self.endcolor()
     def set_style_critical(self):
         self.w.lineEdit_statusbar.setStyleSheet("background-color: rgb(255, 144, 0);color: rgb(0,0,0)")   #orange
+        self.endcolor()
 
     def adjust_stacked_widgets(self,requestedIndex):
         IGNORE = -1
