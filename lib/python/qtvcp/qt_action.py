@@ -103,7 +103,7 @@ class _Lcnc_Action(object):
                     return
                 length = len(INFO.JOINT_SEQUENCE_LIST)
                 for num, j in enumerate(INFO.JOINT_SEQUENCE_LIST):
-                    print(j, num, len(INFO.JOINT_SEQUENCE_LIST))
+                    #print(j, num, len(INFO.JOINT_SEQUENCE_LIST))
                     # at the end so all homed
                     if num == length - 1:
                         self.home_all_warning_flag = False
@@ -633,7 +633,8 @@ class _Lcnc_Action(object):
                             'overlay-offsets-on', 'overlay-offsets-off',
                             'inhibit-selection-on', 'inhibit-selection-off',
                             'alpha-mode-on', 'alpha-mode-off', 'dimensions-on',
-                            'dimensions-off', 'record-view', 'set-recorded-view'):
+                            'dimensions-off', 'record-view', 'set-recorded-view',
+                            'set-large-dro','set-small-dro'):
             STATUS.emit('graphics-view-changed', view, None)
 
     def SET_GRAPHICS_GRID_SIZE(self, size):
@@ -853,7 +854,7 @@ class _Lcnc_Action(object):
     # Action Helper functions
     ######################################
 
-    # adjust the jog rate by one aproximate division of the
+    # adjust the jog rate by one approximate division of the
     # min/max range on an exponential scale.
     # cut off at the upper and lower jog rates as per the INI
     def _step_jograte(self, jograte, minrate, maxrate, inc, divs):

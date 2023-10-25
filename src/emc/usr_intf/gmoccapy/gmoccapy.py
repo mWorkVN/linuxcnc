@@ -76,7 +76,7 @@ sys.excepthook = excepthook
 
 # constants
 #         # gmoccapy  #"
-_RELEASE = " 3.4.3"
+_RELEASE = " 3.4.6"
 _INCH = 0                         # imperial units are active
 _MM = 1                           # metric units are active
 
@@ -359,32 +359,6 @@ class gmoccapy(object):
         self.widgets.fontbutton_popup.set_font(self.prefs.getpref("message_font", "sans 10", str))
         self.widgets.chk_use_frames.set_active(self.prefs.getpref("use_frames", True, bool))
 
-        # this sets the background colors of several buttons
-        # the colors are different for the states of the button
-#         self.widgets.tbtn_on.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.tbtn_estop.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FF0000"))
-#         self.widgets.tbtn_estop.modify_bg(Gtk.StateFlags.NORMAL, Gdk.color_parse("#00FF00"))
-#         self.widgets.rbt_manual.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.rbt_mdi.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.rbt_auto.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.tbtn_setup.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.rbt_forward.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#00FF00"))
-#         self.widgets.rbt_reverse.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#00FF00"))
-#         self.widgets.rbt_stop.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.rbt_view_p.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.rbt_view_x.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.rbt_view_y.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.rbt_view_y2.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.rbt_view_z.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.tbtn_flood.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#00FF00"))
-#         self.widgets.tbtn_fullsize_preview0.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.tbtn_fullsize_preview1.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.tbtn_mist.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#00FF00"))
-#         self.widgets.tbtn_optional_blocks.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.tbtn_user_tabs.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.tbtn_view_dimension.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.tbtn_view_tool_path.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
-#         self.widgets.tbtn_switch_mode.modify_bg(Gtk.StateFlags.ACTIVE, Gdk.color_parse("#FFFF00"))
 
         # should the tool in spindle be reloaded on startup?
         self.widgets.chk_reload_tool.set_active(self.prefs.getpref("reload_tool", True, bool))
@@ -768,8 +742,6 @@ class gmoccapy(object):
         children = self.widgets.hbtb_ref.get_children()
         for child in children:
             self.ref_button_dic[child.get_property("name")] = child
-
-        self.widgets.hbtb_ref.show_all()
 
     def _get_space_label(self, name):
         lbl = Gtk.Label.new("")
@@ -3495,6 +3467,12 @@ class gmoccapy(object):
 #                 self.diameter_mode = True
 
     def _update_toolinfo(self, tool):
+        LOG.debug("Tool is now %s".format(tool))
+        if "G43" in self.active_gcodes:
+            LOG.debug("G43 is active")
+        else:
+            LOG.debug("G43 is not active")
+
         toolinfo = self.widgets.tooledit1.get_toolinfo(tool)
         if toolinfo:
             # Doku
@@ -4781,9 +4759,6 @@ class gmoccapy(object):
         self.widgets.gremlin.set_property('grid_size', widget.get_value())
         self.prefs.putpref('grid_size', widget.get_value(), float)
 
-    def on_tbtn_log_actions_toggled(self, widget, data=None):
-        self.prefs.putpref("log_actions", widget.get_active())
-
     def on_chk_show_dro_toggled(self, widget, data=None):
         state = widget.get_active()
         self.widgets.gremlin.set_property("metric_units", self.dro_dic["Combi_DRO_0"].metric_units)
@@ -5287,6 +5262,8 @@ class gmoccapy(object):
             else:
                 self.alert_sound = file
                 self.prefs.putpref("audio_alert", file)
+            self.audio.set_sound(file)
+            self.audio.run()
 
     def on_tbtn_switch_mode_toggled(self, widget, data=None):
         if widget.get_active():
@@ -5503,6 +5480,14 @@ class gmoccapy(object):
         if self.lathe_mode:
             self.widgets.lbl_blockheight.hide()
 
+    def _optional_blocks(self, pin):
+        LOG.debug("Received a signal from pin {0} with state = {1}".format(pin.name, pin.get()))
+        self.widgets["tbtn_optional_blocks"].set_active(pin.get())
+
+    def _blockdelete(self, pin):
+        LOG.debug("Received a signal from pin {0} with state = {1}".format(pin.name, pin.get()))
+        self.command.set_optional_stop(pin.get())
+
 # =========================================================
 # The actions of the buttons
     def _button_pin_changed(self, pin):
@@ -5712,6 +5697,13 @@ class gmoccapy(object):
         # make a pin to set ignore limits
         pin = self.halcomp.newpin("ignore-limits", hal.HAL_BIT, hal.HAL_IN)
         hal_glib.GPin(pin).connect("value_changed", self._ignore_limits)
+
+        # make pins to set optinal stops and block delete
+        pin = self.halcomp.newpin("optional-stop", hal.HAL_BIT, hal.HAL_IN)
+        hal_glib.GPin(pin).connect("value_changed", self._optional_blocks)
+        pin = self.halcomp.newpin("blockdelete", hal.HAL_BIT, hal.HAL_IN)
+        hal_glib.GPin(pin).connect("value_changed", self._blockdelete)
+
 
 # Hal Pin Handling End
 # =========================================================

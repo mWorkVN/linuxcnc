@@ -491,7 +491,7 @@ if __name__ == "__main__":
 * `ORIENT_OFFSET = 0` - (((ORIENT OFFSET)))
   A float value added to the R word parameter of an <<mcode:m19,M19 Orient Spindle>> operation.
   Used to define an arbitrary zero position regardless of encoder mount orientation.
-* `RS274NGC_STARTUP_CODE = G17 G20 G40 G49 G64 P0.001 G80 G90 G92 G94 G97 G98` - (((RS274NGC STARTUP CODE)))
+* `RS274NGC_STARTUP_CODE = G17 G20 G40 G49 G64 P0.001 G80 G90 G92.1 G94 G97 G98` - (((RS274NGC STARTUP CODE)))
   A string of NC codes that the interpreter is initialized with.
   This is not a substitute for specifying modal G-codes at the top of each NGC file,
   because the modal codes of machines differ, and may be changed by G-code interpreted earlier in the session.
@@ -1293,28 +1293,38 @@ image::images/encoder-scale.png[align="center"]
 [[sub:ini:sec:spindle-num]]
 === [SPINDLE_<num>] Section(s)(((INI File,Sections,[SPINDLE_<num>] Section(s))))
 
-The _<num>_ specifies the spindle number 0 ... (num_spindles-1)
-The value of _num_spindles_ is set by `[TRAJ]SPINDLES=` .
+The _<num>_ specifies the spindle number 0 ... (num_spindles-1) +
+The value of _num_spindles_ is set by `[TRAJ]SPINDLES=` . +
+By default maximum velocity of the spindle in forward and reverse is approximately
+  2147483000 RPM. +
+By default minimum velocity of the spindle in forward and reverse is 0 RPM. +
+By default the increment is 100 RPM. +
+You change these default by setting the following INI variables:
 
-* `MAX_VELOCITY = 20000`
+[NOTE]
+These settings are for the motion controller component. Control screens can limit
+ these settings further. 
+
+* `MAX_FORWARD_VELOCITY = 20000`
   The maximum spindle speed (in rpm) for the specified spindle. Optional.
-* `MIN_VELOCITY = 3000`
+  This will also set MIN_FORWARD_VELOCITY to the negative value unless overridden.
+* `MIN_FORWARD_VELOCITY = 3000`
   The minimum spindle speed (in rpm) for the specified spindle. Optional.
   Many spindles have a minimum speed below which they should not be run.
   Any spindle speed command below this limit will be /increased/ to this limit.
 * `MAX_REVERSE_VELOCITY = 20000`
-  This setting will default to `MAX_VELOCITY` if omitted.
+  This setting will default to `MAX_FORWARD_VELOCITY` if omitted.
   It can be used in cases where the spindle speed is limited in reverse.
   Set to zero for spindles which must not be run in reverse.
   In this context "max" refers to the absolute magnitude of the spindle speed.
 * `MIN_REVERSE_VELOCITY = 3000``
-  This setting is equivalent to `MIN_VELOCITY` but for reverse spindle rotation.
-  It will default to the MIN_VELOCITY if omitted.
+  This setting is equivalent to `MIN_FORWARD_VELOCITY` but for reverse spindle rotation.
+  It will default to the MIN_FORWARD_VELOCITY if omitted.
 * `INCREMENT = 200`
   Sets the step size for spindle speed increment / decrement commands.
   This can have a different value for each spindle.
   This setting is effective with AXIS and Touchy but note that some
-  GUIs may handle things differently.
+  control screens may handle things differently.
 * `HOME_SEARCH_VELOCITY = 100` - FIXME: Spindle homing not yet working.
   Sets the homing speed (rpm) for the spindle.
   The spindle will rotate at this velocity during the homing sequence until the spindle index is located, at which point the spindle position will be set to zero.

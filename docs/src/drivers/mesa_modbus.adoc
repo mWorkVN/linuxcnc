@@ -76,7 +76,7 @@ some realtime implementations of LinuxCNC realtime require that modules
 be kernel modules, and kernel modules have no access to files, the
 mesa_modbus framework compiles-in the modbus register structure and
 HAL pins into an immutable, loadable, module. If you need to change
-the register assigments or add/remove pins/registers then the module
+the register assignments or add/remove pins/registers then the module
 must be recompiled.
 
 Load and activate the module with HAL commands such as
@@ -138,7 +138,7 @@ module will create the following pins for each instance of the driver:
 
 *modname.drive_delay* (default 0)
 
-•modname.update-hz* (default 0)
+*modname.update-hz* (default 0)
 
 *modname.fault* - indicates a fault with the device or comms
 
@@ -262,15 +262,15 @@ The supported Modbus command types are:
 
 [width="90%",options="header"]
 |===
-|Description|Code|
-|Read Coils|1|
-|Read Discrete Inputs|2|
-|Read Multiple Holding Registers|3|
-|Read Input Registers|4|
-|Write Single Coil|5|
-|Write Single Holding Register|6|
-|Write Multiple Coils|15|
-|Write Multiple Holding Registers|16|
+|Description|Code
+|Read Coils|1
+|Read Discrete Inputs|2
+|Read Multiple Holding Registers|3
+|Read Input Registers|4
+|Write Single Coil|5
+|Write Single Holding Register|6
+|Write Multiple Coils|15
+|Write Multiple Holding Registers|16
 |===
 
 The Modbus address can be given in Hexadecimal, decimal (or even octal)
@@ -293,13 +293,13 @@ necessary except in the special case of the 'modcompile all' command,
 which will compile and install all .mod files in the current directory.
 
 ----
-/modcompile my_file.mod
+sudo modcompile my_file.mod
 ----
 
 or
 
 ----
-./modcompile all
+sudo modcompile all
 ----
 
 "modcompile" is provided by the "linuxcnc-dev" package.
@@ -334,7 +334,7 @@ reversed.
 === Ad-hoc Modbus device access ===
 
 For experimentation and one-off configuration it is possible to send /
-recieve data through the FPGA serial port using the mesaflash utility
+receive data through the FPGA serial port using the mesaflash utility
 in a script. A sample script follows.
 
 [source,bash]
