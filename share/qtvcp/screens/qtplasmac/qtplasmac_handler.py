@@ -1,4 +1,6 @@
-VERSION = '1.236.295'
+VERSION = '236.300'
+LCNCVER = '2.9'
+DOCSVER = LCNCVER
 
 '''
 qtplasmac_handler.py
@@ -24,7 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc
 import os
 import sys
 from shutil import copy as COPY
-from shutil import move as MOVE
 from subprocess import Popen, PIPE
 from subprocess import run as RUN
 from subprocess import call as CALL
@@ -33,7 +34,6 @@ import time
 import tarfile
 import math
 import glob
-import webbrowser
 import linuxcnc
 import hal
 from OpenGL.GL import glTranslatef
@@ -64,7 +64,7 @@ from qtvcp.widgets.status_label import StatusLabel as STATLABEL
 from qtvcp.widgets.stylesheeteditor import  StyleSheetEditor as SSE
 from qtvcp.lib.aux_program_loader import Aux_program_loader
 from plasmac import run_from_line as RFL
-from rs274.glcanon import GlCanonDraw
+from rs274.glcanon import GlCanonDraw as DRAW
 from qt5_graphics import Lcnc_3dGraphics as DRO
 
 LOG = logger.getLogger(__name__)
@@ -130,6 +130,7 @@ class HandlerClass:
             if os.path.realpath(m190Path) != os.path.realpath(self.PATHS.CONFIGPATH):
                 COPY(os.path.join(m190Path, 'M190'), os.path.join(self.PATHS.CONFIGPATH, 'M190'))
         self.machineName = self.iniFile.find('EMC', 'MACHINE')
+        self.machineTitle = '{} - QtPlasmaC v{}-{}, powered by QtVCP and LinuxCNC'.format(self.machineName, LCNCVER, VERSION)
         self.prefsFile = os.path.join(self.PATHS.CONFIGPATH, self.machineName + '.prefs')
         self.materialFile = os.path.join(self.PATHS.CONFIGPATH, self.machineName + '_material.cfg')
         self.unitsPerMm = 1
@@ -155,14 +156,7 @@ class HandlerClass:
         if os.path.basename(self.PATHS.XML) == 'qtplasmac_9x16.ui':
             self.landscape = False
         self.upFile = os.path.join(self.PATHS.CONFIGPATH, 'user_periodic.py')
-        major = linuxcnc.version.split('.')[0]
-        minor = linuxcnc.version.split('.')[1]
-        # this will need changing whenever the development branch changes versions
-        if major == '2' and minor == '10':
-            umVer = 'devel'
-        else:
-            umVer = '{}.{}'.format(major, minor)
-        self.umUrl = QUrl('http://linuxcnc.org/docs/{}/html/plasma/qtplasmac.html'.format(umVer))
+        self.umUrl = QUrl('http://linuxcnc.org/docs/{}/html/plasma/qtplasmac.html'.format(DOCSVER))
         KEYBIND.add_call('Key_F12','on_keycall_F12')
         KEYBIND.add_call('Key_F9','on_keycall_F9')
         KEYBIND.add_call('Key_Plus', 'on_keycall_PLUS')
@@ -330,13 +324,18 @@ class HandlerClass:
 
 # called by qtvcp.py
     def initialized__(self):
+        if linuxcnc.version.rsplit('.', 1)[0] != LCNCVER:
+            msg0 = _translate('HandlerClass', 'LinuxCNC version should be')
+            msg1 = _translate('HandlerClass', 'The detected version is')
+            STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{} {}\n{} {}'.format(msg0, LCNCVER, msg1, linuxcnc.version.rsplit('.', 1)[0]))
+            quit()
         ucFile = os.path.join(self.PATHS.CONFIGPATH, 'qtplasmac_custom.py')
         if os.path.isfile(ucFile):
             exec(compile(open(ucFile, 'rb').read(), ucFile, 'exec'))
         # ensure we get all startup errors
         STATUS.connect('error', self.error_update)
         STATUS.connect('graphics-gcode-error', lambda o, e:self.error_update(o, linuxcnc.OPERATOR_ERROR, e))
-        STATUS.emit('update-machine-log', '--- {} - QtPlasmaC v{}, powered by QtVCP on LinuxCNC v{} ---'.format(self.machineName, VERSION, linuxcnc.version.split(':')[0]), None)
+        STATUS.emit('update-machine-log', '--- {} ---'.format(self.machineTitle), None)
         self.make_hal_pins()
         self.init_preferences()
         self.hide_widgets()
@@ -440,12 +439,12 @@ class HandlerClass:
 
         if not os.path.isfile(updateLog):
             with open(updateLog, 'w') as f:
-                f.write('{} Initial    V{}\n'.format(time.strftime('%y-%m-%d'), VERSION))
+                f.write('{} Initial    V{}-{}\n'.format(time.strftime('%y-%m-%d'), LCNCVER, VERSION))
         self.startupTimer.start(250)
 
 # called by qtvcp.py, can override qtvcp settings or qtvcp allowed user options (via INI)
     def before_loop__(self):
-        self.w.setWindowTitle('{} - QtPlasmaC v{}, powered by QtVCP on LinuxCNC v{}'.format(self.machineName, VERSION, linuxcnc.version.split(':')[0]))
+        self.w.setWindowTitle(self.machineTitle)
         self.iconPath = 'share/icons/hicolor/scalable/apps/linuxcnc_alt/linuxcncicon_plasma.svg'
         appPath = os.path.realpath(os.path.dirname(sys.argv[0]))
         self.iconBase = '/usr' if appPath == '/usr/bin' else appPath.replace('/bin', '/debian/extras/usr')
@@ -463,6 +462,7 @@ class HandlerClass:
         self.offset_table_patch()
         self.qt5_graphics_patch()
         self.screen_options_patch()
+        self.glcanon_patch()
 
 # patched file manager functions
     def file_manager_patch(self):
@@ -724,6 +724,18 @@ class HandlerClass:
                     STATUS.emit('play-sound', 'SPEAK %s ' % text)
         STATUS.emit('update-machine-log', text, 'TIME')
 
+# patched glcanon functions
+    def glcanon_patch(self):
+        self.old_draw_grid = DRAW.draw_grid
+        DRAW.draw_grid = self.new_draw_grid
+
+    # allows grid to be drawn in P view
+    def new_draw_grid(self):
+        rotation = math.radians(STATUS.stat.rotation_xy % 90)
+        permutation = lambda x_y_z2: (x_y_z2[0], x_y_z2[1], x_y_z2[2])  # XY Z
+        inverse_permutation = lambda x_y_z3: (x_y_z3[0], x_y_z3[1], x_y_z3[2])  # XY Z
+        self.w.gcodegraphics.draw_grid_permuted(rotation, permutation,
+                inverse_permutation)
 
 #########################################################################################################################
 # SPECIAL FUNCTIONS SECTION #
@@ -1981,7 +1993,7 @@ class HandlerClass:
     def backup_clicked(self):
         self.save_logfile(6)
         bkpPath = '{}'.format(os.path.expanduser('~'))
-        bkpName = '{}_V{}_{}.tar.gz'.format(self.machineName, VERSION, time.strftime('%y-%m-%d_%H-%M-%S'))
+        bkpName = '{}_V{}-{}_{}.tar.gz'.format(self.machineName, LCNCVER, VERSION, time.strftime('%y-%m-%d_%H-%M-%S'))
         tmpFile = os.path.join(self.PATHS.CONFIGPATH, 'config_info.txt')
         lcncInfo = (Popen('linuxcnc_info -s', stdout=PIPE, stderr=PIPE, shell=True).communicate()[0]).decode('utf-8')
         network = (Popen('lspci | grep -i net', stdout=PIPE, stderr=PIPE, shell=True).communicate()[0]).decode('utf-8')
@@ -2044,7 +2056,7 @@ class HandlerClass:
         while time.time() < t:
             QApplication.processEvents()
         self.w.gcodegraphics.set_view('Z')
-        mid, size = GlCanonDraw.extents_info(self.w.gcodegraphics)
+        mid, size = DRAW.extents_info(self.w.gcodegraphics)
         if self.gcodeProps:
             mult = 1
             if self.units == 'in' and self.gcodeProps['gcode_units'] == 'mm':
@@ -3093,13 +3105,13 @@ class HandlerClass:
             self.w.kerf_width.setRange(0.0, 1.0)
             self.w.kerf_width.setDecimals(3)
             self.w.kerf_width.setSingleStep(0.001)
-#            self.w.cut_feed_rate.setRange(0.0, 999.0)
+            self.w.cut_feed_rate.setRange(0.0, 999.0)
             self.w.cut_feed_rate.setDecimals(1)
             self.w.cut_feed_rate.setSingleStep(0.1)
-#            self.w.cut_height.setRange(0.0, 1.0)
+            self.w.cut_height.setRange(0.0, 1.0)
             self.w.cut_height.setDecimals(3)
             self.w.cut_height.setSingleStep(0.001)
-#            self.w.pierce_height.setRange(0.0, 1.0)
+            self.w.pierce_height.setRange(0.0, 1.0)
             self.w.pierce_height.setDecimals(3)
             self.w.pierce_height.setSingleStep(0.001)
         else:
@@ -4878,7 +4890,8 @@ class HandlerClass:
                     elif line.startswith('CUT_MODE'):
                         mat[13] = float(line.split('=')[1].strip())
             self.write_materials_to_dict(mat)
-            self.materialList.append(halpin)
+            if halpin not in self.materialList:
+                self.materialList.append(halpin)
             exists = False
             for n in range(self.w.materials_box.count()):
                 if self.w.materials_box.itemText(n) .startswith(str(halpin)):
@@ -5321,7 +5334,7 @@ class HandlerClass:
                     return False
             else:
                 if not periodic:
-                    msg0 = _translate('cannot be found')
+                    msg0 = _translate('HandlerClass', 'cannot be found')
                     STATUS.emit('error', linuxcnc.OPERATOR_ERROR, '{}:\n{} {}\n{}'.format(head, port, msg0, msg1))
                 return False
         except:
