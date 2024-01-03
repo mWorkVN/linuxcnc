@@ -54,10 +54,14 @@ TAB_USER = 10
 PAGE_UNCHANGED = -1
 PAGE_GCODE = 0
 PAGE_NGCGUI = 1
+MACRO = True
+NO_MACRO = False
 
 DEFAULT = 0
 WARNING = 1
 CRITICAL = 2
+
+VERSION ='1.2'
 
 class HandlerClass:
     def __init__(self, halcomp, widgets, paths):
@@ -234,6 +238,10 @@ class HandlerClass:
         # no buttons hide frame
         if flag:
             self.w.frame_macro_buttons.hide()
+
+        message = "--- QtDragon_hd Version {} on Linuxcnc {} ---".format(
+            VERSION, STATUS.get_linuxcnc_version())
+        STATUS.emit('update-machine-log', message, None)
 
     #############################
     # SPECIAL FUNCTIONS SECTION #
@@ -1026,7 +1034,7 @@ class HandlerClass:
 
     def chk_use_virtual_changed(self, state):
         codestring = "CALCULATOR" if state else "ENTRY"
-        for i in ("x", "y", "z", "a"):
+        for i in ("x", "y", "z", "4", "5"):
             self.w["axistoolbutton_" + i].set_dialog_code(codestring)
         if self.probe:
             self.probe.dialog_code = codestring
@@ -1045,6 +1053,8 @@ class HandlerClass:
         AUX_PRGM.load_gcode_ripper()
 
     def btn_about_clicked(self):
+        self.add_status("QtDragon_hd Version {} on Linuxcnc {} ".format(
+            VERSION, STATUS.get_linuxcnc_version()), CRITICAL)
         info = ACTION.GET_ABOUT_INFO()
         self.w.aboutDialog_.showdialog()
 
@@ -1406,31 +1416,31 @@ class HandlerClass:
         SHOW_DRO = 0
         mode = STATUS.get_current_mode()
         if mode == STATUS.AUTO:
-            seq = {TAB_MAIN: (TAB_MAIN,PAGE_GCODE,SHOW_DRO),
-                    TAB_FILE: (TAB_MAIN,PAGE_GCODE,SHOW_DRO),
-                    TAB_OFFSETS: (TAB_MAIN,PAGE_GCODE,SHOW_DRO),
-                    TAB_TOOL: (TAB_MAIN,PAGE_GCODE,SHOW_DRO),
-                    TAB_STATUS: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO),
-                    TAB_PROBE: (TAB_MAIN,PAGE_GCODE,SHOW_DRO),
-                    TAB_CAMVIEW: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO),
-                    TAB_GCODES: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO),
-                    TAB_SETUP: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO),
-                    TAB_SETTINGS: (requestedIndex,PAGE_GCODE,SHOW_DRO),
-                    TAB_UTILS: (TAB_MAIN,PAGE_GCODE,SHOW_DRO),
-                    TAB_USER: (requestedIndex,PAGE_UNCHANGED,IGNORE) }
+            seq = {TAB_MAIN: (TAB_MAIN,PAGE_GCODE,SHOW_DRO,NO_MACRO),
+                    TAB_FILE: (TAB_MAIN,PAGE_GCODE,SHOW_DRO,NO_MACRO),
+                    TAB_OFFSETS: (TAB_MAIN,PAGE_GCODE,SHOW_DRO,NO_MACRO),
+                    TAB_TOOL: (TAB_MAIN,PAGE_GCODE,SHOW_DRO,NO_MACRO),
+                    TAB_STATUS: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO,NO_MACRO),
+                    TAB_PROBE: (TAB_MAIN,PAGE_GCODE,SHOW_DRO,NO_MACRO),
+                    TAB_CAMVIEW: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO,NO_MACRO),
+                    TAB_GCODES: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO,NO_MACRO),
+                    TAB_SETUP: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO,NO_MACRO),
+                    TAB_SETTINGS: (requestedIndex,PAGE_GCODE,SHOW_DRO,NO_MACRO),
+                    TAB_UTILS: (TAB_MAIN,PAGE_GCODE,SHOW_DRO,NO_MACRO),
+                    TAB_USER: (requestedIndex,PAGE_UNCHANGED,IGNORE,NO_MACRO) }
         else:
-            seq = {TAB_MAIN: (requestedIndex,PAGE_GCODE,SHOW_DRO),
-                    TAB_FILE: (requestedIndex,PAGE_GCODE,IGNORE),
-                    TAB_OFFSETS: (requestedIndex,PAGE_GCODE,IGNORE),
-                    TAB_TOOL: (requestedIndex,PAGE_GCODE,IGNORE),
-                    TAB_STATUS: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO),
-                    TAB_PROBE: (requestedIndex,PAGE_GCODE,SHOW_DRO),
-                    TAB_CAMVIEW: (requestedIndex,PAGE_UNCHANGED,IGNORE),
-                    TAB_GCODES: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO),
-                    TAB_SETUP: (requestedIndex,PAGE_UNCHANGED,IGNORE),
-                    TAB_SETTINGS: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO),
-                    TAB_UTILS: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO),
-                    TAB_USER: (requestedIndex,PAGE_UNCHANGED,IGNORE) }
+            seq = {TAB_MAIN: (requestedIndex,PAGE_GCODE,SHOW_DRO,MACRO),
+                    TAB_FILE: (requestedIndex,PAGE_GCODE,IGNORE,NO_MACRO),
+                    TAB_OFFSETS: (requestedIndex,PAGE_GCODE,IGNORE,NO_MACRO),
+                    TAB_TOOL: (requestedIndex,PAGE_GCODE,IGNORE,NO_MACRO),
+                    TAB_STATUS: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO,NO_MACRO),
+                    TAB_PROBE: (requestedIndex,PAGE_GCODE,SHOW_DRO,NO_MACRO),
+                    TAB_CAMVIEW: (requestedIndex,PAGE_UNCHANGED,IGNORE,MACRO),
+                    TAB_GCODES: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO,NO_MACRO),
+                    TAB_SETUP: (requestedIndex,PAGE_UNCHANGED,IGNORE,NO_MACRO),
+                    TAB_SETTINGS: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO,NO_MACRO),
+                    TAB_UTILS: (requestedIndex,PAGE_UNCHANGED,SHOW_DRO,NO_MACRO),
+                    TAB_USER: (requestedIndex,PAGE_UNCHANGED,IGNORE,MACRO) }
 
         rtn =  seq.get(requestedIndex)
 
@@ -1439,8 +1449,9 @@ class HandlerClass:
             main_index = requestedIndex
             stacked_index = 0
             show_dro = 0
+            show_macro = True
         else:
-            main_index,stacked_index,show_dro = rtn
+            main_index,stacked_index,show_dro,show_macro = rtn
 
         # prpbe widget in not a separate tab
         if main_index == TAB_PROBE:
@@ -1454,6 +1465,12 @@ class HandlerClass:
         # show DRO rather then keyboard.
         if show_dro > IGNORE:
             self.w.stackedWidget_dro.setCurrentIndex(0)
+
+        # macros can only be run in manual or mdi mode
+        if show_macro:
+            self.w.frame_macro_buttons.show()
+        else:
+            self.w.frame_macro_buttons.hide()
 
         # show ngcgui info tab if utilities tab is selected
         # but only if the utilities tab has ngcgui selected

@@ -56,6 +56,8 @@ DEFAULT = 0
 WARNING = 1
 CRITICAL = 2
 
+VERSION ='1.1'
+
 class HandlerClass:
     def __init__(self, halcomp, widgets, paths):
         self.h = halcomp
@@ -275,6 +277,10 @@ class HandlerClass:
         # no buttons hide frame
         if flag:
             self.w.frame_macro_buttons.hide()
+
+        message = "--- QtDragon Version {} on Linuxcnc {} ---".format(
+            VERSION, STATUS.get_linuxcnc_version())
+        STATUS.emit('update-machine-log', message, None)
 
     def init_utils(self):
         from qtvcp.lib.gcode_utility.facing import Facing
@@ -974,6 +980,8 @@ class HandlerClass:
             self.w.stackedWidget.setCurrentIndex(PAGE_GCODE)
 
     def btn_about_clicked(self):
+        self.add_status("QtDragon Version {} on Linuxcnc {} ".format(
+            VERSION, STATUS.get_linuxcnc_version()), CRITICAL)
         info = ACTION.GET_ABOUT_INFO()
         self.w.aboutDialog_.showdialog()
 
@@ -1379,16 +1387,16 @@ class HandlerClass:
                     TAB_USER: (requestedIndex,PAGE_UNCHANGED,IGNORE,IGNORE,False) }
         else:
             seq = {TAB_MAIN: (requestedIndex,PAGE_GCODE,True,SHOW_DRO,True),
-                    TAB_FILE: (requestedIndex,PAGE_FILE,True,IGNORE,True),
-                    TAB_OFFSETS: (requestedIndex,PAGE_OFFSET,True,IGNORE,True),
-                    TAB_TOOL: (requestedIndex,PAGE_TOOL,True,IGNORE,True),
-                    TAB_STATUS: (requestedIndex,PAGE_UNCHANGED,True,SHOW_DRO,True),
-                    TAB_PROBE: (requestedIndex,PAGE_GCODE,True,SHOW_DRO,True),
+                    TAB_FILE: (requestedIndex,PAGE_FILE,True,IGNORE,False),
+                    TAB_OFFSETS: (requestedIndex,PAGE_OFFSET,True,IGNORE,False),
+                    TAB_TOOL: (requestedIndex,PAGE_TOOL,True,IGNORE,False),
+                    TAB_STATUS: (requestedIndex,PAGE_UNCHANGED,True,SHOW_DRO,False),
+                    TAB_PROBE: (requestedIndex,PAGE_GCODE,True,SHOW_DRO,False),
                     TAB_CAMERA: (requestedIndex,PAGE_UNCHANGED,True,IGNORE,True),
-                    TAB_GCODES: (requestedIndex,PAGE_UNCHANGED,False,SHOW_DRO,True),
-                    TAB_SETUP: (requestedIndex,PAGE_UNCHANGED,False,IGNORE,True),
-                    TAB_SETTINGS: (requestedIndex,PAGE_UNCHANGED,False,SHOW_DRO,True),
-                    TAB_UTILITIES: (requestedIndex,PAGE_UNCHANGED,True,SHOW_DRO,True),
+                    TAB_GCODES: (requestedIndex,PAGE_UNCHANGED,False,SHOW_DRO,False),
+                    TAB_SETUP: (requestedIndex,PAGE_UNCHANGED,False,IGNORE,False),
+                    TAB_SETTINGS: (requestedIndex,PAGE_UNCHANGED,False,SHOW_DRO,False),
+                    TAB_UTILITIES: (requestedIndex,PAGE_UNCHANGED,True,SHOW_DRO,False),
                     TAB_USER: (requestedIndex,PAGE_UNCHANGED,IGNORE,IGNORE,True) }
 
         rtn =  seq.get(requestedIndex)
