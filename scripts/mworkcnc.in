@@ -26,6 +26,8 @@ fi
 # if we're running on Wayland where it would normally use EGL.
 if [[ ! -v LINUXCNC_OPENGL_PLATFORM || "${LINUXCNC_OPENGL_PLATFORM}" == "glx" ]]; then
     export PYOPENGL_PLATFORM="x11"
+	export GDK_BACKEND="x11"
+    export QT_QPA_PLATFORM="xcb"
 fi
 ################################################################################
 # 0. Values that come from configure
