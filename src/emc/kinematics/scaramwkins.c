@@ -120,7 +120,7 @@ static int scaraKinematicsInverse(const EmcPose * world,
 {
     double a3;
     double q0, q1;
-    double xt, yt, rsq, cc;
+    double xt, yt,zt, rsq, cc;
     double x, y, z, c;
 
     x = world->tran.x;
