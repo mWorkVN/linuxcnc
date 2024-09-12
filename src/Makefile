@@ -1186,13 +1186,13 @@ scarakins-objs += emc/kinematics/kins_util.o
 scarakins-objs += emc/kinematics/switchkins.o
 scarakins-objs += $(USERKFUNCS)
 
-obj-m += scaramwkins.o
-scaramwkins-objs := emc/kinematics/scaramwkins.o
-scaramwkins-objs += libnml/posemath/_posemath.o
-scaramwkins-objs += libnml/posemath/sincos.o $(MATHSTUB)
-scaramwkins-objs += emc/kinematics/kins_util.o
-scaramwkins-objs += emc/kinematics/switchkins.o
-scaramwkins-objs += $(USERKFUNCS)
+# obj-m += scaramwkins.o
+# scaramwkins-objs := emc/kinematics/scaramwkins.o
+# scaramwkins-objs += libnml/posemath/_posemath.o
+# scaramwkins-objs += libnml/posemath/sincos.o $(MATHSTUB)
+# scaramwkins-objs += emc/kinematics/kins_util.o
+# scaramwkins-objs += emc/kinematics/switchkins.o
+# scaramwkins-objs += $(USERKFUNCS)
 
 obj-m += pumakins.o
 pumakins-objs := emc/kinematics/pumakins.o
@@ -1365,7 +1365,7 @@ endif
 ../rtlib/xyzac-trt-kins$(MODULE_EXT): $(addprefix objects/rt,$(xyzac-trt-kins-objs))
 ../rtlib/xyzbc-trt-kins$(MODULE_EXT): $(addprefix objects/rt,$(xyzbc-trt-kins-objs))
 ../rtlib/scarakins$(MODULE_EXT):      $(addprefix objects/rt,$(scarakins-objs))
-../rtlib/scaramwkins$(MODULE_EXT):      $(addprefix objects/rt,$(scaramwkins-objs))
+#../rtlib/scaramwkins$(MODULE_EXT):      $(addprefix objects/rt,$(scaramwkins-objs))
 ../rtlib/pumakins$(MODULE_EXT):       $(addprefix objects/rt,$(pumakins-objs))
 #----------------------------------------------------------------
 
