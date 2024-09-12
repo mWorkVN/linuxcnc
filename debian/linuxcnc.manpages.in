@@ -36,6 +36,7 @@ usr/share/man/man1/iocontrol.1
 usr/share/man/man1/iov2.1
 usr/share/man/man1/latency-histogram.1
 usr/share/man/man1/latency-plot.1
+usr/share/man/man1/mworkrobot.1
 usr/share/man/man1/latency-test.1
 usr/share/man/man1/lineardelta.1
 usr/share/man/man1/linuxcnc.1

@@ -39,6 +39,7 @@ usr/bin/iov2
 usr/bin/latency-histogram
 usr/bin/latency-plot
 usr/bin/latency-test
+usr/bin/mworkrobot
 usr/bin/lineardelta
 usr/bin/linuxcnc
 usr/bin/linuxcnc_info
