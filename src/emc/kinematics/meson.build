@@ -32,6 +32,6 @@ genserkins_srcs  = files('genserkins.c')
 
 pumakins_srcs  = files('pumakins.c')
 
-#scarakins_srcs  = files('scarakins.c')
+scarakins_srcs  = files('scarakins.c')
 
-scaramwkins_srcs  = files('scaramwkins.c')
+#scaramwkins_srcs  = files('scaramwkins.c')
