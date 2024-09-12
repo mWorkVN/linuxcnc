@@ -95,7 +95,7 @@ int scaraKinematicsForward(const double * joint,
     z = D2*cos(a0) + D4*cos(a1) + D6*cos(a3);
     y = D2*sin(a0) + D4*sin(a1) + D6*sin(a3);
     //z = D1 + D3 - joint[2] - D5;
-    z = joint[0];
+    x = joint[0];
     c = a3;
 
     *iflags = 1;
@@ -120,7 +120,7 @@ static int scaraKinematicsInverse(const EmcPose * world,
 {
     double a3;
     double q0, q1;
-    double xt, yt,zt, rsq, cc;
+    double yt,zt, rsq, cc;
     double x, y, z, c;
 
     x = world->tran.x;
