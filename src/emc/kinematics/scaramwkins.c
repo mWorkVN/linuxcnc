@@ -72,7 +72,7 @@ struct scara_data {
 
 /* joint[0], joint[1] and joint[3] are in degrees and joint[2] is in length units */
 static
-int scaraKinematicsForward(const double * joint,
+int scaramwKinematicsForward(const double * joint,
                       EmcPose * world,
                       const KINEMATICS_FORWARD_FLAGS * fflags,
                       KINEMATICS_INVERSE_FLAGS * iflags)
@@ -113,7 +113,7 @@ int scaraKinematicsForward(const double * joint,
     return (0);
 } //scaraKinematicsForward()
 
-static int scaraKinematicsInverse(const EmcPose * world,
+static int scaramwKinematicsInverse(const EmcPose * world,
                                   double * joint,
                                   const KINEMATICS_INVERSE_FLAGS * iflags,
                                   KINEMATICS_FORWARD_FLAGS * fflags)
@@ -185,7 +185,7 @@ static int scaraKinematicsInverse(const EmcPose * world,
 #define DEFAULT_D5  50
 #define DEFAULT_D6  50
 
-static int scaraKinematicsSetup(const  int   comp_id,
+static int scaramwKinematicsSetup(const  int   comp_id,
                                 const  char* coordinates,
                                 kparms*      kp)
 {
@@ -228,9 +228,9 @@ int switchkinsSetup(kparms* kp,
     kp->max_joints = strlen(kp->required_coordinates);
 
     rtapi_print("\n!!! switchkins-type 0 is %s\n",kp->kinsname);
-    *kset0 = scaraKinematicsSetup;
-    *kfwd0 = scaraKinematicsForward;
-    *kinv0 = scaraKinematicsInverse;
+    *kset0 = scaramwKinematicsSetup;
+    *kfwd0 = scaramwKinematicsForward;
+    *kinv0 = scaramwKinematicsInverse;
 
     *kset1 = identityKinematicsSetup;
     *kfwd1 = identityKinematicsForward;
