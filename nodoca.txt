@@ -2225,7 +2225,7 @@ Compiling realtime emc/tp/spherical_arc.c
 Compiling realtime emc/tp/blendmath.c
 Compiling realtime emc/nml_intf/emcpose.c
 Creating shared library liblinuxcncini.so.0
-config.status: creating ../scripts/mworkcnc
+config.status: creating ../scripts/mworkrobot
 Creating shared library libposemath.so.0
 Creating shared library liblinuxcnchal.so.0
 Linking rtapi_app
@@ -4842,7 +4842,7 @@ install -o root -d -m 0755 /home/mwork/linuxcnc/debian/tmp/usr/share/doc/linuxcn
 ((cd ../configs && tar --exclude CVS --exclude .cvsignore --exclude .gitignore -cf - .) | (cd /home/mwork/linuxcnc/debian/tmp/usr/share/doc/linuxcnc/examples/sample-configs && tar -xf -))
 install -o root -m 0755 ../bin/inivar ../bin/halstreamer ../bin/halsampler ../bin/panelui ../bin/mb2hal ../bin/gs2_vfd ../bin/hy_gt_vfd ../bin/svd-ps_vfd ../bin/shuttle ../bin/xhc-hb04 ../bin/sendkeys ../bin/thermistor ../bin/vfs11_vfd ../bin/classicladder ../bin/halcmd ../bin/halrmt ../bin/halmeter ../bin/halscope ../bin/halcompile ../bin/elbpcom ../bin/vfdb_vfd ../bin/wj200_vfd ../bin/pi500_vfd ../bin/hy_vfd ../bin/xhc-whb04b-6 ../bin/linuxcncrsh ../bin/schedrmt ../bin/linuxcnclcd ../bin/halui ../bin/linuxcncsvr ../bin/milltask ../bin/io ../bin/iov2 ../bin/genserkins ../bin/rs274 ../bin/motion-logger ../bin/tool_mmap_read ../bin/tool_watch ../bin/tooledit ../bin/ngcgui ../bin/pyngcgui ../bin/gremlin_view ../bin/halshow /home/mwork/linuxcnc/debian/tmp/usr/bin
 install -o root -m 0755 ../scripts/linuxcnc /home/mwork/linuxcnc/debian/tmp/usr/bin
-install -o root -m 0755 ../scripts/mworkcnc /home/mwork/linuxcnc/debian/tmp/usr/bin
+install -o root -m 0755 ../scripts/mworkrobot /home/mwork/linuxcnc/debian/tmp/usr/bin
 install -o root -m 0755 ../scripts/linuxcnc_info /home/mwork/linuxcnc/debian/tmp/usr/bin
 install -o root -m 0755 ../scripts/linuxcnc_var /home/mwork/linuxcnc/debian/tmp/usr/bin
 install -o root -m 0755 ../scripts/monitor-xhc-hb04 /home/mwork/linuxcnc/debian/tmp/usr/bin
