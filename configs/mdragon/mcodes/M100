@@ -1,6 +1,0 @@
-#!/bin/bash
-voltage=$1
-feedrate=$2
-halcmd setp thc.voltage $voltage
-halcmd setp thc.feedrate $feedrate
-exit 0
