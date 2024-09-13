@@ -101,8 +101,8 @@ int scaramwKinematicsForward(const double * joint,
         *iflags = 0;
     
     world->tran.x = z;
-    world->tran.y = x;
-    world->tran.z = y;
+    world->tran.y = y;
+    world->tran.z = x;
     /*
     double c_angle = c * 180 / PM_PI;
     if (c_angle >180){
@@ -175,9 +175,9 @@ static int scaramwKinematicsInverse(const EmcPose * world,
         q0 = 360 + q0;
     }
     joint[0] = x;
-    joint[1] = q0;
+    joint[1] = q1;
     //joint[2] = D1 + D3 - D5 - z;
-    joint[2] = q1;
+    joint[2] = q0;
     joint[3] = c - ( q0 + q1);
     joint[4] = world->a;
     joint[5] = world->b;
