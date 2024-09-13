@@ -77,7 +77,7 @@ int scaramwKinematicsForward(const double * joint,
                       const KINEMATICS_FORWARD_FLAGS * fflags,
                       KINEMATICS_INVERSE_FLAGS * iflags)
 {
-    double a0, a1, a3;
+    double a0, a1,a2, a3;
     double x, y, z, c;
 
 /*X thanh Z a0 - >z*/
