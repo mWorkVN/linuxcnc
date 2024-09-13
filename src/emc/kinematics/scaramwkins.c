@@ -84,22 +84,23 @@ int scaramwKinematicsForward(const double * joint,
 
 /* convert joint angles to radians for sin() and cos() */
 
-    a0 = joint[0] * ( PM_PI / 180 );
+    
     a1 = joint[1] * ( PM_PI / 180 );
+    a2 = joint[2] * ( PM_PI / 180 );
     a3 = joint[3] * ( PM_PI / 180 );
 /* convert angles into world coords */
 
-    a1 = a1 + a0;
+    a1 = a1 + a2;
     a3 = a3 + a1;
 
-    z = D2*cos(a0) + D4*cos(a1) + D6*cos(a3);
-    y = D2*sin(a0) + D4*sin(a1) + D6*sin(a3);
+    z = D2*cos(a1) + D4*cos(a2) + D6*cos(a3);
+    y = D2*sin(a1) + D4*sin(a2) + D6*sin(a3);
     //z = D1 + D3 - joint[2] - D5;
     x = joint[0];
     c = a3;
 
     *iflags = 1;
-    if (joint[1] > 0)
+    if (joint[2] > 0)
         *iflags = 0;
     
     world->tran.x = x;
@@ -113,7 +114,7 @@ int scaramwKinematicsForward(const double * joint,
     return (0);
 } //scaraKinematicsForward()
 
-static int scaramwKinematicsInverse(const EmcPose * world,
+static int scaraKinematicsInverse_back(const EmcPose * world,
                                   double * joint,
                                   const KINEMATICS_INVERSE_FLAGS * iflags,
                                   KINEMATICS_FORWARD_FLAGS * fflags)
@@ -132,8 +133,9 @@ static int scaramwKinematicsInverse(const EmcPose * world,
     a3 = c * ( PM_PI / 180 );
 
     /* center of end effector (correct for D6) */
-    zt = z - D6*cos(a3);
-    yt = y - D6*sin(a3);
+    yt = y - D6*cos(a3);
+    zt = z - D6*sin(a3);
+
 
     /* horizontal distance (squared) from end effector centerline
         to main column centerline */
@@ -148,14 +150,14 @@ static int scaramwKinematicsInverse(const EmcPose * world,
         q1 = -q1;
 
     /* angle to end effector */
-    q0 = atan2(yt, zt);
+    q0 = atan2(zt, yt);
 
     /* end effector coords in inner arm coord system */
     zt = D2 + D4*cos(q1);
     yt = D4*sin(q1);
 
     /* inner arm angle */
-    q0 = q0 - atan2(yt, zt);
+    q0 = q0 - atan2(zt, yt);
 
     /* q0 and q1 are still in radians. convert them to degrees */
     q0 = q0 * (180 / PM_PI);
@@ -167,8 +169,8 @@ static int scaramwKinematicsInverse(const EmcPose * world,
         q0 = 360 + q0;
     }
     joint[0] = x;
-    joint[1] = q1;
-    joint[2] = q0;
+    joint[1] = q0;
+    joint[2] = q1;
     joint[3] = c - ( q0 + q1);
     joint[4] = world->a;
     joint[5] = world->b;
@@ -177,6 +179,76 @@ static int scaramwKinematicsInverse(const EmcPose * world,
 
     return (0);
 } // scaraKinematicsInverse()
+
+
+static int scaramwKinematicsInverse(const EmcPose * world,
+                                  double * joint,
+                                  const KINEMATICS_INVERSE_FLAGS * iflags,
+                                  KINEMATICS_FORWARD_FLAGS * fflags)
+{
+    double a3;
+    double q0, q1;
+    double xt, yt, rsq, cc;
+    double x, y, z, c;
+
+    x = world->tran.x;
+    y = world->tran.y;
+    z = world->tran.z;
+    c = world->c;
+
+    /* convert degrees to radians */
+    a3 = c * ( PM_PI / 180 );
+
+    /* center of end effector (correct for D6) */
+    xt = y - D6*cos(a3);
+    yt = z - D6*sin(a3);
+
+    /* horizontal distance (squared) from end effector centerline
+        to main column centerline */
+    rsq = xt*xt + yt*yt;
+    /* joint 1 angle needed to make arm length match sqrt(rsq) */
+    cc = (rsq - D2*D2 - D4*D4) / (2*D2*D4);
+    if(cc < -1) cc = -1;
+    if(cc > 1) cc = 1;
+    q1 = acos(cc);
+
+    if (*iflags)
+        q1 = -q1;
+
+    /* angle to end effector */
+    q0 = atan2(yt, xt);
+
+    /* end effector coords in inner arm coord system */
+    xt = D2 + D4*cos(q1);
+    yt = D4*sin(q1);
+
+    /* inner arm angle */
+    q0 = q0 - atan2(yt, xt);
+
+    /* q0 and q1 are still in radians. convert them to degrees */
+    q0 = q0 * (180 / PM_PI);
+    q1 = q1 * (180 / PM_PI);
+    if (q0 > 180){
+        q0 = q0-360;
+    }
+    else if (q0 < -180){
+        q0 = 360 + q0;
+    }
+    joint[0] = x;
+    joint[1] = qo;
+    //joint[2] = D1 + D3 - D5 - z;
+    joint[2] = q1;
+    joint[3] = c - ( q0 + q1);
+    joint[4] = world->a;
+    joint[5] = world->b;
+
+    *fflags = 0;
+
+    return (0);
+} // scaraKinematicsInverse()
+
+
+
 
 #define DEFAULT_D1 490
 #define DEFAULT_D2 340
