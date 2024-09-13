@@ -72,7 +72,7 @@ struct scara_data {
 
 /* joint[0], joint[1] and joint[3] are in degrees and joint[2] is in length units */
 static
-int scaraKinematicsForward(const double * joint,
+int scaramwKinematicsForward(const double * joint,
                       EmcPose * world,
                       const KINEMATICS_FORWARD_FLAGS * fflags,
                       KINEMATICS_INVERSE_FLAGS * iflags)
