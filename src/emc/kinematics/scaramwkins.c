@@ -93,16 +93,16 @@ int scaramwKinematicsForward(const double * joint,
     x = D2*cos(a0) + D4*cos(a1) + D6*cos(a3);
     y = D2*sin(a0) + D4*sin(a1) + D6*sin(a3);
     //z = D1 + D3 - joint[2] - D5;
-    z = joint[2];
+    z = joint[0];
     c = a3;
 
     *iflags = 1;
-    if (joint[1] > 0)
+    if (joint[2] > 0)
         *iflags = 0;
     
     world->tran.x = z;
-    world->tran.y = y;
-    world->tran.z = x;
+    world->tran.y = x;
+    world->tran.z = y;
     /*
     double c_angle = c * 180 / PM_PI;
     if (c_angle >180){
