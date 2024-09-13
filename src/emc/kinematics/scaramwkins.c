@@ -101,8 +101,8 @@ int scaramwKinematicsForward(const double * joint,
         *iflags = 0;
     
     world->tran.x = z;
-    world->tran.y = x;
-    world->tran.z = y;
+    world->tran.y = y;
+    world->tran.z =x ;
     /*
     double c_angle = c * 180 / PM_PI;
     if (c_angle >180){
@@ -140,8 +140,8 @@ static int scaramwKinematicsInverse(const EmcPose * world,
     a3 = c * ( PM_PI / 180 );
 
     /* center of end effector (correct for D6) */
-    xt = y - D6*cos(a3);
-    yt = z - D6*sin(a3);
+    xt = z - D6*cos(a3);
+    yt = y - D6*sin(a3);
 
     /* horizontal distance (squared) from end effector centerline
         to main column centerline */
