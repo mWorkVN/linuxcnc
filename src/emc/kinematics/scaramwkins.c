@@ -90,19 +90,19 @@ int scaramwKinematicsForward(const double * joint,
     a1 = a1 + a0;
     a3 = a3 + a1;
 
-    x = D2*cos(a0) + D4*cos(a1) + D6*cos(a3);
+    z = D2*cos(a0) + D4*cos(a1) + D6*cos(a3);
     y = D2*sin(a0) + D4*sin(a1) + D6*sin(a3);
     //z = D1 + D3 - joint[2] - D5;
-    z = joint[0];
+    x = joint[0];
     c = a3;
 
     *iflags = 1;
     if (joint[2] > 0)
         *iflags = 0;
     
-    world->tran.x = z;
+    world->tran.x = x;
     world->tran.y = y;
-    world->tran.z =x ;
+    world->tran.z = z ;
     /*
     double c_angle = c * 180 / PM_PI;
     if (c_angle >180){
@@ -128,7 +128,7 @@ static int scaramwKinematicsInverse(const EmcPose * world,
 {
     double a3;
     double q0, q1;
-    double xt, yt, rsq, cc;
+    double xt,zt, yt, rsq, cc;
     double x, y, z, c;
 
     x = world->tran.x;
@@ -140,12 +140,12 @@ static int scaramwKinematicsInverse(const EmcPose * world,
     a3 = c * ( PM_PI / 180 );
 
     /* center of end effector (correct for D6) */
-    xt = z - D6*cos(a3);
+    zt = z - D6*cos(a3);
     yt = y - D6*sin(a3);
 
     /* horizontal distance (squared) from end effector centerline
         to main column centerline */
-    rsq = xt*xt + yt*yt;
+    rsq = zt*zt + yt*yt;
     /* joint 1 angle needed to make arm length match sqrt(rsq) */
     cc = (rsq - D2*D2 - D4*D4) / (2*D2*D4);
     if(cc < -1) cc = -1;
@@ -156,14 +156,14 @@ static int scaramwKinematicsInverse(const EmcPose * world,
         q1 = -q1;
 
     /* angle to end effector */
-    q0 = atan2(yt, xt);
+    q0 = atan2(yt, zt);
 
     /* end effector coords in inner arm coord system */
-    xt = D2 + D4*cos(q1);
+    zt = D2 + D4*cos(q1);
     yt = D4*sin(q1);
 
     /* inner arm angle */
-    q0 = q0 - atan2(yt, xt);
+    q0 = q0 - atan2(yt, zt);
 
     /* q0 and q1 are still in radians. convert them to degrees */
     q0 = q0 * (180 / PM_PI);
