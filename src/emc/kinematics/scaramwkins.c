@@ -235,7 +235,7 @@ static int scaramwKinematicsInverse(const EmcPose * world,
         q0 = 360 + q0;
     }
     joint[0] = x;
-    joint[1] = qo;
+    joint[1] = q0;
     //joint[2] = D1 + D3 - D5 - z;
     joint[2] = q1;
     joint[3] = c - ( q0 + q1);
