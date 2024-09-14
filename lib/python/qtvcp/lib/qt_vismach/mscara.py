@@ -180,21 +180,21 @@ floor = Box(-0.5*size,-0.5*size,-0.02*size,0.5*size,0.5*size,0.0)
 
 # and a table for the workpiece - define in workpiece coords
 reach = d2+d4-d6
-table_height = d1+d3-j3max-d5
+# table_height = d1+d3-j3max-d5
 work = Capture()
-table = Collection([
-    work,
-    Box(-0.35*reach,-0.5*reach, -0.1*d1, 0.35*reach, 0.5*reach, 0.0)])
+# table = Collection([
+#     work,
+#     Box(-0.35*reach,-0.5*reach, -0.1*d1, 0.35*reach, 0.5*reach, 0.0)])
 
-# make the table moveable (tilting)
+# # make the table moveable (tilting)
 
-table = HalRotate([table],comp,"joint.4.pos-fb", 1, 0, 1, 0)
-table = HalRotate([table],comp,"joint.5.pos-fb", 1, 1, 0, 0)
+# table = HalRotate([table],comp,"joint.4.pos-fb", 1, 0, 1, 0)
+# table = HalRotate([table],comp,"joint.5.pos-fb", 1, 1, 0, 0)
 
-# put the table into its proper place
-table = Translate([table],0.5*reach,0.0,table_height)
+# # put the table into its proper place
+# table = Translate([table],0.5*reach,0.0,table_height)
 
-model = Collection([link0, floor, table])
+model = Collection([link0, floor])
 
 # show a title to prove the HUD
 myhud = Hud()
