@@ -167,34 +167,42 @@ link0 = Collection([
 # link3 = Collection([tool,link3])
 # link3 = HalTranslate([link1], comp, "joint.0.pos-fb", 0, 0, -MODEL_SCALING)
 
-xbase = BoxCentered(1000, 200, 30)
-xbase = Color([0, 0, 1, 1], [xbase])
-xbase = Translate([xbase], 0, 0, -15)
-link3 = Collection([xbase, link0])
-link3 = Translate([link3], 0, 0, 35)
-link3 = HalTranslate([link3], None, "joint.0.pos-fb", MODEL_SCALING, 0, 0)
+# xbase = BoxCentered(1000, 200, 30)
+# xbase = Color([0, 0, 1, 1], [xbase])
+# xbase = Translate([xbase], 0, 0, -15)
+# link3 = Collection([xbase, link0])
+# link3 = Translate([link3], 0, 0, 35)
+# link3 = HalTranslate([link3], None, "joint.0.pos-fb", MODEL_SCALING, 0, 0)
 
+
+
+link3 = Collection([Translate([link0],0.0,0.0,d3),
+                  Box(-100,-100,200, 100,100,900),
+                  ])
+
+link3 = Translate([link3], 0,0,150)
+link3 = HalTranslate([link3], comp, "joint.0.pos-fb", 0, 0, -MODEL_SCALING)
 
 # add a floor
 floor = Box(-0.5*size,-0.5*size,-0.02*size,0.5*size,0.5*size,0.0)
 
 # and a table for the workpiece - define in workpiece coords
 reach = d2+d4-d6
-# table_height = d1+d3-j3max-d5
+table_height = d1+d3-j3max-d5
 work = Capture()
-# table = Collection([
-#     work,
-#     Box(-0.35*reach,-0.5*reach, -0.1*d1, 0.35*reach, 0.5*reach, 0.0)])
+table = Collection([
+    work,
+    Box(-0.35*reach,-0.5*reach, -0.1*d1, 0.35*reach, 0.5*reach, 0.0)])
 
-# # make the table moveable (tilting)
+# make the table moveable (tilting)
 
-# table = HalRotate([table],comp,"joint.4.pos-fb", 1, 0, 1, 0)
-# table = HalRotate([table],comp,"joint.5.pos-fb", 1, 1, 0, 0)
+table = HalRotate([table],comp,"joint.4.pos-fb", 1, 0, 1, 0)
+table = HalRotate([table],comp,"joint.5.pos-fb", 1, 1, 0, 0)
 
-# # put the table into its proper place
-# table = Translate([table],0.5*reach,0.0,table_height)
+# put the table into its proper place
+table = Translate([table],0.5*reach,0.0,table_height)
 
-model = Collection([link0, floor])
+model = Collection([link0, floor, table])
 
 # show a title to prove the HUD
 myhud = Hud()
