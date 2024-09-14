@@ -199,7 +199,7 @@ myhud.show("Scara")
 
 class Window(QWidget):
 
-    def __init__(self):
+    def __init__(self,sizezoom):
         super(Window, self).__init__()
         self.glWidget = GLWidget()
         v = self.glWidget
@@ -211,7 +211,7 @@ class Window(QWidget):
 
         world = Capture()
         v.model = Collection([model, world])
-        v.distance = size * 3
+        v.distance = sizezoom
         v.near = size * 0.01
         v.far = size * 10.0
         v.tool2view = tooltip
