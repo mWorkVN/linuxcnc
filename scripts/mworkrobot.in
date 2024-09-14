@@ -769,6 +769,7 @@ if [ -f $LOCKFILE ]; then
     input=y
     echo -n "LinuxCNC is still running.  Restart it?"
     #read input; [ -z $input ] && input=y
+    
   elif [ -z "$DISPLAY" ]; then
     echo "No display, no tty, trying to clean up other instance automatically"
     input=y
@@ -800,7 +801,7 @@ if [ -f $LOCKFILE ]; then
     ;;
   esac
 fi
-echo Starting LinuxCNC...
+echo Starting...
 
 # trap ^C so that it's called if user interrupts script
 trap 'Cleanup ; exit 0' SIGINT SIGTERM

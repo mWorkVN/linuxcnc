@@ -128,7 +128,7 @@ static int scaramwKinematicsInverse(const EmcPose * world,
 {
     double a3;
     double q0, q1;
-    double xt,zt, yt, rsq, cc;
+    double zt, yt, rsq, cc;
     double x, y, z, c;
 
     x = world->tran.x;
