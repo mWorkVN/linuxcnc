@@ -163,13 +163,16 @@ link0 = Collection([
 
 
 ##############################################################
-link3 = CylinderZ(0.0, l3_rad, l3_len, l3_rad)
-# attach tool to end
-link3 = Collection([tool,link3])
-# make joint 2 go up and down
-link3 = HalTranslate([link1], comp, "joint.0.pos-fb", 0, 0, -MODEL_SCALING)
+# link3 = CylinderZ(0.0, l3_rad, l3_len, l3_rad)
+# link3 = Collection([tool,link3])
+# link3 = HalTranslate([link1], comp, "joint.0.pos-fb", 0, 0, -MODEL_SCALING)
 
-
+xbase = BoxCentered(1000, 200, 30)
+xbase = Color([0, 0, 1, 1], [xbase])
+xbase = Translate([xbase], 0, 0, -15)
+link3 = Collection([xbase, link0])
+link3 = Translate([link3], 0, 0, 35)
+link3 = HalTranslate([link3], None, "joint.0.pos-fb", MODEL_SCALING, 0, 0)
 
 
 # add a floor
