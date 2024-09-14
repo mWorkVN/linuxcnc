@@ -183,7 +183,7 @@ static int scaramwKinematicsInverse(const EmcPose * world,
     joint[5] = world->b;
 
     *fflags = 0;
-    //printf("Serial reading...\n");
+    printf("Serial reading...\n");
     return (0);
 } // scaraKinematicsInverse()
 
