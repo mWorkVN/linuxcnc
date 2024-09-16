@@ -91,36 +91,54 @@ size = max(d1+d3+l3_len,d2+d4+d6)
 # the origin starts out at the tool tip, and we want to capture this
 # "tooltip" coordinate system
 tooltip = Capture()
+# tool = Collection([
+#     tooltip,
+#     Sphere(0.0, 0.0, tool_len, tool_dia),
+#     CylinderZ(tool_len, tool_radius, tool_dia, tool_radius),
+#     CylinderZ(tool_dia, tool_radius, 0.0, 0.0)])
+# tool = Translate([tool],0.0,0.0,-tool_len)    
+# tool = Rotate([tool],tool_angle,0.0,-1.0,0.0)
+# tool = HalRotate([tool],comp,"joint.3.pos-fb", 1, 0, 0, 1)
+# outer arm
+# start with link3 and the cylinder it slides in
+
+
+if d3 > 0:
+    flip = 1
+else:
+    flip = -1
+
 tool = Collection([
     tooltip,
-    Sphere(0.0, 0.0, tool_len, tool_dia),
-    CylinderZ(tool_len, tool_radius, tool_dia, tool_radius),
-    CylinderZ(tool_dia, tool_radius, 0.0, 0.0)])
-# translate so origin is at base of tool, not the tip
-tool = Translate([tool],0.0,0.0,-tool_len)    
-# the tool might not be pointing straight down
-tool = Rotate([tool],tool_angle,0.0,-1.0,0.0)
-# make joint 3 rotate
+
+    ])
+tool = Translate([tool], 0.0, 0.0, d4*0.4)
+tool = Collection([
+    tool,
+    #CylinderX(d4*0.4, l2_rad, 1.5*j1_rad, l2_rad)
+    ]
+    )
+tool = Collection([
+    tool,
+    Box(-1.15*j1_rad, -0.9*j1_rad, 0.4*d3, 0.0, 0.9*j1_rad, -flip*j1_hi1),
+    CylinderZ(0.4*d3, j1_rad, flip*-1.2*j1_hi1, j1_rad),
+    CylinderZ(0.6*d3, 0.8*j1_rad, 0.4*d3, 0.8*j1_rad)])
+tool = HalRotate([tool],comp,"joint.3.pos-fb", 1, 1, 0, 0)
 
 
-tool = HalRotate([tool],comp,"joint.3.pos-fb", 1, 0, 0, 1)
 
-# outer arm
 # start with link3 and the cylinder it slides in
 link2 = Collection([
     tool,
     CylinderZ(-j2_hi, j2_rad, j2_hi, j2_rad)])
 # move to end of arm
-link2 = Translate([link2], d4, 0.0, 0.0)
+link2 = Translate([link2], 0.0, 0.0, d4)
 # add the arm itself
 link2 = Collection([
     link2,
-    CylinderX(d4, l2_rad, 1.5*j1_rad, l2_rad)])
+    CylinderZ(d4, l2_rad, 1.5*j1_rad, l2_rad)])
 # the joint gets interesting, because link2 can be above or below link1
-if d3 > 0:
-    flip = 1
-else:
-    flip = -1
+
 # add the joint
 link2 = Collection([
     link2,
@@ -128,34 +146,37 @@ link2 = Collection([
     Box(1.15*j1_rad, -0.9*j1_rad, -0.4*d3, 0.0, 0.9*j1_rad, flip*j1_hi2),
     CylinderZ(-0.4*d3, j1_rad, flip*1.2*j1_hi2, j1_rad)])
 # make the joint work
-link2 = HalRotate([link2],comp,"joint.2.pos-fb", 1, 0, 0, 1)
+link2 = HalRotate([link2],comp,"joint.2.pos-fb", 1, 1, 0, 0)
 
 ###################################################
 
 # inner arm
 # the outer arm and the joint
 link1 = Collection([
-    Translate([link2],0.0,0.0,d3),
-    Box(-1.5*j1_rad, -0.9*j1_rad, -j1_hi1, -1.15*j1_rad, 0.9*j1_rad, j1_hi1),
+    Translate([link2],d3,0.0,0.0),
+    #Box(-1.5*j1_rad, -0.9*j1_rad, -j1_hi1, -1.15*j1_rad, 0.9*j1_rad, j1_hi1),
     Box(-1.15*j1_rad, -0.9*j1_rad, 0.4*d3, 0.0, 0.9*j1_rad, -flip*j1_hi1),
     CylinderZ(0.4*d3, j1_rad, flip*-1.2*j1_hi1, j1_rad),
-    CylinderZ(0.6*d3, 0.8*j1_rad, 0.4*d3, 0.8*j1_rad)])
+    CylinderZ(0.6*d3, 0.8*j1_rad, 0.4*d3, 0.8*j1_rad)]
+    )
 # move to end of arm
-link1 = Translate([link1], d2, 0.0, 0.0)
+link1 = Translate([link1],  0.0, 0.0,d2)
 # add the arm itself, and the inner joint
 link1 = Collection([
     link1,
-    CylinderX(d2-1.5*j1_rad, l1_rad, 1.5*j0_rad, l1_rad),
+    CylinderZ(d2-1.5*j1_rad, l1_rad, 1.5*j0_rad, l1_rad),
     Box(1.5*j0_rad, -0.9*j0_rad, -j0_hi, 0.0, 0.9*j0_rad, j0_hi),
-    CylinderZ(-1.2*j0_hi, j0_rad, 1.2*j0_hi, j0_rad)])
+    CylinderZ(-1.2*j0_hi, j0_rad, 1.2*j0_hi, j0_rad)
+    ])
 # make the joint work
-link1 = HalRotate([link1],comp,"joint.1.pos-fb", 1, 0, 0, 1)
+link1 = HalRotate([link1],comp,"joint.1.pos-fb", 1, 1, 0, 0)
 link1 = Color([1, .5, .5, .5],[link1])
-#stationary base
+#than tru tu X len join1
 link0 = Collection([
     CylinderZ(d1-j0_hi, 0.8*j0_rad, d1-1.5*j0_hi, 0.8*j0_rad),
     CylinderZ(d1-1.5*j0_hi, 0.8*j0_rad, 0.07*d1, 1.3*j0_rad),
-    CylinderZ(0.07*d1, 2.0*j0_rad, 0.0, 2.0*j0_rad)])
+    CylinderZ(0.07*d1, 2.0*j0_rad, 0.0, 2.0*j0_rad)
+    ])
 # slap the arm on top
 link0 = Collection([
     link0,
@@ -163,46 +184,42 @@ link0 = Collection([
 
 
 ##############################################################
-# link3 = CylinderZ(0.0, l3_rad, l3_len, l3_rad)
-# link3 = Collection([tool,link3])
-# link3 = HalTranslate([link1], comp, "joint.0.pos-fb", 0, 0, -MODEL_SCALING)
-
-# xbase = BoxCentered(1000, 200, 30)
-# xbase = Color([0, 0, 1, 1], [xbase])
-# xbase = Translate([xbase], 0, 0, -15)
-# link3 = Collection([xbase, link0])
-# link3 = Translate([link3], 0, 0, 35)
-# link3 = HalTranslate([link3], None, "joint.0.pos-fb", MODEL_SCALING, 0, 0)
 
 
 
-link3 = Collection([Translate([link0],0.0,0.0,d3),
-                  Box(-100,-100,200, 100,100,900),
-                  ])
 
-link3 = Translate([link3], 0,0,150)
-link3 = HalTranslate([link3], comp, "joint.0.pos-fb", 0, 0, -MODEL_SCALING)
-
-# add a floor
-floor = Box(-0.5*size,-0.5*size,-0.02*size,0.5*size,0.5*size,0.0)
-
-# and a table for the workpiece - define in workpiece coords
+# # and a table for the workpiece - define in workpiece coords
 reach = d2+d4-d6
 table_height = d1+d3-j3max-d5
+
+xbase = BoxCentered(1000, 200, 30)
+# let's color it blue
+xbase = Color([0, 0, 1, 1], [xbase])
+# Move table so top is at zero for now,
+# so work (default 0,0,0) is on top of table.
+xbase = Translate([xbase], 0, 0, -15)
+
+# group work and xbase together so they move together.
+xassembly = Collection([link0,xbase])
+# work is now defined and grouped, and default at 0,0,0, or
+# currently on top of x part table.
+# so we move table group upwards, taking work with it.
+xassembly = Translate([xassembly], 0, 0, 35)
+
+# Must define part motion before it becomes part of collection.
+# Must have arguments, object itself, c (defined above), then finally scale from the pin to x y z.
+# since this moves solely on X axis, only x is 1, rest is zero.
+# you could use fractions for say axis that moves in compound like arm for example
+# but this machine is very simple, so all axis will be purely full on axis and zero on other axis.
+xassembly = HalTranslate([xassembly], None, "joint.0.pos-fb", MODEL_SCALING,0, 0)
+# # add a floor
+floor = Box(-0.5*size,-0.5*size,-0.02*size,0.5*size,0.5*size,0.0)
 work = Capture()
 table = Collection([
     work,
     Box(-0.35*reach,-0.5*reach, -0.1*d1, 0.35*reach, 0.5*reach, 0.0)])
-
-# make the table moveable (tilting)
-
-table = HalRotate([table],comp,"joint.4.pos-fb", 1, 0, 1, 0)
-table = HalRotate([table],comp,"joint.5.pos-fb", 1, 1, 0, 0)
-
-# put the table into its proper place
-table = Translate([table],0.5*reach,0.0,table_height)
-
-model = Collection([link0, floor, table])
+model = Collection([xassembly, floor,table])
+#model = Collection([link4])
 
 # show a title to prove the HUD
 myhud = Hud()
@@ -238,5 +255,5 @@ class Window(QWidget):
 # but it you call this directly it should work too
 
 if __name__ == '__main__':
-    main(model, tooltip, work, size=600, hud=myhud, lat=-75, lon=215)
+    main(model, tooltip, work , size=600, hud=myhud, lat=-75, lon=215)
 

@@ -316,7 +316,7 @@ config.h: config.h.in config.status
 	@./config.status -q --header=$@
 
 INFILES = \
-        ../scripts/linuxcnc ../scripts/mworkrobot ../scripts/realtime \
+        ../scripts/linuxcnc ../scripts/mworkrobot ../scripts/mworkrobotmnt ../scripts/realtime \
 	../scripts/linuxcnc_info ../scripts/setup_designer \
 	../scripts/haltcl ../scripts/rtapi.conf Makefile.inc Makefile.modinc \
 	../tcl/linuxcnc.tcl ../scripts/halrun ../scripts/rip-environment \
@@ -717,6 +717,7 @@ install-kernel-indep: install-dirs
 	$(EXE) $(filter-out ../bin/rtapi_app ../bin/linuxcnc_module_helper ../bin/pci_write ../bin/pci_read ../bin/test_rtapi_vsnprintf, $(filter ../bin/%,$(TARGETS))) $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/linuxcnc $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/mworkrobot $(DESTDIR)$(bindir)
+	$(EXE) ../scripts/mworkrobotmnt $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/linuxcnc_info $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/setup_designer $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/linuxcnc_var $(DESTDIR)$(bindir)
